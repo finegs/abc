@@ -106,13 +106,22 @@ void *handle_message(void* requester)
 	{
 		printf("USR<<"); fflush(stdout);
 		scanf("%[^\n]%*c", buf);
-
 		
-		if(strstr(buf, "exit") || strstr(buf, "quit")) {
+		if(strstr(buf, "_exit") || strstr(buf, "_shutdown")) {
 			printf("INFO>> exit by user\n");
 			g_run = 0;
+
+			if(strstr(buf, "_shutdown")) {
+				zmq_send(requester, "_shutdown", strlen("_shutdown"), 0);
+			}
+
 			if(requester) zmq_close(requester);
 			break;
+		}
+		if(strlen(buf)<1) {
+			printf("INFO>> empty string with '\\n'\n");
+			fflush(stdin);
+			continue;
 		}
 
 		zmq_send(requester, buf, strlen(buf), 0);
