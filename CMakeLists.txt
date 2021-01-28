@@ -10,6 +10,7 @@ add_executable(a a.cpp)
 add_executable(aa aa.c)
 add_executable(b b.cpp list.cpp)
 add_executable(w w.cpp)
+add_executable(trie trie.cpp main_trie.cpp)
 
 target_link_libraries(a pthread ws2_32 )
 target_link_libraries(aa pthread ws2_32 )
