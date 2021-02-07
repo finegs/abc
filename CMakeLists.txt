@@ -12,7 +12,7 @@ add_executable(zecho zecho.cpp)
 #add_executable(zcli zcli.cpp)
 #add_executable(serial serial.cpp)
 add_executable(z z.cpp)
-add_executable(aa aa.cpp List.cpp)
+add_executable(aa aa.cpp List.cpp Util.cpp)
 
 target_link_libraries(a pthread ws2_32 )
 target_link_libraries(zecho pthread ws2_32 zmq)

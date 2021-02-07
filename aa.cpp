@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <malloc.h>
 #include "List.h"
+#include "Util.h"
 
 
 int main() {
@@ -14,9 +15,23 @@ int main() {
 	list.insert(56);
 
 	int a;
-	list.remove(&a);
+//	list.remove(&a);
 
 	list.printList();
+
+	size_t str_len = 1024+1;
+	char str[str_len];
+	mmemset(str, 0, str_len);
+
+	printf("string : "); fflush(stdout);
+	scanf("%s", str); fflush(stdin);
+	printf("hash(%s) : %d\n", str, strhash(str));
+
+	int n;
+	printf("number : "); fflush(stdout);
+	scanf("%d", &n); fflush(stdin);
+	printf("prime_max(%d) : %d\n", n, prime_max(n));
+
 
 	return 0;
 }

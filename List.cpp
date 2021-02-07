@@ -2,6 +2,7 @@
 #include <malloc.h>
 
 #include "List.h"
+#include "Util.h"
 
 
 void List::printList() {
@@ -20,6 +21,7 @@ Node* List::end() { return tail; }
 
 void List::insert(int data) {
 	Node* newNode = (Node*)malloc(sizeof(Node));
+	mmemset(newNode, 0, sizeof(Node));
 	newNode->data = data;
 	
 	if(head) {
@@ -33,6 +35,7 @@ void List::insert(int data) {
 
 void List::insertEnd(int data) {
 	Node* newNode = (Node*)malloc(sizeof(Node));
+	mmemset(newNode, 0, sizeof(Node));
 	newNode->data = data;
 
 	if(tail) {
@@ -55,7 +58,7 @@ void List::remove(int* data) {
 
 		head = head->next;
 
-		t->prev = 0;
+		t->prev = t->next = 0;
 		free(t);
 	}
 }
