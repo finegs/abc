@@ -1,0 +1,37 @@
+[
+{
+  "directory": "D:/Programs/msys64/home/finegs/dev/abc/build",
+  "command": "D:\\Programs\\msys64\\mingw64\\bin\\g++.exe     -Wall -std=c++2a -o CMakeFiles\\trie.dir\\trie.cpp.obj -c D:\\Programs\\msys64\\home\\finegs\\dev\\abc\\trie.cpp",
+  "file": "D:/Programs/msys64/home/finegs/dev/abc/trie.cpp"
+},
+{
+  "directory": "D:/Programs/msys64/home/finegs/dev/abc/build",
+  "command": "D:\\Programs\\msys64\\mingw64\\bin\\g++.exe     -Wall -std=c++2a -o CMakeFiles\\trie.dir\\main_trie.cpp.obj -c D:\\Programs\\msys64\\home\\finegs\\dev\\abc\\main_trie.cpp",
+  "file": "D:/Programs/msys64/home/finegs/dev/abc/main_trie.cpp"
+},
+{
+  "directory": "D:/Programs/msys64/home/finegs/dev/abc/build",
+  "command": "D:\\Programs\\msys64\\mingw64\\bin\\g++.exe     -Wall -std=c++2a -o CMakeFiles\\w.dir\\w.cpp.obj -c D:\\Programs\\msys64\\home\\finegs\\dev\\abc\\w.cpp",
+  "file": "D:/Programs/msys64/home/finegs/dev/abc/w.cpp"
+},
+{
+  "directory": "D:/Programs/msys64/home/finegs/dev/abc/build",
+  "command": "D:\\Programs\\msys64\\mingw64\\bin\\g++.exe     -Wall -std=c++2a -o CMakeFiles\\b.dir\\b.cpp.obj -c D:\\Programs\\msys64\\home\\finegs\\dev\\abc\\b.cpp",
+  "file": "D:/Programs/msys64/home/finegs/dev/abc/b.cpp"
+},
+{
+  "directory": "D:/Programs/msys64/home/finegs/dev/abc/build",
+  "command": "D:\\Programs\\msys64\\mingw64\\bin\\g++.exe     -Wall -std=c++2a -o CMakeFiles\\b.dir\\list.cpp.obj -c D:\\Programs\\msys64\\home\\finegs\\dev\\abc\\list.cpp",
+  "file": "D:/Programs/msys64/home/finegs/dev/abc/list.cpp"
+},
+{
+  "directory": "D:/Programs/msys64/home/finegs/dev/abc/build",
+  "command": "D:\\Programs\\msys64\\mingw64\\bin\\gcc.exe     -Wall -std=c++2a -o CMakeFiles\\aa.dir\\aa.c.obj -c D:\\Programs\\msys64\\home\\finegs\\dev\\abc\\aa.c",
+  "file": "D:/Programs/msys64/home/finegs/dev/abc/aa.c"
+},
+{
+  "directory": "D:/Programs/msys64/home/finegs/dev/abc/build",
+  "command": "D:\\Programs\\msys64\\mingw64\\bin\\g++.exe     -Wall -std=c++2a -o CMakeFiles\\a.dir\\a.cpp.obj -c D:\\Programs\\msys64\\home\\finegs\\dev\\abc\\a.cpp",
+  "file": "D:/Programs/msys64/home/finegs/dev/abc/a.cpp"
+}
+]
