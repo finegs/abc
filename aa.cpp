@@ -42,6 +42,5 @@ int main() {
 	scanf("%d", &n); fflush(stdin);
 	printf("prime_max(%d) : %d\n", n, prime_max(n));
 
-
 	return 0;
 }

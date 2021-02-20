@@ -1,60 +1,78 @@
+#include <stdio.h>
+#include <malloc.h>
+
 #include "List.h"
+#include "Util.h"
 
-Node newNode(Element data) {
-	Link link = (Link)malloc(sizeof(Node));
-	link->data = data;
-	link->prev = link->next = 0;
-	return link;
+
+void List::printList() {
+ 	Node* ptr = head;
+ 
+ 	printf("\n[head]=>");
+ 	while(ptr) {
+ 		printf("%s[%d]", ((head != ptr) ? "=>" : ""),  ptr->data);
+ 		ptr = ptr->next;
+ 	}
+ 	printf("\n");
 }
 
-void Node::insert(Link node) {
-	node->prev =  pos->prev;
-	node->next = pos;
-	prev->next = node;
-	prev  = now;
-}
+Node* List::begin() { return head; }
+Node* List::end() { return tail; }
 
-void Node::disconnect() {
-	prev->next = next;
-	next->prev = prev
-}
-
-List* newList() {
-	List* list = 0;
-
-	list = (List*)malloc(sizeof(List));
-	list->head = newNode(0);
-	list->tail = newNode(0);
-	list->head->next = tail;
-	list->tail->prev = head;
-	list->usage = 0;
-
-	return list;
-}
-
-void List::dispose() {
-	Link cur = head;
-	while(cur != tail) {
-		cur = cur->next;
-		free(cur->prev);
+void List::insert(int data) {
+	Node* newNode = (Node*)malloc(sizeof(Node));
+	mmemset(newNode, 0, sizeof(Node));
+	newNode->data = data;
+	
+	if(head) {
+		newNode->next = head;
+		newNode->next->prev = newNode;
 	}
-	free(tail);
-	free(this);
+
+	head = newNode;
+	if(!tail) tail = newNode;
+}	
+
+void List::insertEnd(int data) {
+	Node* newNode = (Node*)malloc(sizeof(Node));
+	mmemset(newNode, 0, sizeof(Node));
+	newNode->data = data;
+
+	if(tail) {
+		tail->next = newNode;
+		newNode->prev = tail;
+
+		tail = newNode;
+	}
+	else {
+		head = newNode;
+		tail = newNode;
+	}
 }
 
-Link List::head() { return head; }
-Link List::tail() { return tail; }
+void List::remove(int* data) {
+	if(head) {
+		*data = head->data;
 
-void List::insert(Element data, Link pos = head) {
-	Link node = (Link)malloc(sizeof(Link));
+		Node* t = head;
 
-	node->next = pos->next;
-	node->prev = pos->prev;
-	pos->prev->next = node;
-	pos->next->prev = node;
-}
-void Elemet::dispose() {
-	free(data);
+		head = head->next;
+
+		t->prev = t->next = 0;
+		free(t);
+	}
 }
 
+void List::removeEnd(int* data) {
+	if(tail) {
+		*data = tail->data;
+
+		Node* t = tail;
+		tail = t->prev;
+		t->prev->next = 0;
+
+		free(t);
+		t = 0;
+	}	
+}
 
