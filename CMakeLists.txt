@@ -3,6 +3,9 @@ project(abc)
 
 add_definitions(-Wall -std=c++2a)
 
+
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 #include_directories(D:\\Programs\\wxwidgets\\wxwidgets\\include)
 #link_directories(D:\\Programs\\wxwidgets\\wxwidgets\\lib)
 
