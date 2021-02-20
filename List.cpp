@@ -10,10 +10,10 @@ void List::printList() {
  
  	printf("\n[head]=>");
  	while(ptr) {
- 		printf("%s %d : ", ((head != ptr) ? ", " : ""),  ptr->data);
+ 		printf("%s[%d]", ((head != ptr) ? "=>" : ""),  ptr->data);
  		ptr = ptr->next;
  	}
- 	printf(" [null]\n");
+ 	printf("\n");
 }
 
 Node* List::begin() { return head; }
