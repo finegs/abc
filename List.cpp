@@ -53,8 +53,8 @@ void List::insert(Element data, Link pos = head) {
 	pos->prev->next = node;
 	pos->next->prev = node;
 }
-}
 void Elemet::dispose() {
 	free(data);
-l
+}
+
 

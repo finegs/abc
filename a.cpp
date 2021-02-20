@@ -2,14 +2,14 @@
 using namespace std;
 
 struct AA{
-	union {
-		struct {
-			unsigned char m1:2;
-			unsigned char m2:4;
-			unsigned char m3:2;
-		};
-		unsigned char m;
-	};
+  union {
+    struct {
+      unsigned char m1:2;
+      unsigned char m2:4;
+      unsigned char m3:2;
+    };
+    unsigned char m;
+  };
 };
 
 

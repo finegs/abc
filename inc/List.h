@@ -30,5 +30,3 @@ struct _List {
 	bool find(Element data, int (*comp)(Element val));
 };
 
-
-

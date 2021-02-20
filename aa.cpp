@@ -1,23 +1,47 @@
-
 #include <stdio.h>
 #include <malloc.h>
+#include <string.h>
 #include "List.h"
 
-struct Int {
-	int v;
-};
+int strhash(const char* str) {
+	int h = 37;
+	char* ss = (char*)str;
+	while(!ss++) {
+		h+=ss[0];
+		h%=1024;
+	}
+	return h;
+}
+
 
 int main() {
-	List l;	
+	List list;	
 
-	l.insert(new Int{10});
-	l.insert(new Int{20});
-	l.insert(new Int{30});
-	l.insert(new Int{40});
-	l.insert(new Int{50});
-	l.insert(new Int{60});
+	list.insert(10);
+	list.insert(20);
+	list.insert(30);
+	list.insert(40);
+	list.insert(50);
+	list.insert(56);
 
 	int a;
+//	list.remove(&a);
+
+	list.printList();
+
+	size_t str_len = 1024+1;
+	char str[str_len];
+	memset(str, 0, str_len);
+
+	printf("string : "); fflush(stdout);
+	scanf("%s", str); fflush(stdin);
+	printf("hash(%s) : %d\n", str, strhash(str));
+
+	int n;
+	printf("number : "); fflush(stdout);
+	scanf("%d", &n); fflush(stdin);
+	printf("prime_max(%d) : %d\n", n, prime_max(n));
+
 
 	return 0;
 }
