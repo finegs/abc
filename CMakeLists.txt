@@ -16,12 +16,14 @@ add_executable(zecho zecho.cpp)
 #add_executable(serial serial.cpp)
 add_executable(z z.cpp)
 add_executable(aa aa.cpp List.cpp Util.cpp)
+add_executable(c20 c20.cpp)
 
 target_link_libraries(a pthread ws2_32 )
 target_link_libraries(zecho pthread ws2_32 zmq)
 #target_link_libraries(zcli pthread ws2_32 zmq)
 #target_link_libraries(serial pthread ws2_32 zmq)
 target_link_libraries(z pthread ws2_32 zmq)
+target_link_libraries(c20 pthread ws2_32 zmq)
 
 #install(TARGETS a 
 #		RUNTIME DESTINATION bin
@@ -35,3 +37,4 @@ install(TARGETS zecho DESTINATION C:\\Programs\\bin)
 #install(TARGETS serial DESTINATION C:\\Programs\\bin)
 install(TARGETS z DESTINATION C:\\Programs\\bin)
 install(TARGETS aa DESTINATION C:\\Programs\\bin)
+install(TARGETS c20 DESTINATION C:\\Programs\\bin)
