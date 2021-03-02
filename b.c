@@ -6,19 +6,19 @@ typedef int (*Compare)(Element , Element);
 
 void quick_sort(Element *base, int n, Compare compare)
 {
-    Element temp;//êµí™˜ì„ ìœ„í•œ ì„ì‹œ ë³€ìˆ˜
-    int pivot = 0; //í”¼ë²—ì˜ ìœ„ì¹˜ë¥¼ ê¸°ì–µí•˜ê¸° ìœ„í•œ ë³€ìˆ˜
-    int big=0, small=0; //í”¼ë²—ë³´ë‹¤ í° ê°’ê³¼ ì‘ì€ ê°’ì˜ ìœ„ì¹˜ë¥¼ ì°¾ê¸° ìœ„í•œ ë³€ìˆ˜
+    Element temp;//±³È¯À» À§ÇÑ ÀÓ½Ã º¯¼ö
+    int pivot = 0; //ÇÇ¹şÀÇ À§Ä¡¸¦ ±â¾ïÇÏ±â À§ÇÑ º¯¼ö
+    int big=0, small=0; //ÇÇ¹şº¸´Ù Å« °ª°ú ÀÛÀº °ªÀÇ À§Ä¡¸¦ Ã£±â À§ÇÑ º¯¼ö
     if(n<=1)
     {
         return; 
-    }//    ì¡°ê±´(n<=1)   ì¢…ë£Œ
-    //í”¼ë²—ì„ ì„ íƒí•œë‹¤.    
+    }//    Á¶°Ç(n<=1)   Á¾·á
+    //ÇÇ¹şÀ» ¼±ÅÃÇÑ´Ù.    
     if(compare(base[0],base[n-1])>0) 
     {
-        if(compare(base[0],base[n/2])>0) //base[0]ì´ ì œì¼ í° ê°’, ì´ ì¡°ê±´ì¸ ê±°ì§“ì¼ ë•ŒëŠ” 0ë²ˆì§¸ ì›ì†Œê°€ ì¤‘ê°„ ê°’
+        if(compare(base[0],base[n/2])>0) //base[0]ÀÌ Á¦ÀÏ Å« °ª, ÀÌ Á¶°ÇÀÎ °ÅÁşÀÏ ¶§´Â 0¹øÂ° ¿ø¼Ò°¡ Áß°£ °ª
         {
-            if(compare(base[n/2],base[n-1])>0) //ë‘˜ ì¤‘ì— í° ê°’ì´ ì¤‘ê°„ ê°’
+            if(compare(base[n/2],base[n-1])>0) //µÑ Áß¿¡ Å« °ªÀÌ Áß°£ °ª
             {
                 pivot = n/2;
             }
@@ -28,59 +28,59 @@ void quick_sort(Element *base, int n, Compare compare)
             }
         }		
     }
-    else //base[n-1]ì´ base[0]ë³´ë‹¤ í¬ê±°ë‚˜ ê°™ìŒ
+    else //base[n-1]ÀÌ base[0]º¸´Ù Å©°Å³ª °°À½
     {
         if(compare(base[n/2],base[n-1])>0)
         {			
-            pivot = n-1; //n-1ë²ˆì§¸ ì›ì†Œê°€ ì¤‘ê°„ ê°’
+            pivot = n-1; //n-1¹øÂ° ¿ø¼Ò°¡ Áß°£ °ª
         }
-        else//n-1ë²ˆì§¸ ì›ì†Œê°€ ì œì¼ í° ê°’
+        else//n-1¹øÂ° ¿ø¼Ò°¡ Á¦ÀÏ Å« °ª
         {
-            if(compare(base[n/2],base[0])>0)//ì´ ì¡°ê±´ì¸ ê±°ì§“ì¼ ë•ŒëŠ” 0ë²ˆì§¸ ì›ì†Œê°€ ì¤‘ê°„ ê°’
+            if(compare(base[n/2],base[0])>0)//ÀÌ Á¶°ÇÀÎ °ÅÁşÀÏ ¶§´Â 0¹øÂ° ¿ø¼Ò°¡ Áß°£ °ª
             {
-                pivot = n/2;//n/2ê°€ ì¤‘ê°„ ê°’
+                pivot = n/2;//n/2°¡ Áß°£ °ª
             }
         }
     }
 
-    //í”¼ë²—ê³¼ ë§¨ ì•ì˜ ìš”ì†Œë¥¼ êµí™˜í•œë‹¤.
+    //ÇÇ¹ş°ú ¸Ç ¾ÕÀÇ ¿ä¼Ò¸¦ ±³È¯ÇÑ´Ù.
     temp = base[pivot];
     base[pivot] = base[0];
     base[0] = temp;
 
     big=0;//big:=0
     small = n;//small:=n
-    while(big<small)//ë°˜ë³µ(big<small)
+    while(big<small)//¹İº¹(big<small)
     {
-        for(big++; big<n; big++)//        ë°˜ë³µ(big:=big+1; big<n; big:=big+1)
+        for(big++; big<n; big++)//        ¹İº¹(big:=big+1; big<n; big:=big+1)
         {
-            if(compare(base[0],base[big])<0)//            ì¡°ê±´(compare(base[0],base[big])<0)
+            if(compare(base[0],base[big])<0)//            Á¶°Ç(compare(base[0],base[big])<0)
             {
-                break;//                ë£¨í”„ íƒˆì¶œ
+                break;//                ·çÇÁ Å»Ãâ
             }
         }
-        for(small--; small>0; small--)//        ë°˜ë³µ(small:small-1;small>0;small:small-1)
+        for(small--; small>0; small--)//        ¹İº¹(small:small-1;small>0;small:small-1)
         {
-            if(compare(base[0],base[small])>0)//            ì¡°ê±´(compare(base[0],base[small])>0)
+            if(compare(base[0],base[small])>0)//            Á¶°Ç(compare(base[0],base[small])>0)
             {
-                break;//                ë£¨í”„ íƒˆì¶œ
+                break;//                ·çÇÁ Å»Ãâ
             }			
         }
-        if(big<small)//        ì¡°ê±´(big<small)
+        if(big<small)//        Á¶°Ç(big<small)
         {
-            //            êµí™˜(base [big], base [small])
+            //            ±³È¯(base [big], base [small])
             temp = base[big];
             base[big] = base[small];
             base[small] = temp;
         }
     }
     
-    //êµí™˜(base [0], base [small])
+    //±³È¯(base [0], base [small])
     temp = base[0];
     base[0] = base[small];
     base[small] = temp;
-    quick_sort(base,small,compare);//í€µ ì •ë ¬(base,small, compare)
-    quick_sort(base+big,n-big,compare);//í€µ ì •ë ¬(base+big, n-big, compare)
+    quick_sort(base,small,compare);//Äü Á¤·Ä(base,small, compare)
+    quick_sort(base+big,n-big,compare);//Äü Á¤·Ä(base+big, n-big, compare)
 }
 #define MAX_BOOK	4000
 Book *books[MAX_BOOK]={0};
@@ -93,8 +93,8 @@ void SimulationInit()
     {
         sprintf(title,"%010d",rand());
         sprintf(author,"%010d",rand());
-        books[i] = New_Book(title,author,rand());//ëœë¤ í…ŒìŠ¤íŠ¸ ìš©
-        //books[i] = New_Book(title,author,i+1); //ìˆœì°¨ì  í…ŒìŠ¤íŠ¸ ìš©
+        books[i] = New_Book(title,author,rand());//·£´ı Å×½ºÆ® ¿ë
+        //books[i] = New_Book(title,author,i+1); //¼øÂ÷Àû Å×½ºÆ® ¿ë
     }
 }
 int CompareByTitle(void *b1,void *b2)
@@ -121,10 +121,10 @@ void ListBook(int n)
 void Simulation1()
 {
     quick_sort((Element *)books,10,CompareByTitle);
-    printf("--------ì œëª©ìˆœ-------\n");
+    printf("--------Á¦¸ñ¼ø-------\n");
     ListBook(10);
     quick_sort((Element *)books,10,CompareByNum);
-    printf("--------ë²ˆí˜¸ìˆœ-------\n");
+    printf("--------¹øÈ£¼ø-------\n");
     ListBook(10);
 }
 void Simulation2()
@@ -133,11 +133,11 @@ void Simulation2()
     st = clock();
     quick_sort(books,MAX_BOOK/10,CompareByNum);
     et=clock();
-    printf("%dê°œ ì •ë ¬ì— ê±¸ë¦° ì‹œê°„:%d\n",MAX_BOOK/10,et-st);
+    printf("%d°³ Á¤·Ä¿¡ °É¸° ½Ã°£:%d\n",MAX_BOOK/10,et-st);
     st = clock();
     quick_sort(books,MAX_BOOK,CompareByNum);
     et=clock();	
-    printf("%dê°œ ì •ë ¬ì— ê±¸ë¦° ì‹œê°„:%d\n",MAX_BOOK,et-st);
+    printf("%d°³ Á¤·Ä¿¡ °É¸° ½Ã°£:%d\n",MAX_BOOK,et-st);
 }
 void SimulationClear()
 {
