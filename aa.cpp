@@ -4,10 +4,11 @@
 #include "List.h"
 
 int strhash(const char* str) {
-	int h = 37;
+	int h = 5381;
+	char c;
 	char* ss = (char*)str;
-	while(!ss++) {
-		h+=ss[0];
+	while((c = ss[0]++)) {
+		h+=((h<<5) + h) + c;
 		h%=1024;
 	}
 	return h;

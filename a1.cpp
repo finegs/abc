@@ -96,5 +96,6 @@ int main(int argc, char* argv[]) {
 	if(verbose) {print(arr, arr_len); fprintf(stdout, "\n"); }
 
 	free(arr);
+
 	return 0;
 }
