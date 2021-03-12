@@ -14,8 +14,8 @@
 using namespace std;
 
 #define swap(a,b) {int t = a; (a) = (b); (b) = t; }
-
-const char* timestamp();
+static char timestamp_buf[25];
+const char* timestamp(char* buf = timestamp_buf);
 
 void heap_push(int arr[], int pos) {
 	if(pos<=1||arr[pos/2]>arr[pos]) return;
@@ -34,12 +34,10 @@ void heap_pop(int arr[], int n, int pos) {
 void print(int arr[], int arr_len) {
 	fprintf(stdout, "%s Array : [", timestamp());
 	for(int i = 1;i<=arr_len;i++) { printf("%d ", arr[i]); }
-	//std::for_each_n(arr+1, arr_len, [](int a) { printf("%d ", a); });
-	//std::for_each(arr, arr+arr_len, [](int a) { printf("%d ", a); });
-	fprintf(stdout, "]"); fflush(stdout);
+	fprintf(stdout, "]\n");
 }
 
-const char* timestamp() {
+const char* timestamp(char* buf) {
 	time_t rawTime;
 	struct tm* pTimeInfo;
 
@@ -50,14 +48,13 @@ const char* timestamp() {
 	gettimeofday(&curTime, NULL);
 	int milli = curTime.tv_usec / 1000;
 	
-	static char tmstmp_buf [25];
-	memset(tmstmp_buf, 0, 25);
-//	strftime(tmstmp_buf, 80, "%Y-%m-%d %H:%M:%S", localtime(&curTime.tv_sec));
-	strftime(tmstmp_buf, 20, "%Y-%m-%d %H:%M:%S", pTimeInfo);
+	memset(buf, 0, 25);
+//	strftime(buf, 80, "%Y-%m-%d %H:%M:%S", localtime(&curTime.tv_sec));
+	strftime(buf, 20, "%Y-%m-%d %H:%M:%S", pTimeInfo);
 	
-	sprintf(tmstmp_buf+19, ".%03d", milli);
-//	printf("current time: %s \n", currentTime);
-	return tmstmp_buf;
+	sprintf(buf+19, ".%03d", milli);
+//	printf("current time: %s \n", buf);
+	return buf;
 }
 
 int main(int argc, char* argv[]) {
@@ -92,10 +89,12 @@ int main(int argc, char* argv[]) {
 	if(verbose) {print(arr, arr_len); fprintf(stdout, "\n"); }
 	for(int i = arr_len;i>1;i--) { swap(arr[1], arr[i]); heap_pop(arr, i-1, 1); }
 
-	fprintf(stdout, "%s swap & heap_pop(%d) is doen.\n", timestamp(), arr_len+1);
+	fprintf(stdout, "%s swap & heap_pop(%d) is done.\n", timestamp(), arr_len+1);
 	if(verbose) {print(arr, arr_len); fprintf(stdout, "\n"); }
 
 	free(arr);
+
+	cout << "Good " << endl;
 
 	return 0;
 }

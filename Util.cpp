@@ -7,11 +7,16 @@
 extern "C" {
 #endif
 
-int strhash(const char* str) {
-	int hash = 271;
-	const char* s = str;
-	while(*s++) { hash += s[0]; hash %= 1024; }
-	return hash;
+
+int strhash(const char* str, int mod) {
+	int h = 5381;
+	char c;
+	char* ss = (char*)str;
+	while((c = *ss++)) {
+		h+=((h<<5) + h) + c;
+		h%=mod;
+	}
+	return h;
 }
 
 uint32_t hash(void *buf, size_t len, uint32_t* hval) {

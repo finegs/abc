@@ -2,17 +2,7 @@
 #include <malloc.h>
 #include <string.h>
 #include "List.h"
-
-int strhash(const char* str) {
-	int h = 5381;
-	char c;
-	char* ss = (char*)str;
-	while((c = ss[0]++)) {
-		h+=((h<<5) + h) + c;
-		h%=1024;
-	}
-	return h;
-}
+#include "Util.h"
 
 
 int main() {
@@ -25,7 +15,7 @@ int main() {
 	list.insert(50);
 	list.insert(56);
 
-	int a;
+//	int a;
 //	list.remove(&a);
 
 	list.printList();
@@ -34,9 +24,12 @@ int main() {
 	char str[str_len];
 	memset(str, 0, str_len);
 
-	printf("string : "); fflush(stdout);
-	scanf("%s", str); fflush(stdin);
-	printf("hash(%s) : %d\n", str, strhash(str));
+	while(1) {
+    	printf("Enter string to hash : "); fflush(stdout);
+    	scanf("%s", str); fflush(stdin);
+		if(!strcmp("exit", str) || !strcmp("quit", str)) break;
+    	printf("hash(%s) : %d\n", str, strhash(str));
+	}
 
 	int n;
 	printf("number : "); fflush(stdout);
