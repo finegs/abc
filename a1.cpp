@@ -21,6 +21,9 @@ using namespace std;
 	memcpy(&x, swap_temp, sizeof(x)); \
 } while(0)
 */
+template<typename T>
+inline void swap(T &a, T &b) { T tmp = a; a = b; b = tmp; }
+
 void swap2(void** pa, void** pb);
 static char timestamp_buf[25];
 const char* timestamp(char* buf = timestamp_buf);
@@ -62,7 +65,10 @@ int main(int argc, char* argv[]) {
 
 	fprintf(stdout, "%s arr = rand() && heap_push(%d) is done.\n", timestamp(), arr_len+1);
 	if(verbose) {print(arr, arr_len); fprintf(stdout, "\n"); }
-	for(int i = arr_len;i>1;i--) { swap2((void**)&arr+1, (void**)&arr+i); heap_pop(arr, i-1, 1, comp_int); }
+	for(int i = arr_len;i>1;i--) { 
+		swap2((void**)&arr+1, (void**)&arr+i); 
+		heap_pop(arr, i-1, 1, comp_int); 
+	}
 
 	fprintf(stdout, "%s swap & heap_pop(%d) is done.\n", timestamp(), arr_len+1);
 	if(verbose) {print(arr, arr_len); fprintf(stdout, "\n"); }
