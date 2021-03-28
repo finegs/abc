@@ -1,5 +1,6 @@
 //Book.c
 #include "Book.h"
+#include <malloc.h>
 
 void Book_Book(Book *book,const char *title,const char *author,int num);
 Book *New_Book(const char *title,const char *author,int num)
