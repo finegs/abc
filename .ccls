@@ -1,9 +1,0 @@
-clang
-%c -std=c11
-%cpp -std=c++2a
-%h -x
-%h c++header
-%c %cpp -pthread
--Iinc
--I.
--DMACRO
