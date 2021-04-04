@@ -15,3 +15,5 @@ D:/Programs/msys64/mingw64/include
 D:/Programs/msys64/mingw64/lib/gcc/x86_64-w64-mingw32/10.2.0/include-fixed
 -isystem
 D:/Programs/msys64/mingw64/x86_64-w64-mingw32/include
+-I
+D:/Dev/git/abc
