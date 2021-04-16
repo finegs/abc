@@ -3,6 +3,12 @@
 #include <string.h>
 #include "List.h"
 #include "Util.h"
+#include "hash_map.hpp"
+
+struct MyCharsHash {
+	unsigned int operator(const char* str) {
+	}
+};
 
 
 int main() {
@@ -35,6 +41,10 @@ int main() {
 	printf("number : "); fflush(stdout);
 	scanf("%d", &n); fflush(stdin);
 	printf("prime_max(%d) : %d\n", n, prime_max(n));
+
+
+	MyHashMap<char*, int, MyCharsHash> map;
+	map.Insert("1", 1);
 
 	return 0;
 }
