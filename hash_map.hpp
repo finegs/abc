@@ -1,76 +1,114 @@
 #pragma once
+
 #include <iostream>
-#include <list>
-template<typename Key, typename Value>
-struct MyHashMapEntry {
-	Key key;
-	Value value;
+
+template<typename K, size_t TableSize=1000000>
+struct KeyHash {
+	unsigned long operator() (const K& key) const  {
+		return reinterpret_cast<unsigned long>(key) % TableSize;
+	}
+};	
+
+template <typename Key, typename Value>
+class HashNode {
+	public:
+		HashNode(Key key, Value value) : key(key), value(value) , next(nullptr) {}
+		Key getKey() const { return key; }
+		Value getValue() const{ return value; }
+		HashNode* getNext() const { return next; }
+		void setValue(Value value) { HashNode::value = value; }
+		void setNext(HashNode* next) { HashNode::next = next; }
+
+   	private:
+		Key key;
+		Value value;
+		HashNode* next;
 };
 
-template<typename TKey, typename TValue, size_t Bucket_len = 1000>
-class MyHashMap {
-private:
+template <typename Key, typename Value, typename Hash, size_t TableSize = 1000000>
+class HashMap {
+	public:
+		HashMap() {
+			table = new HashNode<Key,Value>* [TableSize];
+		}
 
-    std::list<MyHashMapEntry<TKey, TValue>*> bucket[Bucket_len];
-    
-    static int const MAX_COUNT = 5;
-    int CalcHashFunc(TKey key);
+		~HashMap() {
+			for (int i = 0; i < TableSize; ++i) {
+				HashNode<Key,Value> *entry = table[i];
+				while(entry != NULL) {
+					HashNode<Key,Value> *pre = entry;
+					entry = entry->getNext();
+					delete pre;
+				}
+				table[i] = nullptr;
+			}
+			delete[] table;
+		}
 
-public:
-    MyHashMap<TKey, TValue, Bucket_len>();
-    void Insert(TKey key, TValue value);
-    void Delete(TKey key);
-    void Print();
+		bool get(const Key &key, Value &value) {
+			unsigned long hashValue = hashFunc(key);
+			HashNode<Key, Value>* entry = table[hashValue];
+			
+			while(entry != nullptr) {
+				if(entry->getKey() == key) {
+					value = entry->getValue();
+					return true;
+				}
+				entry = entry->getNext();
+			}
+			return false;
+		}
+
+		void put(const Key& key, const Value& value) {
+			unsigned long hashValue = hashFunc(key);
+			HashNode<Key, Value> *prev = nullptr;
+			HashNode<Key, Value> *entry = table[hashValue];
+
+			while(entry != nullptr && entry->getKey() != key) {
+				prev = entry;
+				entry = entry->getNext();
+			}
+			if(entry==nullptr){
+				entry = new HashNode<Key, Value>(key, value);
+				if(prev==nullptr) {
+					table[hashValue] = entry;
+				} else {
+					prev->setNext(entry);
+				}
+			}
+			else {
+				entry->setValue(value);
+			}
+		}
+
+		void remove(const Key& key) {
+			unsigned long hashValue = hashFunc(key);
+			HashNode<Key, Value> *prev = nullptr;
+			HashNode<Key, Value> *entry = table[hashValue];
+
+			while(entry != nullptr&& entry->getKey() != key) {
+				prev = entry;
+				entry = entry->getNext();
+			}
+
+			if(entry==nullptr) {
+				return;
+			}
+			else {
+				if(prev==nullptr) {
+					table[hashValue] = entry->getNext();
+				}
+				else {
+					prev->setNext(entry->getNext());
+				}
+				delete entry;
+			}
+		}
+
+	private:
+		HashNode<Key, Value>** table;
+		Hash hashFunc;
+
 };
 
-template<typename TKey, typename TValue, size_t Bucket_len>
-MyHashMap<TKey, TValue, Bucket_len>::MyHashMap() {
-}
 
-template<typename TKey, typename TValue, size_t Bucket_len>
-int MyHashMap<TKey, TValue, Bucket_len>::CalcHashFunc(TKey key) {
-    return key % Bucket_len;
-}
-template<typename TKey, typename TValue, size_t Bucket_len>
-void MyHashMap<TKey, TValue, Bucket_len>::Insert(TKey key, TValue value) {
-    std::list<MyHashMapEntry<TKey, TValue>*> &list = bucket[CalcHashFunc(key)];
-    if (list.size() > 0) {
-        for (MyHashMapEntry<TKey, TValue> *it : list) {
-            if (it->key == key) {
-                it->value = value;
-                return;
-            }
-        }
-    }
-    MyHashMapEntry<TKey, TValue>* data = new MyHashMapEntry<TKey, TValue>;
-    data->key = key;
-    data->value = value;
-    list.push_back(data);
-}
-template<typename TKey, typename TValue, size_t Bucket_len>
-void MyHashMap<TKey, TValue, Bucket_len>::Print() {
-    for (int i = 0; i < Bucket_len; i++) {
-        std::list<MyHashMapEntry<TKey, TValue>*> list = bucket[i];
-        if (list.size() > 0) {
-            for (MyHashMapEntry<TKey, TValue> *it : list) {
-                std::cout << "key : " << it->key << " value : " << it->value << "\t";
-            }
-        }
-        std::cout << std::endl;
-    }
-}
-template<typename TKey, typename TValue, size_t Bucket_len>
-void MyHashMap<TKey, TValue, Bucket_len>::Delete(TKey key) {
-    std::list<MyHashMapEntry<TKey, TValue>*> &list = bucket[CalcHashFunc(key)];
-    if (list.size() > 0) {
-        for (MyHashMapEntry<TKey, TValue>* it : list) {
-            if (it->key == key) {
-                list.remove(it);
-                return;
-            }
-        }
-    }
-}
- 
-
- 

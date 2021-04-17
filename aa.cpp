@@ -6,7 +6,15 @@
 #include "hash_map.hpp"
 
 struct MyCharsHash {
-	unsigned int operator(const char* str) {
+	unsigned long operator()(const char* str) {
+		unsigned long h = 5417;
+		char* c = (char*)str;
+		while(*c) {
+			h = h<<4 | h;
+			h += *c;
+			c++;
+		}
+		return h;
 	}
 };
 
@@ -43,8 +51,11 @@ int main() {
 	printf("prime_max(%d) : %d\n", n, prime_max(n));
 
 
-	MyHashMap<char*, int, MyCharsHash> map;
-	map.Insert("1", 1);
+	HashMap<const char*, int, MyCharsHash> map;
+	map.put("1", 1);
+	int iv;
+	bool b = map.get("1", iv);
+	std::cout<< "map.get("<< "1" << ") = " << (b ? "true" : "false") << ", value = " << iv << std::endl;
 
 	return 0;
 }
