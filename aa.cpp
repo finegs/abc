@@ -16,16 +16,29 @@ int memset(void* p, char v, size_t len) {
 int strcmp(const char* a, const char* b) {
 	char* aa = (char*)a;
 	char* bb = (char*)b;
-	while(1) {
-		if(aa[0] != bb[0]) return (aa[0] > bb[0] ? 1 : -1);
-		if(!*aa) break;
-		aa++;b++;
+	while(*aa) {
+		if(*aa != *bb) break;
+		aa++;
+		bb++;
 	}
-	return 0;
+	return *(unsigned char*)aa - *(unsigned char*)bb;
 }
 
+struct MyCharsIntViewer {
+  void operator()(const char *key, int value) const {
+    printf("(%s, %d)", key, value);
+  }
+};
+
+struct MyCharsMatcher {
+	int operator()(const char* str1, const char* str2) const {
+		return strcmp(str1, str2);
+	}
+};
 struct MyCharsHash {
 	unsigned long operator()(const char* str) {
+		return strhash(str);
+#if 0
 		unsigned long h = 5417;
 		char* c = (char*)str;
 		while(*c) {
@@ -34,6 +47,7 @@ struct MyCharsHash {
 			c++;
 		}
 		return h;
+#endif
 	}
 };
 
@@ -63,9 +77,11 @@ int main() {
 
 	list.printList();
 
-	HashMap<const char*, int, MyCharsHash> map;
+        HashMap<const char *, int, MyCharsIntViewer, MyCharsHash,
+                MyCharsMatcher>
+            map;
 
-	size_t str_len = 1024+1;
+        size_t str_len = 1024+1;
 	char cmd[32+1], str[str_len], value[12];
 
 	while(1) {
@@ -76,15 +92,41 @@ int main() {
     	printf("Enter cmd [key value] : "); fflush(stdout);
     	scanf("%s", cmd);
 		if(!strcmp("--exit", cmd) || !strcmp("--quit", cmd)) break;
-		else if(!strcmp("--help", cmd) || !strcmp("-h", cmd)) { printUsage(); }
-		else if(!strcmp("--add",cmd) ||!strcmp("-a", cmd)) { scanf("%s %s", str, value);  map.put(str, atoi(value)); }
-		else if (!strcmp("--remove",cmd) ||!strcmp("-r", cmd)) { scanf("%s", str); map.remove(str); }
-		else if (!strcmp("--clearall",cmd) ||!strcmp("-ca", cmd)) { map.clearall(); }
-		else if (!strcmp("--get",cmd) ||!strcmp("-g", cmd)) { scanf("%s", str); map.remove(str); }
-		else if (!strcmp("--print",cmd) ||!strcmp("-p", cmd)) { map.print(); }
+		else if (!strcmp("--help", cmd) || !strcmp("-h", cmd)) { printUsage(); }
+		else if (!strcmp("--add",cmd) ||!strcmp("-a", cmd)) { 
+			scanf("%s %s", str, value); 
+			printf("[Info] %-10s : (%s, %s)\n", cmd, str, value); 
+			map.put(str, atoi(value)); 
+			printf("[Info] %-10s : completed(size=%lld) (%s, %s)\n", cmd, map.getSize(), str, value); 
+		}
+		else if (!strcmp("--remove",cmd) ||!strcmp("-r", cmd)) { 
+			scanf("%s", str); 
+			printf("[Info] %-10s : (%s)\n", cmd, str); 
+			map.remove(str); 
+		}
+		else if (!strcmp("--clearall",cmd) ||!strcmp("-ca", cmd)) { 
+			printf("[Info] %-10s : Are your sure to cleanAll? (yes/No)\n", cmd); 
+			scanf("%s", str);
+			if(!strcmp("y",str) || !strcmp("Y",str) || !strcmp("yes",str) || !strcmp("YES", str)) {
+				map.clearall(); 
+				printf("[Info] %-10s : CleanAll is done.\n", cmd); 
+			}
+		}
+		else if (!strcmp("--get",cmd) ||!strcmp("-g", cmd)) { 
+			int value = 0 ;
+			scanf("%s", str); 
+			bool rb = map.get(str, value); 
+			printf("[Info] %-10s : (%s= get(%s, %d)\n", cmd, (rb? "true" : "false"), str, value);
+
+		}
+		else if (!strcmp("--print",cmd) ||!strcmp("-p", cmd)) { 
+			map.print(); 
+		}
 		else { printUsage(); }
-		
-    	printf("\t\t\t[Debug] hash(%s) : %d\n", cmd, strhash(cmd));
+
+		char* ts = str;
+		while(*ts == '-') { ts++; }
+    	printf("\t\t\t[Debug] hash(%s) : %d\n", ts, strhash(ts));
 		fflush(stdin);
 	}
 

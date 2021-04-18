@@ -4,10 +4,23 @@
 
 #define HASH_MAP_USE_KEYSET 0
 
-template<typename K, size_t TableSize=1000000>
+template<typename Key, typename Value>
+struct KeyValueViewer {
+	void operator()(const Key& key, const Value& value) const {
+		printf("(%s, %s)", key, value);	
+	}
+};
+
+template<typename Key>
+struct KeyMatcher {
+	int operator()(const Key& a, const Key& b) const {
+		return reinterpret_cast<unsigned long>(a) - reinterpret_cast<unsigned long>(b);
+	}
+};
+template<typename K>
 struct KeyHash {
 	unsigned long operator() (const K& key) const  {
-		return reinterpret_cast<unsigned long>(key) % TableSize;
+		return reinterpret_cast<unsigned long>(key);
 	}
 };	
 
@@ -27,11 +40,18 @@ class HashNode {
 		HashNode* next;
 };
 
-template <typename Key, typename Value, typename Hash, size_t TableSize = 1000000>
+template <typename Key, 
+		 typename Value, 
+		 typename KeyValueViewer = KeyValueViewer<Key,Value>,
+		 typename Hash = KeyHash<Key>, 
+		 typename KeyMatcher = KeyMatcher<Key>, 
+		 size_t TableSize = 1000000>
 class HashMap {
 	public:
 		HashMap() {
 			table = new HashNode<Key,Value>* [TableSize];
+			memset(table, 0, sizeof(HashNode<Key, Value>*)*TableSize);
+			size = 0;
 #if HASH_MAP_USE_KEYSET
 			keySet = nullptr;
 #endif
@@ -68,12 +88,14 @@ class HashMap {
 #endif
 		}
 
+		unsigned int getSize() const { return size; }
+
 		bool get(const Key &key, Value &value) {
-			unsigned long hashValue = hashFunc(key);
+			unsigned long hashValue = hashFunc(key) % TableSize;
 			HashNode<Key, Value>* entry = table[hashValue];
 			
 			while(entry != nullptr) {
-				if(entry->getKey() == key) {
+				if(!keyMatcher(entry->getKey(), key)) {
 					value = entry->getValue();
 					return true;
 				}
@@ -83,14 +105,15 @@ class HashMap {
 		}
 
 		void put(const Key& key, const Value& value) {
-			unsigned long hashValue = hashFunc(key);
+			unsigned long hashValue = hashFunc(key) % TableSize;
 			HashNode<Key, Value> *prev = nullptr;
 			HashNode<Key, Value> *entry = table[hashValue];
 
-			while(entry != nullptr && entry->getKey() != key) {
+			while(entry != nullptr && !keyMatcher(entry->getKey(), key)) {
 				prev = entry;
 				entry = entry->getNext();
 			}
+
 			if(entry==nullptr){
 				entry = new HashNode<Key, Value>(key, value);
 				if(prev==nullptr) {
@@ -102,6 +125,7 @@ class HashMap {
 			else {
 				entry->setValue(value);
 			}
+			size++;
 			
 			// add newKey to keySet List
 #if HASH_MAP_USE_KEYSET
@@ -118,7 +142,7 @@ class HashMap {
 		}
 
 		void remove(const Key& key) {
-			unsigned long hashValue = hashFunc(key);
+			unsigned long hashValue = hashFunc(key) % TableSize;
 			HashNode<Key, Value> *prev = nullptr;
 			HashNode<Key, Value> *entry = table[hashValue];
 
@@ -139,26 +163,26 @@ class HashMap {
 				}
 				delete entry;
 			}
+			size--;
 		}
 
 		void print() {
 
-			HashNode<Key, Value> *prev;
-			HashNode<Key, Value> *entry;
+			HashNode<Key, Value>* entry = nullptr;
 
+			printf("size=%lld, tableSize=%lld\n", size, TableSize);
 			for(int i = 0;i<TableSize;i++) {
 
-				prev = nullptr;
 				entry = table[i];
 
 				if(!entry) continue;
 
 				printf("[%d] : ", i);
 
-				while(entry != nullptr) {
-					printf("(%s, %s)", entry->getKey(), entry->getValue());	
+				while(entry) {
+					keyValueViewer(entry->getKey(), entry->getValue());	
 					entry = entry->getNext();	
-					if(entry) printf(",");
+					if(entry) printf(", ");
 				}
 				printf("\n");
 			}
@@ -167,7 +191,6 @@ class HashMap {
 		void clearall() {
 			for (int i = 0; i < TableSize; ++i) {
 			 	HashNode<Key,Value> *entry = table[i];
-
 				while(entry != NULL) {
 					HashNode<Key,Value> *pre = entry;
 					entry = entry->getNext();
@@ -175,14 +198,18 @@ class HashMap {
 				}
 				table[i] = nullptr;
 			}
+			size = 0;
 		}
 
 	private:
 		HashNode<Key, Value>** table;
+		size_t size;
 #if HASH_MAP_USE_KEYSET
 		HashNode<Key, int>* keySet;
 #endif
 		Hash hashFunc;
+		KeyMatcher keyMatcher;
+		KeyValueViewer keyValueViewer;
 };
 
 
