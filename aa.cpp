@@ -4,15 +4,16 @@
 #include "List.h"
 #include "Util.h"
 #include "hash_map.hpp"
+#include <memory>
 
-int memset(void* p, char v, size_t len) {
-	char* c = (char*)p;
+int memset(void* p, char c, size_t len) {
+	char* pp = (char*)p;
 	while(len--) {
-		*c = v;
-		c++;
+		*pp++ = c;
 	}
 	return 0;
 }
+
 int strcmp(const char* a, const char* b) {
 	char* aa = (char*)a;
 	char* bb = (char*)b;
@@ -22,6 +23,18 @@ int strcmp(const char* a, const char* b) {
 		bb++;
 	}
 	return *(unsigned char*)aa - *(unsigned char*)bb;
+}
+
+void strncpy(char* dst, const char* src, size_t len) {
+	char* sp = (char*)src;
+	while(len--) *dst++ = *sp++; 
+}
+
+size_t strlen(const char* str) {
+	size_t len = 0;
+	char* c = (char*)str;
+	while(*c++) len++;
+	return len;
 }
 
 struct MyCharsIntViewer {
@@ -61,6 +74,51 @@ void printUsage() {
 	printf("        --clearall(-ca)\n");
 }
 
+class MString {
+	public:
+		explicit MString(size_t capacity = 8193) : str(nullptr), len(0), capacity(capacity) {}	
+		explicit MString(const char* str) : capacity(8193) {
+			str = new char[capacity];
+			memset(MString::str, '\0', capacity);
+			strncpy(MString::str, str, len = strlen(str));
+		}
+
+		friend std::ostream& operator<<(std::ostream& os, const MString& o) {
+			os << "len=" <<o.len << ", capacity="<<o.capacity<<", str="<<o.str;
+			return os;
+		}
+
+		friend std::istream& operator>>(std::istream& is, MString& o) {
+			size_t buf_len = 8193;
+			size_t b_len = buf_len;
+			char c;
+
+			int i = o.len;
+			if(!o.str) {
+				o.str = new char[buf_len];
+				memset(o.str, '\0', buf_len);
+			}
+
+			//while(is.get(c) || c != ' ' || c != '\n' | c != '\t') {
+			while(is.get(o.str, buf_len)) {
+				if(i>=b_len) {
+					b_len *= 2;
+					o.str = (char*)realloc(o.str, b_len);
+				}
+				o.str[i++]=c;
+			}
+			o.str[i] = '\0';
+			o.len = i;
+			o.capacity = b_len;
+			return is;
+		}
+
+	private:
+		char* str;
+		size_t len;
+		size_t capacity;
+};
+
 
 int main() {
 	List list;	
@@ -77,11 +135,9 @@ int main() {
 
 	list.printList();
 
-        HashMap<const char *, int, MyCharsIntViewer, MyCharsHash,
-                MyCharsMatcher>
-            map;
+    HashMap<const char *, int, MyCharsIntViewer, MyCharsHash, MyCharsMatcher> map;
 
-        size_t str_len = 1024+1;
+    size_t str_len = 1024+1;
 	char cmd[32+1], str[str_len], value[12];
 
 	while(1) {
@@ -122,6 +178,23 @@ int main() {
 		else if (!strcmp("--print",cmd) ||!strcmp("-p", cmd)) { 
 			map.print(); 
 		}
+		else if (!strcmp("--test01", cmd)) {
+			std::unique_ptr<MString> p1 = std::make_unique<MString>(1025);
+			std::cout << "Enter String to test MString :"; std::cout.flush();
+			std::cin >> *p1.get();
+
+			std::cout << "MString : " << *p1.get() << std::endl;
+		}
+		else if (!strcmp("--test02", cmd)) {
+			char buf[100];
+			memset(buf, 0, 100);
+
+			std::cin.clear();
+			std::cout.flush();
+			std::cout<<"Enter Message : "; std::cout.flush();
+			std::cin.get(buf, 100);
+			std::cout << std::endl << "Your Message : " << buf << std::endl;
+ 		}
 		else { printUsage(); }
 
 		char* ts = str;
