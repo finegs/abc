@@ -1,3 +1,6 @@
 **/.*.swp
 **/.*.un*
 **/*.exe
+**/cscope.*
+**/tags
+**/clangd/*
