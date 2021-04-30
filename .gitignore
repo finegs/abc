@@ -3,4 +3,5 @@
 **/*.exe
 **/cscope.*
 **/tags
-**/clangd/*
+.clangd/*
+build/*
