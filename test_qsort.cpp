@@ -21,6 +21,10 @@ void swap(void* a, void* b, size_t len, void* t = nullptr) {
 	if (tt) free(tt);
 }
 
+int qsort_partition(void* dataSet, size_t dataSize, int left, int right);
+void qsort(void* dataSet, size_t dataSize, int (*dataComparator)(void*a, void*b), int left, int right);
+int IntComparator(void* a, void* b);
+#if 0
 int qsort_partitin(int* dataSet, int left, int right) {
 	int first = left;
 	int pivot = dataSet[first];
@@ -47,6 +51,7 @@ void qsort(int* dataSet, int left, int right) {
 		qsort(dataSet, idx+1, right);
 	}
 }
+#endif
 
 void print(void* dataSet, size_t len, void (*printData)(void* data)) {
 	int* sp = (int*)dataSet;
@@ -74,9 +79,37 @@ int main(int argc, char* argv[]) {
 
 	printf("Before : "); print(arr, arr_len, printInt);
 
-	qsort(arr, 0, arr_len-1);
+	qsort((void*)arr, sizeof(int), IntComparator, 0, arr_len-1);
 
 	printf("After : "); print(arr, arr_len, printInt);
 
 	return 0;
-}	
+}
+
+int IntComparator(void* a, void* b) {
+	int* aa  = (int*)a;
+	int* bb = (int*)b;
+	if(*aa == *bb) return 0;
+	return *aa > * bb ? 1 : -1;
+}
+
+
+int qsort_partition(void* dataSet, size_t dataSize, int (*dataComparator)(void* a, void* b), int left, int right) {
+	int first = left;
+	while(left<=right) {
+		while(dataComparator((int*)dataSet+left, (int*)dataSet+first)<0 && left<=right) ++left;
+		while(dataComparator((int*)dataSet+right,(int*)dataSet+first)>=0&& left<right) --right; 
+		if(left<right) swap((int*)dataSet+left, (int*)dataSet+right, dataSize);
+		else break;
+	}
+	swap((int*)dataSet+first,  (int*)dataSet+right, dataSize);
+	return right;
+}
+
+void qsort(void* dataSet, size_t dataSize, int (*dataComparator)(void*a,void*b), int left, int right) {
+	if(left<right) {
+		int idx = qsort_partition(dataSet, dataSize, dataComparator, left, right);
+		qsort(dataSet, dataSize, dataComparator, left, idx-1);
+		qsort(dataSet, dataSize, dataComparator, idx+1, right);
+	}
+}
