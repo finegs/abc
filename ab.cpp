@@ -58,7 +58,7 @@ void print(void* dataSet, size_t len, void (*printData)(void* data)) {
 }
 
 void printInt(void* data) {
-	printf("%d", *(int*)data);
+	printf("%d", *((int*)data));
 }
 
 int main(int argc, char* argv[]) {
@@ -69,7 +69,7 @@ int main(int argc, char* argv[]) {
 	if(!arr) { fprintf(stderr, "fail to malloc(sizeof(int)*%d)", arr_len); return 1; }
 	memset(arr, '\0', arr_len);
 	for(int i = 0;i < arr_len;i++) {
-		scanf("%d", arr++);
+		scanf("%d", arr+i);
 	}
 
 	printf("Before : "); print(arr, arr_len, printInt);
