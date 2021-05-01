@@ -25,7 +25,7 @@ add_executable(zecho zecho.cpp)
 add_executable(z z.cpp)
 add_executable(aa aa.cpp List.cpp Util.cpp)
 add_executable(c20 c20.cpp)
-add_executable(app a.cpp hash.cpp hash_map.cpp)
+add_executable(app a.cpp hash.cpp)
 
 target_link_libraries(a pthread ws2_32 )
 target_link_libraries(a1 pthread ws2_32 zmq)
