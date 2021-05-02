@@ -3,7 +3,6 @@
 //#include <string.h>
 #include "List.h"
 #include "Util.h"
-#include "hash_map.hpp"
 #include <memory>
 
 int memset(void* p, char c, size_t len) {
@@ -76,11 +75,15 @@ void printUsage() {
 
 class MString {
 	public:
-		explicit MString(size_t capacity = 8193) : str(nullptr), len(0), capacity(capacity) {}	
-		explicit MString(const char* str) : capacity(8193) {
+		explicit MString(size_t capacity = 8193) : str(nullptr), len(0), capacity(capacity) {
+
+		}	
+		explicit MString(const char* str) {
+			len = strlen(str);
+			capacity = len+1;
 			str = new char[capacity];
 			memset(MString::str, '\0', capacity);
-			strncpy(MString::str, str, len = strlen(str));
+			strncpy(MString::str, str, len);
 		}
 
 		friend std::ostream& operator<<(std::ostream& os, const MString& o) {
@@ -89,27 +92,36 @@ class MString {
 		}
 
 		friend std::istream& operator>>(std::istream& is, MString& o) {
-			size_t buf_len = 8193;
-			size_t b_len = buf_len;
-			char c;
 
-			int i = o.len;
 			if(!o.str) {
-				o.str = new char[buf_len];
-				memset(o.str, '\0', buf_len);
+				o.len = 0;
+				o.capacity = 8193;
+				o.str = new char[o.capacity];
+				memset(o.str, '\0', o.capacity);
+			}
+			else {
+				o.len = 0;
+				memset(o.str, '\0', strlen(o.str));
 			}
 
 			//while(is.get(c) || c != ' ' || c != '\n' | c != '\t') {
-			while(is.get(o.str, buf_len)) {
-				if(i>=b_len) {
-					b_len *= 2;
-					o.str = (char*)realloc(o.str, b_len);
+			size_t buf_len = 256;
+			char buf[buf_len];
+			memset(buf, '\0', buf_len);
+
+			// TODO : read buf until std::istream.get is OK
+			size_t i = 0;
+			while(is.get(buf, buf_len)) {
+				if(i>=o.capacity) {
+					o.capacity *= 2;
+					o.str = (char*)realloc(o.str, o.capacity);
 				}
-				o.str[i++]=c;
+				strncpy(o.str+i, buf, buf_len); 
+				o.len += buf_len;
+				i+=buf_len;
 			}
 			o.str[i] = '\0';
 			o.len = i;
-			o.capacity = b_len;
 			return is;
 		}
 
