@@ -3,8 +3,6 @@
 **/*.exe
 compile_commands.json
 Debug/**/*.*
-cscope.files
-cscope.out
-**/cscope.out
-**/cscope.files
+**/cscope.*
+cscope.*
 **/tags
