@@ -1,10 +1,6 @@
 #include <stdio.h>
 #include <malloc.h>
-//#include <string.h>
-#include "List.h"
-#include "Util.h"
-#include "hash_map.hpp"
-#include <memory>
+#include "MyHashMap.hpp"
 
 int memset(void* p, char c, size_t len) {
 	char* pp = (char*)p;
@@ -48,21 +44,6 @@ struct MyCharsMatcher {
 		return strcmp(str1, str2);
 	}
 };
-struct MyCharsHash {
-	unsigned long operator()(const char* str) {
-		return strhash(str);
-#if 0
-		unsigned long h = 5417;
-		char* c = (char*)str;
-		while(*c) {
-			h = h<<4 | h;
-			h += *c;
-			c++;
-		}
-		return h;
-#endif
-	}
-};
 
 void printUsage() {
 	printf("Usage : cmd [ key value]\n");
@@ -76,11 +57,15 @@ void printUsage() {
 
 class MString {
 	public:
-		explicit MString(size_t capacity = 8193) : str(nullptr), len(0), capacity(capacity) {}	
-		explicit MString(const char* str) : capacity(8193) {
+		explicit MString(size_t capacity = 8193) : str(nullptr), len(0), capacity(capacity) {
+
+		}	
+		explicit MString(const char* str) {
+			len = strlen(str);
+			capacity = len+1;
 			str = new char[capacity];
 			memset(MString::str, '\0', capacity);
-			strncpy(MString::str, str, len = strlen(str));
+			strncpy(MString::str, str, len);
 		}
 
 		friend std::ostream& operator<<(std::ostream& os, const MString& o) {
@@ -89,29 +74,45 @@ class MString {
 		}
 
 		friend std::istream& operator>>(std::istream& is, MString& o) {
-			size_t buf_len = 8193;
-			size_t b_len = buf_len;
-			char c;
+			memset(o.str, '\0', o.capacity);
+			is >> o.str;
+			o.len = strlen(o.str);
+#if 0
 
-			int i = o.len;
 			if(!o.str) {
-				o.str = new char[buf_len];
-				memset(o.str, '\0', buf_len);
+				o.len = 0;
+				o.capacity = 8193;
+				o.str = new char[o.capacity];
+				memset(o.str, '\0', o.capacity);
+			}
+			else {
+				o.len = 0;
+				memset(o.str, '\0', strlen(o.str));
 			}
 
 			//while(is.get(c) || c != ' ' || c != '\n' | c != '\t') {
-			while(is.get(o.str, buf_len)) {
-				if(i>=b_len) {
-					b_len *= 2;
-					o.str = (char*)realloc(o.str, b_len);
+			size_t buf_len = 256;
+			char buf[buf_len];
+			memset(buf, '\0', buf_len);
+
+			// TODO : read buf until std::istream.get is OK
+			size_t i = 0;
+			while(is.get(buf, buf_len)) {
+				if(i>=o.capacity) {
+					o.capacity *= 2;
+					o.str = (char*)realloc(o.str, o.capacity);
 				}
-				o.str[i++]=c;
+				strncpy(o.str+i, buf, buf_len); 
+				o.len += buf_len;
+				i+=buf_len;
 			}
 			o.str[i] = '\0';
 			o.len = i;
-			o.capacity = b_len;
+#endif
 			return is;
 		}
+
+		const char* getStr() const { return str; }
 
 	private:
 		char* str;
@@ -119,89 +120,23 @@ class MString {
 		size_t capacity;
 };
 
+struct MStringHash {
+	unsigned long operator() (const MString& o) const {
+		return MyCharsKeyHash(o.getStr());
+	}
+};
+
+struct MStringViewer {
+	void operator()(FILE* fp, const MyHashNode<MString, MString>& o) const {
+		fprintf(fp, "{Key:%s, Value:%s}", o.getKey(), o.getKey());
+	}
+};
+
 
 int main() {
-	List list;	
 
-	list.insert(10);
-	list.insert(20);
-	list.insert(30);
-	list.insert(40);
-	list.insert(50);
-	list.insert(56);
+    MyHashMap<MString, MString, MStringViewer, MStringHash, 1000> map;
 
-//	int a;
-//	list.remove(&a);
-
-	list.printList();
-
-    HashMap<const char *, int, MyCharsIntViewer, MyCharsHash, MyCharsMatcher> map;
-
-    size_t str_len = 1024+1;
-	char cmd[32+1], str[str_len], value[12];
-
-	while(1) {
-		memset(str, 0, str_len);
-		memset(cmd, 0, 32+1);
-		memset(value,0,12);
-
-    	printf("Enter cmd [key value] : "); fflush(stdout);
-    	scanf("%s", cmd);
-		if(!strcmp("--exit", cmd) || !strcmp("--quit", cmd)) break;
-		else if (!strcmp("--help", cmd) || !strcmp("-h", cmd)) { printUsage(); }
-		else if (!strcmp("--add",cmd) ||!strcmp("-a", cmd)) { 
-			scanf("%s %s", str, value); 
-			printf("[Info] %-10s : (%s, %s)\n", cmd, str, value); 
-			map.put(str, atoi(value)); 
-			printf("[Info] %-10s : completed(size=%lld) (%s, %s)\n", cmd, map.getSize(), str, value); 
-		}
-		else if (!strcmp("--remove",cmd) ||!strcmp("-r", cmd)) { 
-			scanf("%s", str); 
-			printf("[Info] %-10s : (%s)\n", cmd, str); 
-			map.remove(str); 
-		}
-		else if (!strcmp("--clearall",cmd) ||!strcmp("-ca", cmd)) { 
-			printf("[Info] %-10s : Are your sure to cleanAll? (yes/No)\n", cmd); 
-			scanf("%s", str);
-			if(!strcmp("y",str) || !strcmp("Y",str) || !strcmp("yes",str) || !strcmp("YES", str)) {
-				map.clearall(); 
-				printf("[Info] %-10s : CleanAll is done.\n", cmd); 
-			}
-		}
-		else if (!strcmp("--get",cmd) ||!strcmp("-g", cmd)) { 
-			int value = 0 ;
-			scanf("%s", str); 
-			bool rb = map.get(str, value); 
-			printf("[Info] %-10s : (%s= get(%s, %d)\n", cmd, (rb? "true" : "false"), str, value);
-
-		}
-		else if (!strcmp("--print",cmd) ||!strcmp("-p", cmd)) { 
-			map.print(); 
-		}
-		else if (!strcmp("--test01", cmd)) {
-			std::unique_ptr<MString> p1 = std::make_unique<MString>(1025);
-			std::cout << "Enter String to test MString :"; std::cout.flush();
-			std::cin >> *p1.get();
-
-			std::cout << "MString : " << *p1.get() << std::endl;
-		}
-		else if (!strcmp("--test02", cmd)) {
-			char buf[100];
-			memset(buf, 0, 100);
-
-			std::cin.clear();
-			std::cout.flush();
-			std::cout<<"Enter Message : "; std::cout.flush();
-			std::cin.get(buf, 100);
-			std::cout << std::endl << "Your Message : " << buf << std::endl;
- 		}
-		else { printUsage(); }
-
-		char* ts = str;
-		while(*ts == '-') { ts++; }
-    	printf("\t\t\t[Debug] hash(%s) : %d\n", ts, strhash(ts));
-		fflush(stdin);
-	}
 
 #if 0
 	int n;
