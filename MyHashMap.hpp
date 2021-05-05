@@ -11,7 +11,7 @@ class MyHashNode {
 			: key(key), value(value), next(nullptr) {}
 
 	const K& getKey() const { return key; }
-	V& getValue() { return value; }
+	const V& getValue() const { return value; }
 	void setValue(V value) { this->value = value; }
 	MyHashNode* getNext() const { return next; }
 	void setNext(MyHashNode* next) { this->next = next; }
@@ -101,11 +101,12 @@ public:
 			else {
 				prev->setNext(entry);
 			}
+
+			size++;
 		}
 		else {
 			entry->setValue(value);
 		}
-		size++;
 	}
 
 	void remove(const K& key) {
@@ -134,9 +135,10 @@ public:
 	}
 
 	void print(FILE* fp) {
+		int cnt = 0;
 		fprintf(fp, "{");
-		fprintf(fp, "\n\tsize=%d\n\t,capacity=%d", size, capacity);
-		fprintf(fp, "\n\t,Entry=[");
+		fprintf(fp, "\n\tsize=%d\n\t, capacity=%d", size, capacity);
+		fprintf(fp, "\n\t, entry=[");
 		for (int i = 0; i < TABLE_SIZE; ++i) {
 			MyHashNode<K,V>* entry = table[i];
 
@@ -144,22 +146,21 @@ public:
 
 			fprintf(fp,
 					"\n\t\t%s[%d]=[",
-						(i>0?", ":""),
+						(cnt>0?", ":""),
 						i);
 
 			while(entry) {
-				fprintf(fp,
-						"\n\t\t%s[%d]=",
-							(i>0?", ":""),
-							i);
-
 				viewer(fp, *entry);
+				if(entry->getNext()) fprintf(fp, ", ");
 				entry = entry->getNext();
 			}
 			fprintf(fp, "]");
 
+			cnt++;
+
 		}
-		fprintf(fp, "]}\n");
+		if (cnt>0) fprintf(fp, "\n\t\t]"); else fprintf(fp, "]");
+		fprintf(fp, "\n}\n");
 	}
 
 private:

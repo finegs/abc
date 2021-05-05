@@ -73,12 +73,13 @@ class MString {
 
 		// copy construct
 		MString(const MString& o) {
-				clone(o);
-			}
+			clone(o);
+		}
 
 		// copy operator=
 		const MString& operator=(const MString& o) {
 			if(this == &o) return o;
+			dispose();
 			clone(o);
 			return *this;
 		}
@@ -90,6 +91,7 @@ class MString {
 
 		const MString& operator=(MString&& o) {
 			if(this==&o) return o;
+			dispose();
 			move(std::forward<MString&&>(o));
 			return *this;
 		}
@@ -102,15 +104,14 @@ class MString {
 		}
 
 		void clone(const MString& o) {
-			dispose();
-			capacity = o.capacity;
-			len = o.len;
+			len = strlen(o.str);
+			capacity = len+1;
 			str = new char[capacity];
 			strncpy(str, o.str, len);
+			str[len] = '\0';
 		}
 
 		void move(MString&& o) {
-			dispose();
 			str = std::move(o.str);
 			len  = o.len;
 			capacity = o.capacity;
@@ -120,7 +121,7 @@ class MString {
 		}
 
 		bool operator==(const MString& o) const {
-			return !strcmp(this->str, o.str);
+			return !strcmp(str, o.str);
 		}
 
 		bool operator!=(const MString& o) const {
@@ -187,7 +188,7 @@ struct MStringHash {
 
 struct MStringViewer {
 	void operator()(FILE* fp, const MyHashNode<MString, MString>& o) const {
-		fprintf(fp, "{Key:%s, Value:%s}", o.getKey().getStr(), o.getKey().getStr());
+		fprintf(fp, "{Key:%s, Value:%s}", o.getKey().getStr(), o.getValue().getStr());
 	}
 };
 
@@ -199,47 +200,48 @@ int main() {
 
     MyHashMap<MString, MString, MStringViewer, MStringHash, 1000> map;
 
-	size_t cmd_len = 1024+1, key_len = 1024+1, exec_cnt = 0;
+	size_t cmd_len = 1024+1, key_len = 1024+1, value_len = 1024+1, exec_cnt = 0;
 	char cmd[cmd_len];
 	g_run = true;
 	while(g_run) {
 		memset(cmd, '\0', cmd_len);
-		cout << "[" << ++exec_cnt << "] Enter (--add key, --remove key, --print, --clear, --exit) : "; cout.flush();
+		cout << "[" << ++exec_cnt << "] Enter (--add key value, --get key, --remove key, --print, --clear, --exit) : "; cout.flush();
 		cin>>cmd;
-		if(!strcmp(cmd, "--add")) {
-			char key[key_len];
+		if(!strcmp(cmd, "--add") || !strcmp(cmd, "-a")) {
+			char key[key_len], value[value_len];
 			memset(key, '\0', key_len);
-			cin >> key;
-			MString ms(key);
-			map.put(ms, ms);
-		}
-		else if(!strcmp(cmd, "--get")) {
+			memset(value, '\0', value_len);
+			cin >> key >> value;
+			MString mk(key), mv(value);
+			map.put(mk, mv);
+        }
+		else if(!strcmp(cmd, "--get") || !strcmp(cmd, "-g")) {
 			char key[key_len];
 			memset(key, '\0', key_len);
 			cin >> key;
 			MString ms(key);
 			MString mm;
 			if(map.get(ms, mm)) {
-				cout << "Found : " << mm << std::endl;
+				cout << "Found : key="<< ms << ", value=" << mm << std::endl;
 			}
 			else {
 				cout << "Not found : " << key << std::endl;
 			}
 		}
-		else if(!strcmp(cmd, "--remove")) {
+		else if(!strcmp(cmd, "--remove") || !strcmp(cmd, "-r")) {
 			char key[key_len];
 			memset(key, '\0', key_len);
 			cin >> key;
 			MString ms(key);
 			map.remove(ms);
 		}
-		else if(!strcmp(cmd, "--print")) {
+		else if(!strcmp(cmd, "--print") || !strcmp(cmd, "-p")) {
 			map.print(stdout);
 		}
-		else if(!strcmp(cmd, "--clear")) {
+		else if(!strcmp(cmd, "--clear") || !strcmp(cmd, "-c")) {
 			map.clear();
 		}
-		else if(!strcmp(cmd, "--exit")) {
+		else if(!strcmp(cmd, "--exit") || !strcmp(cmd, "-e") || !strcmp(cmd, "-q")) {
 			g_run = false;
 		}
 		else {
