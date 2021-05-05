@@ -2,6 +2,7 @@
 #define __MYHASHMAP_H
 
 #include <iostream>
+#include "Util.h"
 
 template<typename K, typename V>
 class MyHashNode {
@@ -9,14 +10,14 @@ class MyHashNode {
 	MyHashNode(const K& key, const V& value)
 			: key(key), value(value), next(nullptr) {}
 
-	K getKey() const { return key; }
-	V getValue() const { return value; }
-	void setValue(V value) { MyHashNode::value = value; }
+	const K& getKey() const { return key; }
+	V& getValue() { return value; }
+	void setValue(V value) { this->value = value; }
 	MyHashNode* getNext() const { return next; }
-	void setNext(MyHashNode* next) { MyHashNode::next = next; }
+	void setNext(MyHashNode* next) { this->next = next; }
 
 	private:
-	K key;
+	const K key;
 	V value;
 	MyHashNode* next;
 };
@@ -35,16 +36,24 @@ struct MyEntryViewer {
 	}
 };
 
-template<typename K, typename V, typename Viewer = MyEntryViewer<K,V>, typename F = MyKeyHash<K>, size_t TABLE_SIZE = 1000>
+template<typename K, typename V, typename MyEntryViewer = MyEntryViewer<K,V>, typename MyKeyHashFunc = MyKeyHash<K>, size_t TABLE_SIZE = 1000>
 class MyHashMap {
 public:
 	MyHashMap() {
 		table = new MyHashNode<K,V>*[TABLE_SIZE];
+		memset(table, 0, sizeof(MyHashNode<K,V>*)*TABLE_SIZE);
 		size = 0;
 		capacity = TABLE_SIZE;
 	}
 
 	~MyHashMap() {
+		clear();
+		delete[] table;
+		table = nullptr;
+		capacity = 0;
+	}
+
+	void clear() {
 		if(size<1) return;
 		for (int i = 0; i < capacity; ++i) {
 			MyHashNode<K,V>* entry = table[i];
@@ -56,8 +65,7 @@ public:
 			}
 			table[i] = nullptr;
 		}
-		delete[] table;
-		size = capacity = 0;
+		size = 0;
 	}
 
 
@@ -101,7 +109,7 @@ public:
 	}
 
 	void remove(const K& key) {
-		unsigned long hashValue = hashFunct(key);
+		unsigned long hashValue = hashFunc(key);
 		MyHashNode<K,V>* prev = nullptr;
 		MyHashNode<K,V>* entry = table[hashValue%TABLE_SIZE];
 
@@ -126,26 +134,38 @@ public:
 	}
 
 	void print(FILE* fp) {
-		fprintf(fp, "{size=%d, capacity=%d", size, capacity);
-		fprintf(fp, ", Entry=[");
+		fprintf(fp, "{");
+		fprintf(fp, "\n\tsize=%d\n\t,capacity=%d", size, capacity);
+		fprintf(fp, "\n\t,Entry=[");
 		for (int i = 0; i < TABLE_SIZE; ++i) {
 			MyHashNode<K,V>* entry = table[i];
 
 			if(!entry) continue;
 
 			fprintf(fp,
-					"%s{Key=%s, Value=%s}",
+					"\n\t\t%s[%d]=[",
 						(i>0?", ":""),
-						entry->getKey(),
-						entry->getValue());
+						i);
+
+			while(entry) {
+				fprintf(fp,
+						"\n\t\t%s[%d]=",
+							(i>0?", ":""),
+							i);
+
+				viewer(fp, *entry);
+				entry = entry->getNext();
+			}
+			fprintf(fp, "]");
+
 		}
 		fprintf(fp, "]}\n");
 	}
 
 private:
 	MyHashNode<K,V>** table;
-	Viewer viewer;
-	F hashFunc;
+	MyEntryViewer viewer;
+	MyKeyHashFunc hashFunc;
 	size_t size;
 	size_t capacity;
 };

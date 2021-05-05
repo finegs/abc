@@ -8,13 +8,13 @@ extern "C" {
 #endif
 
 
-int strhash(const char* str, int mod) {
-	int h = 5381;
+unsigned long strhash(const char* str, int mod) {
+	unsigned long h = 5731;
 	char c;
 	char* ss = (char*)str;
 	while((c = *ss++)) {
-		h+=((h<<5) + h) + c;
-		h%=mod;
+		h+=((h<<5) & h) * c;
+		if(mod) h%=mod;
 	}
 	return h;
 }
@@ -35,10 +35,11 @@ uint32_t hash(void *buf, size_t len, uint32_t* hval) {
 	return *hval;
 }
 
-unsigned int hash(const void *key) {
+unsigned int hash_void(const void *key) {
 	const char *p;
 	unsigned int val;
-	val = 0;
+	val = 0x01000193;
+
 	p =(char*)key;
 	while(*p!='\0') {
 		unsigned int tmp;

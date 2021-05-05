@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <malloc.h>
+#include <utility>
 #include "MyHashMap.hpp"
+
 
 int memset(void* p, char c, size_t len) {
 	char* pp = (char*)p;
@@ -57,19 +59,76 @@ void printUsage() {
 
 class MString {
 	public:
-		explicit MString(size_t capacity = 8193) : str(nullptr), len(0), capacity(capacity) {
-
+		explicit MString(size_t capacity = 8193) 
+			: str(nullptr), len(0), capacity(capacity) {
 		}	
+
 		explicit MString(const char* str) {
 			len = strlen(str);
 			capacity = len+1;
+			this->str = new char[capacity];
+			memset(this->str, '\0', capacity);
+			strncpy(this->str, str, len);
+		}
+
+		// copy construct
+		MString(const MString& o) {
+				clone(o);
+			}
+
+		// copy operator=
+		const MString& operator=(const MString& o) {
+			if(this == &o) return o;
+			clone(o);
+			return *this;
+		}
+
+		// move construct
+		MString(MString&& o) {
+			move(std::forward<MString&&>(o));
+		}
+
+		const MString& operator=(MString&& o) {
+			if(this==&o) return o;
+			move(std::forward<MString&&>(o));
+			return *this;
+		}
+
+		void dispose() {
+			if(!str) return;
+			delete[] str;
+			str = nullptr;
+			len = capacity = 0;
+		}
+
+		void clone(const MString& o) {
+			dispose();
+			capacity = o.capacity;
+			len = o.len;
 			str = new char[capacity];
-			memset(MString::str, '\0', capacity);
-			strncpy(MString::str, str, len);
+			strncpy(str, o.str, len);
+		}
+
+		void move(MString&& o) {
+			dispose();
+			str = std::move(o.str);
+			len  = o.len;
+			capacity = o.capacity;
+
+			o.str = nullptr;
+			o.len = o.capacity = 0;
+		}
+
+		bool operator==(const MString& o) const {
+			return !strcmp(this->str, o.str);
+		}
+
+		bool operator!=(const MString& o) const {
+			return strcmp(str, o.str);
 		}
 
 		friend std::ostream& operator<<(std::ostream& os, const MString& o) {
-			os << "len=" <<o.len << ", capacity="<<o.capacity<<", str="<<o.str;
+			os << "{len=" <<o.len << ", capacity="<<o.capacity<<", str="<<o.str << "}";
 			return os;
 		}
 
@@ -122,22 +181,71 @@ class MString {
 
 struct MStringHash {
 	unsigned long operator() (const MString& o) const {
-		return MyCharsKeyHash(o.getStr());
+		return strhash(o.getStr(), 0);
 	}
 };
 
 struct MStringViewer {
 	void operator()(FILE* fp, const MyHashNode<MString, MString>& o) const {
-		fprintf(fp, "{Key:%s, Value:%s}", o.getKey(), o.getKey());
+		fprintf(fp, "{Key:%s, Value:%s}", o.getKey().getStr(), o.getKey().getStr());
 	}
 };
 
+bool g_run;
+
 
 int main() {
+	using namespace std;
 
     MyHashMap<MString, MString, MStringViewer, MStringHash, 1000> map;
 
-
+	size_t cmd_len = 1024+1, key_len = 1024+1, exec_cnt = 0;
+	char cmd[cmd_len];
+	g_run = true;
+	while(g_run) {
+		memset(cmd, '\0', cmd_len);
+		cout << "[" << ++exec_cnt << "] Enter (--add key, --remove key, --print, --clear, --exit) : "; cout.flush();
+		cin>>cmd;
+		if(!strcmp(cmd, "--add")) {
+			char key[key_len];
+			memset(key, '\0', key_len);
+			cin >> key;
+			MString ms(key);
+			map.put(ms, ms);
+		}
+		else if(!strcmp(cmd, "--get")) {
+			char key[key_len];
+			memset(key, '\0', key_len);
+			cin >> key;
+			MString ms(key);
+			MString mm;
+			if(map.get(ms, mm)) {
+				cout << "Found : " << mm << std::endl;
+			}
+			else {
+				cout << "Not found : " << key << std::endl;
+			}
+		}
+		else if(!strcmp(cmd, "--remove")) {
+			char key[key_len];
+			memset(key, '\0', key_len);
+			cin >> key;
+			MString ms(key);
+			map.remove(ms);
+		}
+		else if(!strcmp(cmd, "--print")) {
+			map.print(stdout);
+		}
+		else if(!strcmp(cmd, "--clear")) {
+			map.clear();
+		}
+		else if(!strcmp(cmd, "--exit")) {
+			g_run = false;
+		}
+		else {
+			cout << "Unsupported Cmd : " << cmd << std::endl;
+		}
+	}
 #if 0
 	int n;
 	printf("number : "); fflush(stdout);
