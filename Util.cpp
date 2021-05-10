@@ -14,7 +14,7 @@ int strhash(const char* str, int mod) {
 	char* ss = (char*)str;
 	while((c = *ss++)) {
 		h+=((h<<5) + h) + c;
-		h%=mod;
+		if(mod>0)h%=mod;
 	}
 	return h;
 }
@@ -35,7 +35,23 @@ uint32_t hash(void *buf, size_t len, uint32_t* hval) {
 	return *hval;
 }
 
-void mmemset(void* p, int v, size_t len) {
+unsigned int hash(const char* key) {
+	const char *p;
+	unsigned int val = 5371;
+	p =(char*)key;
+	while(*p!='\0') {
+		unsigned int tmp;
+		val = ((val<<5) * val)+(*p);
+//		if((tmp=(val & 0xf0000000))) {
+//			val = val ^ (tmp>>24);
+//			val = val ^ tmp;
+//		}
+		p++;
+	}
+	return val % 0xffffffff;
+}
+
+void mmemset(void* p, char v, size_t len) {
 	char* pp = (char*)p;
 	while(len--) { *pp++ = v; }
 }

@@ -4,7 +4,6 @@ struct MyData {
 	int data;
 };
 
-
 struct Node {
 	int data;
 	Node *prev;
