@@ -29,7 +29,7 @@ int main(int argc, char* argv[]) {
 
 	printf("#%d : Input\n", ++tc);
 	for (int i = 1; i< argc; i++) {
-		printf("%d : hash(%s)=%d\n", i, argv[i], hash((const char*)argv[i])); 
+		printf("%d : hash(%s)=%d\n", i, argv[i], hash(const char*)argv[i])); 
 	}
 
 	HashMap<muint, char*, UIntStrViewer, UIntHasher, UIntMatcher> *map 

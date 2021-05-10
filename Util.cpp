@@ -8,8 +8,8 @@ extern "C" {
 #endif
 
 
-int strhash(const char* str, int mod) {
-	int h = 5381;
+unsigned long strhash(const char* str, int mod) {
+	unsigned long h = 5731;
 	char c;
 	char* ss = (char*)str;
 	while((c = *ss++)) {
@@ -46,6 +46,19 @@ unsigned int hash(const char* key) {
 //			val = val ^ (tmp>>24);
 //			val = val ^ tmp;
 //		}
+unsigned int hash_void(const void *key) {
+	const char *p;
+	unsigned int val;
+	val = 0x01000193;
+
+	p =(char*)key;
+	while(*p!='\0') {
+		unsigned int tmp;
+		val = (val<<4)+(*p);
+		if((tmp=(val & 0xf0000000))) {
+			val = val ^ (tmp>>24);
+			val = val ^ tmp;
+		}
 		p++;
 	}
 	return val % 0xffffffff;

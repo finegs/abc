@@ -23,7 +23,7 @@ add_executable(zecho zecho.cpp)
 #add_executable(zcli zcli.cpp)
 #add_executable(serial serial.cpp)
 add_executable(z z.cpp)
-add_executable(aa aa.cpp List.cpp Util.cpp)
+add_executable(aa aa.cpp Util.cpp)
 add_executable(c20 c20.cpp)
 add_executable(app a.cpp Util.cpp)
 

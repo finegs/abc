@@ -1,10 +1,9 @@
 **/.*.swp
 **/.*.un*
 **/*.exe
+**/cscope.*
+**/tags
+.clangd/*
+build/*
 compile_commands.json
 Debug/**/*.*
-cscope.files
-cscope.out
-**/cscope.out
-**/cscope.files
-**/tags
