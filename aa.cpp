@@ -3,6 +3,8 @@
 //#include <string.h>
 #include "List.h"
 #include "Util.h"
+#include "hash_map.hpp"
+#include <iostream>
 #include <memory>
 
 int memset(void* p, char c, size_t len) {
