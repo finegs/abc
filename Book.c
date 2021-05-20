@@ -1,9 +1,10 @@
 //Book.c
 #include "Book.h"
+#include "Util.h"
 #include <malloc.h>
 
 void Book_Book(Book *book,const char *title,const char *author,int num);
-Book *New_Book(const char *title,const char *author,int num)
+Book *Book_New(const char *title,const char *author,int num)
 {
 	Book *book = 0;
 	book = (Book *)malloc(sizeof(Book));
@@ -17,7 +18,7 @@ void Book_Book(Book *book,const char *title,const char *author,int num)
 	strncpy(book->author,author,MAX_AUT_LEN);
 	book->num = num;
 }
-void Delete_Book(Book *book)
+void Book_Delete(Book *book)
 {
 	free(book);
 }
@@ -28,11 +29,11 @@ void Book_View(Book *book)
 }
 int Book_CompareTitle(Book *book,const char *title)
 {
-	return strcmp(book->title,title);
+	return strncmp(book->title,title, strlen(title));
 }
 int Book_CompareAuthor(Book *book,const char *author)
 {
-	return strcmp(book->author,author);
+	return strncmp(book->author,author, strlen(author));
 }
 int Book_CompareNum(Book *book,int num)
 {

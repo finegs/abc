@@ -1,9 +1,10 @@
 #include <stdio.h>
 #include <malloc.h>
-#include <utility>
+//#include <utility>
 #include "MyHashMap.hpp"
 
 
+#if 0
 int memset(void* p, char c, size_t len) {
 	char* pp = (char*)p;
 	while(len--) {
@@ -23,9 +24,11 @@ int strcmp(const char* a, const char* b) {
 	return *(unsigned char*)aa - *(unsigned char*)bb;
 }
 
-void strncpy(char* dst, const char* src, size_t len) {
+int strncpy(char* dst, const char* src, size_t len) {
+	if(!dst) return -1;
 	char* sp = (char*)src;
-	while(len--) *dst++ = *sp++; 
+	while(len-->0) *dst++ = *sp++; 
+	return 0;
 }
 
 size_t strlen(const char* str) {
@@ -34,6 +37,8 @@ size_t strlen(const char* str) {
 	while(*c++) len++;
 	return len;
 }
+
+#endif
 
 struct MyCharsIntViewer {
   void operator()(const char *key, int value) const {
@@ -182,7 +187,7 @@ class MString {
 
 struct MStringHash {
 	unsigned long operator() (const MString& o) const {
-		return strhash(o.getStr(), 0);
+		return strhash(o.getStr(), 1024*1024*1024);
 	}
 };
 

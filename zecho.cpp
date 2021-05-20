@@ -1,10 +1,11 @@
 #include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+//#include <stdlib.h>
+//#include <string.h>
 #include <assert.h>
 #include <pthread.h>
 #include <zmq.h>
 #include "mzhelper.h"
+#include "Util.h"
 
 const size_t LEN_BIND_URL = 256;
 const size_t LEN_BUF = 8096;

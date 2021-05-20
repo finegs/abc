@@ -1,14 +1,6 @@
-#include <string.h>
-#include <stdint.h>
 #include "Util.h"
 
-
-#ifdef __cpluscplus
-extern "C" {
-#endif
-
-
-unsigned long strhash(const char* str, int mod) {
+unsigned long strhash(const char* str, unsigned long mod) {
 	unsigned long h = 5731;
 	char c;
 	char* ss = (char*)str;
@@ -54,9 +46,11 @@ unsigned int hash_void(const void *key) {
 }
 
 
-void mmemset(void* p, int v, size_t len) {
+void* memset(void* p, int v, size_t len) {
+	if(!p) return p;
 	char* pp = (char*)p;
 	while(len--) { *pp++ = v; }
+	return p;
 }
 
 int prime_max(int n) {
@@ -90,6 +84,62 @@ int prime_max(int n) {
     for (int p = 2; p <= n; p++) { if (prime[p]) pn = p; }
 	return pn;
 }
+
+int strncmp(const char* a, const char* b, size_t len) {
+	while(len-->0) {
+		if(*a!=*b) return (*a>*b? 1 : -1);
+		a++;
+		b++;
+	}
+	return 0;
+}
+
+int strcmp(const char* a, const char* b) {
+	return strncmp(a, b, strlen(a));
+}
+
+char* strncpy(char* dst, const char* src, size_t len) {
+	char* dp = dst;
+	char* sp = (char*)src;
+	while(len-->0) *dst++ = *sp++;
+	return dp;
+}
+
+
+size_t strlen(const char* p) {
+	size_t l = 0;
+	char* pp = (char*)p;
+	while(*pp++) { l++; }
+	return l;
+}
+
+char* strstr(const char* str1, const char* str2) {
+	char *cp = (char *)str1;
+	char *s1, *s2;
+	if ( !*str2 )
+		return((char *)str1);
+ 
+	while (*cp)
+	{
+		s1 = cp;
+		s2 = (char *) str2;
+		while ( *s2 && !(*s1 - *s2) )
+			s1++, s2++;
+		if (!*s2)
+			return(cp);
+		cp++;
+	}
+ 
+	return(NULL);
+}
+
+#if 0
+size_t strncpy(char* p, const char* s, size_t s_len) {
+	size_t ll = s_len;
+	while(ll-->0) { *(p+ll-1) = *(s+ll-1); }
+	return s_len;
+}
+#endif
 
 #ifdef __cpluscplus
 }

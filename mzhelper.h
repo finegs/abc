@@ -1,5 +1,5 @@
 #include<stdlib.h>
-#include<string.h>
+//#include<string.h>
 #include <zmq.h>
 
 static char* zmq_recv_buf(void* socket, char* buf, size_t buf_size) {

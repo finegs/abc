@@ -12,7 +12,7 @@ struct _Book {
 	int num;
 };
 
-Book* Book_New(const char *title, const char* author);
+Book *Book_New(const char *title,const char *author,int num);
 void Book_Delete(Book* book);
 void Book_View(Book* book);
 int Book_CompareTitle(Book *book,const char *title);

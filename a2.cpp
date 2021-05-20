@@ -1,11 +1,9 @@
 
 #include <algorithm>
 #include <iostream>
-#include <cstdlib>
-#include <string>
+#include "Util.h"
 
 using namespace std;
-
 
 namespace ns_gg {
 	struct Ast {
@@ -49,10 +47,6 @@ typedef struct {
 	char name[32];
 } BB;
 
-int mhash(const char* str);
-int mmemset(void* p, char c, size_t len);
-size_t mstrncpy(char* p, const char* s, size_t s_len);
-size_t mstrlen(const char* p);
 
 int main(int argc, char* argv[]) {
 
@@ -60,15 +54,15 @@ int main(int argc, char* argv[]) {
 	size_t b_len = 10;
 	BB* b = (BB*)malloc(sizeof(BB)* b_len);
 
-	mmemset((void*)b, '\0', sizeof(BB)*b_len);
+	memset((void*)b, '\0', sizeof(BB)*b_len);
 
 	char i_buf[32];
 
-	mmemset(i_buf, '\0', 32);
+	memset(i_buf, '\0', 32);
 	for (int idx = 0; idx < b_len; ++idx) {
 		char* pn = b[idx].name;
-		mstrncpy(pn, "name", sizeof("name"));
-		itoa(idx, pn+mstrlen(pn), 10);	
+		strncpy(pn, "name", sizeof("name"));
+		itoa(idx, pn+strlen(pn), 10);	
 		b[idx].cnt = idx; 
 	}
 
@@ -99,7 +93,7 @@ int main(int argc, char* argv[]) {
 
 }
 
-int mhash(const char* str) {
+int hash(const char* str) {
 
 	int h;
 	h = 5381;
@@ -108,24 +102,3 @@ int mhash(const char* str) {
 	return h;
 }
 
-int mmemset(void* p, char c, size_t len) {
-	char* pp = (char*)p;
-	size_t ll = len;
-	while(ll--) {
-		*pp++=c;
-	}
-	return 0;
-}
-
-size_t mstrlen(const char* p) {
-	size_t l = 0;
-	char* pp = (char*)p;
-	while(*pp++) { l++; }
-	return l;
-}
-
-size_t mstrncpy(char* p, const char* s, size_t s_len) {
-	size_t ll = s_len;
-	while(ll-->0) { *(p+ll-1) = *(s+ll-1); }
-	return s_len;
-}
