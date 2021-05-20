@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <malloc.h>
+#include <type_traits>
 //#include <utility>
 #include "MyHashMap.hpp"
 
@@ -197,8 +198,20 @@ struct MStringViewer {
 	}
 };
 
-bool g_run;
+template<typename t, size_t n>
+inline void array_copy(t (&dst)[n], t (&src)[n]) {
+	static_assert(std::is_trivially_copy_assignable<t>::value, "element type has non-trivial copy assignment");
+	memcpy(dst, src, n*sizeof(t));
+#if 0
+	for (size_t i = 0; i < n; ++i) {
+		dst[i] = src[i];	
+	}
+#endif
+}
 
+void do_test_t2();
+
+bool g_run;
 
 int main() {
 	using namespace std;
@@ -249,6 +262,9 @@ int main() {
 		else if(!strcmp(cmd, "--exit") || !strcmp(cmd, "-e") || !strcmp(cmd, "-q")) {
 			g_run = false;
 		}
+		else if(!strcmp(cmd, "--t2") || !strcmp(cmd, "-t2")) {
+			do_test_t2();
+		}
 		else {
 			cout << "Unsupported Cmd : " << cmd << std::endl;
 		}
@@ -269,4 +285,16 @@ int main() {
 #endif
 
 	return 0;
+}
+
+void do_test_t2() {
+	int a[3] = {1,2,3}, b[3]={0};
+
+	array_copy<int, 3>(b, a);
+
+	for (int i = 0; i < 3; ++i) {
+		printf("[%d]=%d\t", i, b[i]);
+	}
+	printf("\n");
+
 }
