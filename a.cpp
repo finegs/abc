@@ -1,44 +1,55 @@
-
 #include <iostream>
+#include <stdio.h>
 
-using namespace std;
+#include "Util.h"
+#include "hash_map.hpp"
 
-struct AA{
-  union {
-    struct {
-      unsigned char m1:2;
-      unsigned char m2:4;
-      unsigned char m3:2;
-    };
-    unsigned char m;
-  };
+typedef unsigned int muint;
+
+struct UIntHasher  {
+	unsigned long operator()(const muint& key) const {
+		return key;
+	}
 };
 
-int mhash(const char* str) {
-	int h;
-	h = 5381;
-	char* s = (char*)str;
-	while(*s++) { h=((h<<5)+h)+s[0]; h%= 1024; }
-	return h;
-}
-
-int mmemset(void* p, char c, size_t len) {
-	while(len--) {
-		((char*)p+len-1)[0]=c;
+struct UIntStrViewer {
+	void operator()(const muint& key, char* value) const {
+		printf("{%d, %s}", key, value);
 	}
-	return 0;
-}
+};
+
+struct UIntMatcher {
+	bool operator()(const muint& a, const muint& b) const {
+		return a == b;
+	}
+};
 
 int main(int argc, char* argv[]) {
-	AA aa{};
-	aa.m = (0x01)|(0x02<<2)|(0x03<<6);
-	cout << "size:" << sizeof(AA) << endl;
-	cout << (int)aa.m1<<","<<(int)aa.m2<<","<<(int)aa.m3<<endl;
+	int tc = 0;
 
-	char* str = (char*)malloc(sizeof(char)*1024);
-	mmemset(str, 0, 1024);
-	printf("Enter:"); fflush(stdout);
-	scanf("%s", str); fflush(stdin);
-	printf("mhash(%s)=%d\n", str, mhash(str));
+	printf("#%d : Input\n", ++tc);
+	for (int i = 1; i< argc; i++) {
+		printf("%d : hash(%s)=%zu\n", i, argv[i], strhash(argv[i], 1024*1024*1024)); 
+	}
+
+	HashMap<muint, char*, UIntStrViewer, UIntHasher, UIntMatcher> *map 
+		= new HashMap<muint, char*, UIntStrViewer, UIntHasher, UIntMatcher>;
+
+	printf("#%d : Put\n", ++tc);
+	for (int i = 1; i< argc; i++) {
+		printf("%d : hash(%s)=%zu\n", i, argv[i], strhash(argv[i], 1024*1024*1024)); 
+		map->put(strhash(argv[i], 1024*1024*1024), argv[i]);
+	}
+
+	printf("#%d : Print\n", ++tc);
+	map->print();
+
+	printf("#%d : Remove\n", ++tc);
+	for (int i = 1; i< argc; i++) {
+		map->remove(strhash(argv[i], 1024*1024*1024));
+	}
+
+	delete(map);
+
 	return 0;
 }

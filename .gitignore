@@ -1,0 +1,9 @@
+**/.*.swp
+**/.*.un*
+**/*.exe
+**/cscope.*
+**/tags
+.clangd/*
+build/*
+compile_commands.json
+Debug/**/*.*
