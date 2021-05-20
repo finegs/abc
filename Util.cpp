@@ -5,8 +5,8 @@ unsigned long strhash(const char* str, unsigned long mod) {
 	char c;
 	char* ss = (char*)str;
 	while((c = *ss++)) {
-		h+=((h<<5) & h) * c;
-		if(mod) h%=mod;
+		h+=((h<<5) + h) + c;
+		if(mod>0)h%=mod;
 	}
 	return h;
 }
@@ -27,6 +27,20 @@ uint32_t hash(void *buf, size_t len, uint32_t* hval) {
 	return *hval;
 }
 
+unsigned int hash(const char* key) {
+	const char *p;
+	unsigned int val = 5371;
+	p =(char*)key;
+	while(*p!='\0') {
+		unsigned int tmp;
+		val = ((val<<5) * val)+(*p);
+//		if((tmp=(val & 0xf0000000))) {
+//			val = val ^ (tmp>>24);
+//			val = val ^ tmp;
+//		}
+	}
+	return val;
+}
 unsigned int hash_void(const void *key) {
 	const char *p;
 	unsigned int val;
@@ -47,7 +61,6 @@ unsigned int hash_void(const void *key) {
 
 
 void* memset(void* p, int v, size_t len) {
-	if(!p) return p;
 	char* pp = (char*)p;
 	while(len--) { *pp++ = v; }
 	return p;

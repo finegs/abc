@@ -1,7 +1,19 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <malloc.h>
 
+int main(int argc, char* argv[]) {
+	int a,b;
+	if(argc<1) return 0;
+	a = atoi(argv[1]);
+	b = atoi(argv[2]);
+//	scanf("%d", a);
+//	scanf("%d", &b);
+	printf("%d^%d=%d\n", a,b,a^b);
+}
+
+#if 0
 typedef struct {
 	int no;
 	char name[32];
@@ -60,3 +72,5 @@ int swapbn(void* a, void* b, void* buf, size_t len) {
 	for(int i = 0;i<len;i++) *(bb+i)=*(tt+i);
 	return 0;
 }
+
+#endif

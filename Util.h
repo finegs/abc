@@ -8,7 +8,6 @@
 extern "C" {
 #endif
 
-
 uint32_t hash(void* buf, size_t len, uint32_t* hash);
 unsigned int hash_void(const void *key);
 int prime_max(int n);
@@ -26,4 +25,3 @@ char* strstr(const char* str1, const char* str2);
 #ifdef __cplusplus
 }
 #endif
-
