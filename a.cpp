@@ -3,6 +3,8 @@
 
 #include "Util.h"
 #include "hash_map.hpp"
+#include "array.hpp"
+
 
 typedef unsigned int muint;
 
@@ -23,6 +25,8 @@ struct UIntMatcher {
 		return a == b;
 	}
 };
+
+void do_test_array();
 
 int main(int argc, char* argv[]) {
 	int tc = 0;
@@ -51,5 +55,18 @@ int main(int argc, char* argv[]) {
 
 	delete(map);
 
+
+	do_test_array();
+
 	return 0;
+}
+
+void do_test_array() {
+
+	int arr[3] = {1, 2,100};
+
+	Array<int, 3> arr2(arr);
+
+	arr2.print();
+
 }
