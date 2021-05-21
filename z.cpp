@@ -31,7 +31,7 @@ int main(int argc, char** argv)
 
 		printf(">>%s\n", rcv_buf);
 
-		if(strstr(rcv_buf, "_shutdown")) {
+		if(strstr(rcv_buf, "-shutdown")) {
 			zmq_send(responder, "server going to shutdown", 14, 0);
 			g_run = 0;
 			continue;
