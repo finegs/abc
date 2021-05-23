@@ -3,11 +3,28 @@ project(abc)
 
 #add_definitions(-Wall -std=c++2a)
 
-set(CMAKE_C_FLAGS "-std=c99")
+#set(CMAKE_C_FLAGS "-std=c99")
+set(CMAKE_C_FLAGS "-std=c17")
 set(CMAKE_CXX_FLAGS "-std=c++2a")
 set(CMAKE_BUILD_TYPE Debug)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+# find dependencies
+# gcc `pkg-config --cflags gtk+-3.0` -o hello-world-gtk hello-world-gtk.c `pkg-config --libs gtk+-3.0`
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(GTK REQUIRED gtk+-3.0)
+
+include_directories(${GTK_INCLUDE_DIRS})
+link_directories(${GTK_LIBRARY_DIRS})
+add_definitions(${GTK_CFLAGS_OTHER})
+add_compile_options(${GTK_CFLAGS_OTHER})
+
+#set(LIBRARY ${LIBRARIES} ${GTK_LIBRARIES})
+#set(FLAGS "-I{GTK_INCLUDE_DIRS}")
+#message(STATUS "Flags: ${FLAGS}")
+#string(REPLACE ";" " -I" FLAGS "${FLAGS}")
+#set(CMAKE_C_FLAGS ${CMAKE_C_FLAGS} ${GTK_FLAGS} ${FLAGS})
 
 #include_directories(D:\\Programs\\wxwidgets\\wxwidgets\\include)
 #link_directories(D:\\Programs\\wxwidgets\\wxwidgets\\lib)
@@ -20,23 +37,32 @@ add_executable(a3 a3.cpp)
 add_executable(a4 a4.cpp)
 add_executable(b b.c book.c)
 add_executable(zecho zecho.cpp)
-#add_executable(zcli zcli.cpp)
+add_executable(zcli zcli.cpp)
 #add_executable(serial serial.cpp)
-add_executable(z z.cpp)
+add_executable(zsrv z.cpp)
 add_executable(aa aa.cpp Util.cpp)
 add_executable(c20 c20.cpp)
 add_executable(app a.cpp Util.cpp)
+add_executable(ThreadPool ThreadPool.cpp)
+add_executable(hello_g hello_g.c)
 
 target_link_libraries(a pthread ws2_32 )
 target_link_libraries(a1 pthread ws2_32 zmq)
 target_link_libraries(a2 pthread ws2_32 )
 target_link_libraries(zecho pthread ws2_32 zmq)
-#target_link_libraries(zcli pthread ws2_32 zmq)
+target_link_libraries(zcli pthread ws2_32 zmq)
 #target_link_libraries(zcli pthread ws2_32 zmq)
 #target_link_libraries(serial pthread ws2_32 zmq)
-target_link_libraries(z pthread ws2_32 zmq)
+target_link_libraries(zsrv pthread ws2_32 zmq)
 target_link_libraries(c20 pthread ws2_32 zmq)
 target_link_libraries(app pthread ws2_32 zmq)
+target_link_libraries(ThreadPool pthread ws2_32 zmq)
+
+
+target_compile_definitions(hello_g PRIVATE ${GTK_CFLAGS_OTHER})
+target_include_directories(hello_g PRIVATE ${GTK_INCLUDE_DIRS})
+target_link_directories(hello_g PRIVATE ${GTK_LIBRARY_DIRS})
+target_link_libraries(hello_g PRIVATE ${GTK_LIBRARIES} ws2_32 zmq)
 
 #install(TARGETS a 
 #		RUNTIME DESTINATION bin
@@ -50,7 +76,8 @@ install(TARGETS a2 DESTINATION C:\\Programs\\bin)
 install(TARGETS zecho DESTINATION C:\\Programs\\bin)
 #install(TARGETS zcli DESTINATION C:\\Programs\\bin)
 #install(TARGETS serial DESTINATION C:\\Programs\\bin)
-install(TARGETS z DESTINATION C:\\Programs\\bin)
+install(TARGETS zsrv DESTINATION C:\\Programs\\bin)
 install(TARGETS aa DESTINATION C:\\Programs\\bin)
 install(TARGETS c20 DESTINATION C:\\Programs\\bin)
+install(TARGETS ThreadPool DESTINATION C:\\Programs\\bin)
 

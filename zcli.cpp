@@ -107,12 +107,12 @@ void *handle_message(void* requester)
 		printf("USR<<"); fflush(stdout);
 		scanf("%[^\n]%*c", buf);
 		
-		if(strstr(buf, "_exit") || strstr(buf, "_shutdown")) {
+		if(strstr(buf, "-exit") || strstr(buf, "-shutdown")) {
 			printf("INFO>> exit by user\n");
 			g_run = 0;
 
-			if(strstr(buf, "_shutdown")) {
-				zmq_send(requester, "_shutdown", strlen("_shutdown"), 0);
+			if(strstr(buf, "-shutdown")) {
+				zmq_send(requester, "-shutdown", strlen("-shutdown"), 0);
 			}
 
 			if(requester) zmq_close(requester);

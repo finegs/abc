@@ -1,9 +1,11 @@
 #include <stdio.h>
 #include <malloc.h>
-#include <utility>
+#include <type_traits>
+//#include <utility>
 #include "MyHashMap.hpp"
 
 
+#if 0
 int memset(void* p, char c, size_t len) {
 	char* pp = (char*)p;
 	while(len--) {
@@ -23,9 +25,11 @@ int strcmp(const char* a, const char* b) {
 	return *(unsigned char*)aa - *(unsigned char*)bb;
 }
 
-void strncpy(char* dst, const char* src, size_t len) {
+int strncpy(char* dst, const char* src, size_t len) {
+	if(!dst) return -1;
 	char* sp = (char*)src;
-	while(len--) *dst++ = *sp++; 
+	while(len-->0) *dst++ = *sp++; 
+	return 0;
 }
 
 size_t strlen(const char* str) {
@@ -34,6 +38,8 @@ size_t strlen(const char* str) {
 	while(*c++) len++;
 	return len;
 }
+
+#endif
 
 struct MyCharsIntViewer {
   void operator()(const char *key, int value) const {
@@ -182,7 +188,7 @@ class MString {
 
 struct MStringHash {
 	unsigned long operator() (const MString& o) const {
-		return strhash(o.getStr(), 0);
+		return strhash(o.getStr(), 1024*1024*1024);
 	}
 };
 
@@ -192,8 +198,20 @@ struct MStringViewer {
 	}
 };
 
-bool g_run;
+template<typename t, size_t n>
+inline void array_copy(t (&dst)[n], t (&src)[n]) {
+	static_assert(std::is_trivially_copy_assignable<t>::value, "element type has non-trivial copy assignment");
+	memcpy(dst, src, n*sizeof(t));
+#if 0
+	for (size_t i = 0; i < n; ++i) {
+		dst[i] = src[i];	
+	}
+#endif
+}
 
+void do_test_t2();
+
+bool g_run;
 
 int main() {
 	using namespace std;
@@ -244,6 +262,9 @@ int main() {
 		else if(!strcmp(cmd, "--exit") || !strcmp(cmd, "-e") || !strcmp(cmd, "-q")) {
 			g_run = false;
 		}
+		else if(!strcmp(cmd, "--t2") || !strcmp(cmd, "-t2")) {
+			do_test_t2();
+		}
 		else {
 			cout << "Unsupported Cmd : " << cmd << std::endl;
 		}
@@ -264,4 +285,16 @@ int main() {
 #endif
 
 	return 0;
+}
+
+void do_test_t2() {
+	int a[3] = {1,2,3}, b[3]={0};
+
+	array_copy<int, 3>(b, a);
+
+	for (int i = 0; i < 3; ++i) {
+		printf("[%d]=%d\t", i, b[i]);
+	}
+	printf("\n");
+
 }

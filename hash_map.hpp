@@ -51,7 +51,7 @@ class HashMap {
 	public:
 		HashMap() {
 			table = new HashNode<Key,Value>* [TableSize];
-			mmemset(table, 0, sizeof(HashNode<Key, Value>*)*TableSize);
+			memset(table, 0, sizeof(HashNode<Key, Value>*)*TableSize);
 			size = 0;
 #if HASH_MAP_USE_KEYSET
 			keySet = nullptr;

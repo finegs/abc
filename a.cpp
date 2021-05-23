@@ -3,6 +3,8 @@
 
 #include "Util.h"
 #include "hash_map.hpp"
+#include "array.hpp"
+
 
 typedef unsigned int muint;
 
@@ -24,12 +26,14 @@ struct UIntMatcher {
 	}
 };
 
+void do_test_array();
+
 int main(int argc, char* argv[]) {
 	int tc = 0;
 
 	printf("#%d : Input\n", ++tc);
 	for (int i = 1; i< argc; i++) {
-		printf("%d : hash(%s)=%d\n", i, argv[i], hash(const char*)argv[i])); 
+		printf("%d : hash(%s)=%zu\n", i, argv[i], strhash(argv[i], 1024*1024*1024)); 
 	}
 
 	HashMap<muint, char*, UIntStrViewer, UIntHasher, UIntMatcher> *map 
@@ -37,8 +41,8 @@ int main(int argc, char* argv[]) {
 
 	printf("#%d : Put\n", ++tc);
 	for (int i = 1; i< argc; i++) {
-		printf("%d : hash(%s)=%d\n", i, argv[i], hash((const char*)argv[i])); 
-		map->put(hash((const char*)argv[i]), argv[i]);
+		printf("%d : hash(%s)=%zu\n", i, argv[i], strhash(argv[i], 1024*1024*1024)); 
+		map->put(strhash(argv[i], 1024*1024*1024), argv[i]);
 	}
 
 	printf("#%d : Print\n", ++tc);
@@ -46,10 +50,23 @@ int main(int argc, char* argv[]) {
 
 	printf("#%d : Remove\n", ++tc);
 	for (int i = 1; i< argc; i++) {
-		map->remove(hash((const char*)argv[i]));
+		map->remove(strhash(argv[i], 1024*1024*1024));
 	}
 
 	delete(map);
 
+
+	do_test_array();
+
 	return 0;
+}
+
+void do_test_array() {
+
+	int arr[3] = {1, 2,100};
+
+	Array<int, 3> arr2(arr);
+
+	arr2.print();
+
 }
