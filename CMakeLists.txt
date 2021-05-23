@@ -11,6 +11,8 @@ set(CMAKE_BUILD_TYPE Debug)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # find dependencies
+if (MSYS)
+
 # gcc `pkg-config --cflags gtk+-3.0` -o hello-world-gtk hello-world-gtk.c `pkg-config --libs gtk+-3.0`
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(GTK REQUIRED gtk+-3.0)
@@ -19,6 +21,8 @@ include_directories(${GTK_INCLUDE_DIRS})
 link_directories(${GTK_LIBRARY_DIRS})
 add_definitions(${GTK_CFLAGS_OTHER})
 add_compile_options(${GTK_CFLAGS_OTHER})
+
+endif()
 
 #set(LIBRARY ${LIBRARIES} ${GTK_LIBRARIES})
 #set(FLAGS "-I{GTK_INCLUDE_DIRS}")
@@ -58,11 +62,14 @@ target_link_libraries(c20 pthread ws2_32 zmq)
 target_link_libraries(app pthread ws2_32 zmq)
 target_link_libraries(ThreadPool pthread ws2_32 zmq)
 
+if(MSYS)
 
 target_compile_definitions(hello_g PRIVATE ${GTK_CFLAGS_OTHER})
 target_include_directories(hello_g PRIVATE ${GTK_INCLUDE_DIRS})
 target_link_directories(hello_g PRIVATE ${GTK_LIBRARY_DIRS})
 target_link_libraries(hello_g PRIVATE ${GTK_LIBRARIES} ws2_32 zmq)
+
+endif()
 
 #install(TARGETS a 
 #		RUNTIME DESTINATION bin
