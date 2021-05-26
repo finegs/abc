@@ -5,6 +5,30 @@
 #include "hash_map.hpp"
 #include "array.hpp"
 
+class Super {
+	private:
+		int m_value;
+	public:
+		void setValue(const int& value) { m_value = value;}
+		const int& getValue() const { return m_value; }
+		virtual void someMethod();
+};
+
+class Sub : public Super {
+	public:
+		Sub(int value) {
+			setValue(value);
+		}
+		void someMethod() override;
+};
+
+void Super::someMethod() {
+	std::cout << " Super::" << "someMethod() , m_value:" << getValue() << std::endl;
+}
+
+void Sub::someMethod() {
+	std::cout << " Sub::" << "someMethod(), m_value:" << getValue() << std::endl;
+}
 
 typedef unsigned int muint;
 
@@ -27,6 +51,7 @@ struct UIntMatcher {
 };
 
 void do_test_array();
+void do_class_test();
 
 int main(int argc, char* argv[]) {
 	int tc = 0;
@@ -57,6 +82,8 @@ int main(int argc, char* argv[]) {
 
 
 	do_test_array();
+	do_class_test();
+	system("pause");
 
 	return 0;
 }
@@ -68,5 +95,11 @@ void do_test_array() {
 	Array<int, 3> arr2(arr);
 
 	arr2.print();
+
+}
+
+void do_test_class() {
+	Sub sb{100};
+	sb.someMethod();
 
 }
