@@ -20,7 +20,9 @@ unsigned long  strhash(const char* str, unsigned long mod);
 int strncmp(const char* a, const char* b, size_t len);
 int strcmp(const char* a, const char* b);
 char* strstr(const char* str1, const char* str2);
-
+#if 0
+char* itoa(int num, char* buffer, int base);
+#endif
 
 #ifdef __cplusplus
 }

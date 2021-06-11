@@ -13,7 +13,7 @@ const size_t LEN_BUF = 8096;
 static int g_run = 1;
 void *handle_response(void* responder);
 
-int main(int argc, char** argv)
+int main(int argc, char* argv[])
 {
 	char bind_url[256] = {0};
 	char bind_addr[128] = {"*"};
@@ -102,4 +102,3 @@ void *handle_response(void* responder)
 	}
 	return responder;
 }
-

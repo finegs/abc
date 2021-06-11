@@ -171,7 +171,7 @@ class HashMap {
 
 			HashNode<Key, Value>* entry = nullptr;
 
-			printf("size=%lld, tableSize=%lld\n", size, TableSize);
+			printf("size=%zu, tableSize=%zu\n", size, TableSize);
 			for(int i = 0;i<TableSize;i++) {
 
 				entry = table[i];

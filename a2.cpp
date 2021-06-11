@@ -108,9 +108,10 @@ int main(int argc, char* argv[]) {
 	char i_buf[32];
 
 	memset(i_buf, '\0', 32);
+	size_t ll = strlen("name");
 	for (int idx = 0; idx < b_len; ++idx) {
 		char* pn = b[idx].name;
-		strncpy(pn, "name", sizeof("name"));
+		strncpy(pn, "name", ll);
 		itoa(idx, pn+strlen(pn), 10);	
 		b[idx].cnt = idx; 
 	}
