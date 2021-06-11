@@ -34,7 +34,7 @@ endif()
 #link_directories(D:\\Programs\\wxwidgets\\wxwidgets\\lib)
 include_directories(.)
 
-add_executable(a a.c)
+add_executable(a a.cpp Util.cpp)
 add_executable(a1 a1.cpp)
 add_executable(a2 a2.cpp)
 add_executable(a3 a3.cpp)

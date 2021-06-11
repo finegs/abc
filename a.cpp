@@ -51,7 +51,7 @@ struct UIntMatcher {
 };
 
 void do_test_array();
-void do_class_test();
+void do_test_class();
 
 int main(int argc, char* argv[]) {
 	int tc = 0;
@@ -82,7 +82,7 @@ int main(int argc, char* argv[]) {
 
 
 	do_test_array();
-	do_class_test();
+	do_test_class();
 	system("pause");
 
 	return 0;

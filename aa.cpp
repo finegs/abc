@@ -1,4 +1,4 @@
-#include <stdio.h>
+#include <cstdio>
 #include <malloc.h>
 #include <type_traits>
 //#include <utility>

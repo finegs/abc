@@ -8,15 +8,15 @@
             "name": "(gdb) 시작",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${fileDirname}\\build\\${fileBasenameNoExtension}.exe",
+            "program": "${fileDirname}\\build\\${input:AppName}.exe",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${fileDirname}",
             "environment": [],
-            "additionalSOLibSearchPath": "D:\\Programs\\msys2\\mingw64\\bin;D:\\Programs\\msys2\\usr\\bin",
+            "additionalSOLibSearchPath": "D:\\Programs\\msys64\\mingw64\\bin;D:\\Programs\\msys64\\usr\\bin",
             "externalConsole": true,
             "MIMode": "gdb",
-            "miDebuggerPath": "D:\\Programs\\msys2\\mingw64\\bin\\gdb.exe",
+            "miDebuggerPath": "gdb.exe",
             "setupCommands": [
                 {
                     "description": "gdb에 자동 서식 지정 사용",
@@ -25,6 +25,15 @@
                 }
             ],
             "preLaunchTask": "C/C++: cmake.exe - make"
+        }
+    ],
+    "inputs": [
+        {
+           "id":"AppName",
+           "description": "Application Name",
+           "default": "${fileBasenameNoExtension}",
+           "type":"promptString"
+
         }
     ]
 }

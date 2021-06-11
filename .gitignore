@@ -9,3 +9,5 @@ compile_commands.json
 Debug/**/*.*
 .ccls
 .ccls-cache
+.vscode/*.*
+**/CMakeCache.txt
