@@ -12,3 +12,6 @@ Debug/**/*.*
 .vscode/*.*
 **/CMakeCache.txt
 **/CMakeFiles/**/*
+**/*.cmake
+**/*.dll*
+**/Makefile
