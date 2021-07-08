@@ -55,6 +55,7 @@ add_executable(c20 c20.cpp)
 add_executable(app a.cpp Util.cpp)
 add_executable(ThreadPool ThreadPool.cpp)
 add_executable(hello_g hello_g.c)
+add_executable(a5 a5.cpp)
 
 IF(MSYS)
 target_link_libraries(a pthread ws2_32 )
