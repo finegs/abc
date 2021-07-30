@@ -3,16 +3,44 @@
     // Hover to view descriptions of existing attributes.
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
+    "inputs": [
+        {
+           "id":"AppName",
+           "description": "Application Name",
+           "default": "${fileBasenameNoExtension}",
+           "type":"promptString"
+        }
+        ,{
+            "id":"pickType-mapType",
+            "description": "Select type U or M",
+            "type":"pickString",
+            "options":["u","m"],
+            "default": "d"
+        }
+    ],
     "configurations": [
         {
             "name": "(gdb) 시작",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${fileDirname}\\build\\${input:AppName}.exe",
-            "args": [],
+//            "program": "${fileDirname}\\build\\${input:AppName}.exe",
+            "program": "${command:cmake.launchTargetPath}",
+            "args": [
+                "${input:pickType-mapType",
+                "32",
+                "1048576"
+            ],
             "stopAtEntry": false,
-            "cwd": "${fileDirname}",
-            "environment": [],
+        //    "cwd": "${fileDirname}",
+            "cwd": "${workspaceFolder}\\build",
+            "environment": [
+                {
+                    // add the directory where our target was built to the PATHs
+                    // it gets resolved by CMake Tools:
+                    "name": "PATH",
+                    "value": "${env:PATH}:${command:cmake.getLaunchTargetDirectory}"
+                }
+            ],
             "additionalSOLibSearchPath": "D:\\Programs\\msys64\\mingw64\\bin;D:\\Programs\\msys64\\usr\\bin",
             "externalConsole": true,
             "MIMode": "gdb",
@@ -25,15 +53,6 @@
                 }
             ],
             "preLaunchTask": "C/C++: cmake.exe - make"
-        }
-    ],
-    "inputs": [
-        {
-           "id":"AppName",
-           "description": "Application Name",
-           "default": "${fileBasenameNoExtension}",
-           "type":"promptString"
-
         }
     ]
 }
