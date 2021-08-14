@@ -5,9 +5,14 @@
 
 int main(int argc, char* argv[]) {
 	int a,b;
-	if(argc<2) return 0;
-	a = atoi(argv[1]);
-	b = atoi(argv[2]);
+	if(argc<2) {
+		printf(" a b :"); fflush(stdout);
+		scanf("%d %d", &a, &b);
+	}
+	else {
+		a = atoi(argv[1]);
+		b = atoi(argv[2]);
+	}
 //	scanf("%d", a);
 //	scanf("%d", &b);
 	printf("%d^%d=%d\n", a,b,a^b);
