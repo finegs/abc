@@ -1,0 +1,73 @@
+{
+    "terminal.integrated.profiles.windows": {
+        "PowerShell": {
+            "source": "PowerShell",
+            "icon": "terminal-powershell"
+        },
+        "Command Prompt": {
+            "path": [
+                "${env:windir}\\Sysnative\\cmd.exe",
+                "${env:windir}\\System32\\cmd.exe"
+            ],
+            "args": [],
+            "icon": "terminal-cmd"
+        },
+        "Git Bash": {
+            "source": "Git Bash"
+        }
+    },
+    "C_Cpp.updateChannel": "Insiders",
+    "explorer.confirmDelete": false,
+    "cmake.mingwSearchDirs": [
+        "D:\\Programs\\msys64\\mingw64"
+    ],
+    "cmake.debugConfig": {
+    },
+    "cmake.parallelJobs": 4,
+    "editor.columnSelection": false,
+    "terminal.integrated.scrollback": 9999999,
+    "output.smartScroll.enabled": false,
+    "cmake.ctest.parallelJobs": 4,
+    "cmake.defaultVariants": {
+
+        "buildType": {
+            "default": "debug",
+            "description": "The build type.",
+            "choices": {
+                "debug": {
+                    "short": "Debug",
+                    "long": "Disable optimizations - include debug information.",
+                    "buildType": "Debug"
+                },
+                "release": {
+                    "short": "Release",
+                    "long": "Optimize for speed - exclude debug information.",
+                    "buildType": "Release"
+                },
+                "minsize": {
+                    "short": "MinSizeRel",
+                    "long": "Optimize for smallest binary size - exclude debug information.",
+                    "buildType": "MinSizeRel"
+                },
+                "reldeb": {
+                    "short": "RelWithDebInfo",
+                    "long": "Optimize for speed - include debug information.",
+                    "buildType": "RelWithDebInfo"
+                }
+            }
+        }
+    },
+    "cmake.configureOnOpen": true,
+    "C_Cpp.default.compilerPath": "D:\\Programs\\msys64\\mingw64\\bin\\g++.exe",
+    "terminal.integrated.defaultProfile.windows": "Command Prompt",
+    "C_Cpp.default.intelliSenseMode": "gcc-x64",
+    "C_Cpp.default.cppStandard": "c++20",
+    "C_Cpp.default.cStandard": "c17",
+    "workbench.editorAssociations": {
+        "*.ipynb": "jupyter-notebook"
+    },
+    "notebook.cellToolbarLocation": {
+        "default": "right",
+        "jupyter-notebook": "left"
+    }
+}

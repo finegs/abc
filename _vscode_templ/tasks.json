@@ -1,0 +1,88 @@
+{
+    "tasks": [
+        {
+            "type": "cppbuild",
+            "label": "C/C++: g++.exe 활성 파일 빌드",
+            "command": "g++.exe",
+            "args": [
+                "-g",
+                "${file}",
+                "-o",
+                "${fileDirname}\\${fileBasenameNoExtension}.exe"
+            ],
+            "options": {
+                "cwd": "${fileDirname}"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": "build",
+            "detail": "디버거에서 생성된 작업입니다."
+        },
+        {
+            "type":"shell",
+            "label":"cmake_clean_cache",
+            "command":"del",
+            "args":[
+                "/f",
+                "${workspaceRoot}\\build\\CMakeCache.txt"
+            ],
+            "options": {
+                "cwd": "${workspaceRoot}"
+            },
+        },
+        {
+            "type": "shell",
+            "label": "C/C++: cmake.exe - cmake_generate_make",
+            "command": "cmake.exe",
+            "args": [
+                "-G",
+                "MinGW Makefiles",
+                "-B",
+                "build",
+                "."
+            ],
+            "options": {
+                "cwd": "${workspaceRoot}"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": "build",
+            "detail": "cmake current file.",
+            "dependsOn": "cmake_clean_cache",
+        },
+        {
+            "type": "cppbuild",
+            "label": "C/C++: cmake.exe - make",
+            "command": "cmake.exe",
+            "args": [
+                "--build",
+                "build",
+                "--",
+                "${fileBasenameNoExtension}",
+                "-j4"
+            ],
+            "options": {
+                "cwd": "${workspaceRoot}"
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "detail": "cmake current file.",
+            "dependsOn": "C/C++: cmake.exe - cmake_generate_make",
+            "problemMatcher": []
+        }
+    ],
+    "version": "2.0.0",
+    "inputs": [
+            {
+            "id":"AppName",
+            "description": "Application Name",
+            "default": "${fileBasenameNoExtension}",
+            "type":"promptString"
+
+            }
+        ]
+}
