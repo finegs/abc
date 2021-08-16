@@ -20,7 +20,7 @@
     ],
     "configurations": [
         {
-            "name": "(gdb) 시작",
+            "name": "(gdb) Start",
             "type": "cppdbg",
             "request": "launch",
 //            "program": "${fileDirname}\\build\\${input:AppName}.exe",
@@ -30,7 +30,7 @@
                 "32",
                 "1048576"
             ],
-            "stopAtEntry": false,
+            "stopAtEntry": true,
         //    "cwd": "${fileDirname}",
             "cwd": "${workspaceFolder}\\build",
             "environment": [
@@ -42,17 +42,17 @@
                 }
             ],
             "additionalSOLibSearchPath": "D:\\Programs\\msys2\\mingw64\\bin;D:\\Programs\\msys2\\usr\\bin",
-            "externalConsole": true,
+            "externalConsole": false,
             "MIMode": "gdb",
-            "miDebuggerPath": "gdb.exe",
+            "miDebuggerPath": "D:\\Programs\\msys2\\mingw64\\bin\\gdb.exe",
             "setupCommands": [
                 {
                     "description": "gdb에 자동 서식 지정 사용",
                     "text": "-enable-pretty-printing",
                     "ignoreFailures": true
                 }
-            ],
-            "preLaunchTask": "C/C++: cmake.exe - make"
+            ]
+//            ,"preLaunchTask": "C/C++: cmake.exe - make"
         }
     ]
 }

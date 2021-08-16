@@ -13,10 +13,9 @@ int main(int argc, char* argv[]) {
 		a = atoi(argv[1]);
 		b = atoi(argv[2]);
 	}
-//	scanf("%d", a);
-//	scanf("%d", &b);
 	printf("%d^%d=%d\n", a,b,a^b);
-	system("pause");
+	getchar();
+//	system("pause");
 }
 
 #if 0
