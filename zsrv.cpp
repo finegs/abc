@@ -22,6 +22,7 @@ int main(int argc, char** argv)
 	size_t rcv_len_limit = 10;
 	while(g_run)
 	{
+		fprintf(stdout, "=Waiting Client Message\n");
 		memset(rcv_buf, 0, LEN_BUFFER);
 		zmq_recv(responder, rcv_buf, rcv_len_limit, 0);
 
@@ -29,9 +30,9 @@ int main(int argc, char** argv)
 			fprintf(stderr, "Warning : rcv_buf is overflow. len=%lld\n", rcv_len_limit);
 		}
 
-		printf(">>%s\n", rcv_buf);
+		printf(">%s\n", rcv_buf);
 
-		if(strstr(rcv_buf, "-shutdown")) {
+		if(strstr(rcv_buf, "-shutdown") == 0) {
 			zmq_send(responder, "server going to shutdown", 14, 0);
 			g_run = 0;
 			continue;
