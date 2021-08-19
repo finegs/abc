@@ -1,5 +1,6 @@
 #include <iostream>
 #include <stdio.h>
+#include <memory>
 
 #include "Util.h"
 #include "hash_map.hpp"
@@ -61,8 +62,11 @@ int main(int argc, char* argv[]) {
 		printf("%d : hash(%s)=%zu\n", i, argv[i], strhash(argv[i], 1024*1024*1024)); 
 	}
 
-	HashMap<muint, char*, UIntStrViewer, UIntHasher, UIntMatcher> *map 
-		= new HashMap<muint, char*, UIntStrViewer, UIntHasher, UIntMatcher>;
+	using MyMap = HashMap<muint, char*, UIntStrViewer, UIntHasher, UIntMatcher>;
+
+	auto pmap = std::make_unique<MyMap>();
+	//HashMap<muint, char*, UIntStrViewer, UIntHasher, UIntMatcher> *map = new HashMap<muint, char*, UIntStrViewer, UIntHasher, UIntMatcher>;
+	MyMap *map = pmap.get();
 
 	printf("#%d : Put\n", ++tc);
 	for (int i = 1; i< argc; i++) {
@@ -79,7 +83,6 @@ int main(int argc, char* argv[]) {
 	}
 
 	delete(map);
-
 
 	do_test_array();
 	do_test_class();
