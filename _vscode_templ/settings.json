@@ -90,7 +90,7 @@
             "label": "WSL Bash"
         },
         {
-            "shell": "D:\\Programs\\msys64\\usr\\bin\\bash.exe",
+            "shell": "D:\\Programs\\msys2\\usr\\bin\\bash.exe",
             "label": "MSYS2",
             "args": ["--login", "-i"],
             "env": {
@@ -100,5 +100,5 @@
             }
         }
     ],
-    "C_Cpp.default.compilerPath": "D:\\Programs\\msys64\\mingw64\\bin\\g++.exe"
+    "C_Cpp.default.compilerPath": "D:\\Programs\\msys2\\mingw64\\bin\\g++.exe"
 }

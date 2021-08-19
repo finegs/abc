@@ -41,7 +41,7 @@
                     "value": "${env:PATH}:${command:cmake.getLaunchTargetDirectory}"
                 }
             ],
-            "additionalSOLibSearchPath": "D:\\Programs\\msys64\\mingw64\\bin;D:\\Programs\\msys64\\usr\\bin",
+            "additionalSOLibSearchPath": "D:\\Programs\\msys2\\mingw64\\bin;D:\\Programs\\msys2\\usr\\bin",
             "externalConsole": true,
             "MIMode": "gdb",
             "miDebuggerPath": "gdb.exe",
