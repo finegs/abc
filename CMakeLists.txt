@@ -5,11 +5,11 @@ project(abc)
 
 #set(CMAKE_C_FLAGS "-std=c99")
 IF(MSYS)
-    set(CMAKE_C_FLAGS "-std=c17")
-    set(CMAKE_CXX_FLAGS "-std=c++2a")
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O0 -std=c17")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0 -std=c++2a")
 ELSE(MSYS)
-    set(CMAKE_C_FLAGS "-std=c11")
-    set(CMAKE_CXX_FLAGS "-std=c++17")
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O0 -std=c17")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0 -std=c++2a")
 ENDIF(MSYS)
 
 set(CMAKE_BUILD_TYPE Debug)
@@ -33,6 +33,7 @@ endif(MSYS)
 include_directories(.)
 
 add_executable(a a.cpp)
+add_executable(c c.c)
 
 IF(MSYS)
 target_link_libraries(a pthread ws2_32 zmq)
