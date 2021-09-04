@@ -19,7 +19,7 @@
     "C_Cpp.updateChannel": "Insiders",
     "explorer.confirmDelete": false,
     "cmake.mingwSearchDirs": [
-        "D:\\Programs\\msys2\\mingw64"
+        "D:\\Programs\\msys64\\mingw64"
     ],
     "cmake.debugConfig": {
     },
@@ -58,7 +58,7 @@
         }
     },
     "cmake.configureOnOpen": true,
-    "C_Cpp.default.compilerPath": "D:\\Programs\\msys2\\mingw64\\bin\\g++.exe",
+    "C_Cpp.default.compilerPath": "D:\\Programs\\msys64\\mingw64\\bin\\g++.exe",
     "terminal.integrated.defaultProfile.windows": "Command Prompt",
     "C_Cpp.default.intelliSenseMode": "gcc-x64",
     "C_Cpp.default.cppStandard": "c++20",

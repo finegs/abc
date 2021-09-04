@@ -11,7 +11,7 @@
                 "_UNICODE"
             ],
             "windowsSdkVersion": "10.0.18362.0",
-            "compilerPath": "D:/Programs/msys2/mingw64/bin/g++.exe",
+            "compilerPath": "D:/Programs/msys64/mingw64/bin/g++.exe",
             "cStandard": "c17",
             "cppStandard": "c++17",
             "intelliSenseMode": "gcc-x64",
@@ -31,7 +31,7 @@
             "cStandard": "c17",
             "cppStandard": "c++17",
             "intelliSenseMode": "gcc-x64",
-            "compilerPath": "D:/Programs/msys2/mingw64/bin/g++.exe",
+            "compilerPath": "D:/Programs/msys64/mingw64/bin/g++.exe",
             "compileCommands": "${workspaceFolder}/compile_commands.json"
         }
     ],

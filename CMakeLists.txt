@@ -30,40 +30,24 @@ if (MSYS)
 
 endif(MSYS)
 
-#set(LIBRARY ${LIBRARIES} ${GTK_LIBRARIES})
-#set(FLAGS "-I{GTK_INCLUDE_DIRS}")
-#message(STATUS "Flags: ${FLAGS}")
-#string(REPLACE ";" " -I" FLAGS "${FLAGS}")
-#set(CMAKE_C_FLAGS ${CMAKE_C_FLAGS} ${GTK_FLAGS} ${FLAGS})
-
-#include_directories(D:\\Programs\\wxwidgets\\wxwidgets\\include)
-#link_directories(D:\\Programs\\wxwidgets\\wxwidgets\\lib)
 include_directories(.)
 
 add_executable(a a.cpp)
-add_executable(zcli zcli.cpp)
-add_executable(zsrv zecho.cpp)
 add_executable(d d.cpp)
 
 IF(MSYS)
-target_link_libraries(a pthread ws2_32 )
-target_link_libraries(zcli pthread ws2_32 zmq)
-target_link_libraries(zsrv pthread ws2_32 zmq)
-target_link_libraries(d pthread ws2_32 zmq)
+target_link_libraries(a pthread ws2_32 zmq)
 ELSE(MSYS)
 target_link_libraries(a pthread )
-target_link_libraries(zcli pthread zmq)
-target_link_libraries(zsrv pthread zmq)
-target_link_libraries(d pthread zmq)
 
 ENDIF(MSYS)
 
 if(MSYS)
 
-target_compile_definitions(hello_g PRIVATE ${GTK_CFLAGS_OTHER})
-target_include_directories(hello_g PRIVATE ${GTK_INCLUDE_DIRS})
-target_link_directories(hello_g PRIVATE ${GTK_LIBRARY_DIRS})
-target_link_libraries(hello_g PRIVATE ${GTK_LIBRARIES} ws2_32 zmq)
+#target_compile_definitions(hello_g PRIVATE ${GTK_CFLAGS_OTHER})
+#target_include_directories(hello_g PRIVATE ${GTK_INCLUDE_DIRS})
+#target_link_directories(hello_g PRIVATE ${GTK_LIBRARY_DIRS})
+#target_link_libraries(hello_g PRIVATE ${GTK_LIBRARIES} ws2_32 zmq)
 
 endif()
 
@@ -74,9 +58,12 @@ endif()
 #		)
 
 IF (MSYS)
+
 install(TARGETS a DESTINATION C:\\Programs\\bin)
 install(TARGETS d DESTINATION C:\\Programs\\bin)
-ELSE ()
+
+ELSE (MSYS)
+
 install(TARGETS a DESTINATION ~/bin)
 install(TARGETS d DESTINATION ~/bin)
 
