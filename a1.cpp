@@ -39,23 +39,52 @@ struct List {
 		head = std::move(temp);
 	}
 
+	friend std::ostream& operator<<(std::ostream& os, const List& o);
+
+	Node* find(int data) {
+		List::Node* node = head.get();
+		while(node) {
+			if(data == node->data) {
+				return node;
+			}
+			if(node->next)
+				node = node->next.get();
+			else
+				node = nullptr;
+		}
+		return nullptr;
+	}
+
+	void pop() {
+		if(head == nullptr) return; 
+		std::unique_ptr<Node> temp = std::move(head);
+		head = std::move(temp->next);
+	}
+
 	int remove(int data) {
 
-		std::unique_ptr<Node>  curr = std::move(head);
-		std::unique_ptr<Node>  node;
+		List::Node* node = head.get();
+		while(node) {
+			if(data == node->data) {
 
-		while(curr) {
-			if(curr.get()->data == data) {
-				node = std::move(curr);
-				curr = std::move(node->next);
 			}
-			if(node) node.release();
+			node = node->next.get();
 		}
+		return 0;
 	}
 
 	private:
 	std::unique_ptr<Node> head;
 };
+
+std::ostream& operator<<(std::ostream& os, const List& o) {
+	List::Node* head = o.head.get();
+	while(head) {
+		os << head->data << ' ';
+		head = head->next.get();
+	}
+	return os;
+}
 
 int main() {
 	std::cout << "1) Unique ownership semantics demo\n";
