@@ -1,3 +1,99 @@
+#if 1
+
+
+#include <stdio.h>
+#include <malloc.h>
+
+#define MAX 0xFFFFFFFF
+
+void mmemset(void* p, char c, size_t s) {
+  char* pp = (char*)p;
+  while(s-->0)  *pp++ = c;
+}
+
+void upheap(int array[], int k) {
+  int v;
+  v = array[k];
+//  array[0] = MAX;
+  while(array[k/2]<=v && k > 0) {
+    array[k] = array[k/2];
+    k/=2;
+  }
+  array[k] = v;
+}
+
+void insert(int array[], int *hn, int v) {
+  array[++(*hn)] = v;
+  upheap(array, *hn);
+}
+
+void downheap(int array[], int n, int k) {
+  int i;
+  int v = array[k];
+  while(k<=n/2) {
+    i = k<<1;
+    if(i<n&&array[i]<array[i+1]) i++;
+    if(v>=array[i]) break;
+    array[k] = array[i];
+    k = i; 
+  }
+  array[k] = v;
+}
+
+int mdelete(int array[], int *n) {
+  int v = array[1];
+  array[1] = array[(*n)--];
+  downheap(array, *n, 1);
+  return v;
+}
+
+void heap_sort(int array[], int n) {
+  int hn = 0;
+  int i = 0;
+  for(i = 1;i<=n;i++) {
+    insert(array, &hn, array[i]);
+  }
+  for(i=hn;i>=1;i--) {
+    array[i] = mdelete(array, &hn);
+  }
+  for (int j = 0; j < n; j++)
+  {
+    array[j] = array[j+1];
+  }
+}
+
+void print_array(int array[], int size) {
+  for (int i = 0; i < size; i++)
+  {
+    printf("[%4d]", array[i]);
+  }
+  printf("\n");
+}
+
+int main(int argc, char* argv[]) {
+  int n = 0;
+  int* arr;
+  
+  sscanf(argv[1], "%d", &n);
+  printf("n=%d\n", n);
+  arr = (int*)malloc(sizeof(int)*n);
+  mmemset(arr, 0, sizeof(int)*n);
+  for (size_t i = 0; i < n; i++)
+  {
+    sscanf(argv[i+2], "%d", &(arr[i]));
+    printf(">>argv[%d]=%s, %d\n", i, argv[i+2], arr[i]);
+  }
+
+  printf("(1) : "); print_array(arr, n);
+  heap_sort(arr, n);
+  printf("(2) : "); print_array(arr, n);
+
+  return 0;
+}
+
+
+#endif
+#if 0
 #include <iostream>
 #include <vector>
 #include <memory>
@@ -150,3 +246,5 @@ int main()
   } // destroys all 1 million nodes
   std::cout << "Done.\n";
 }
+
+#endif
