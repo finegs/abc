@@ -34,6 +34,7 @@ include_directories(.)
 
 add_executable(a a.cpp)
 add_executable(c c.c)
+add_executable(d d.cpp)
 
 IF(MSYS)
 target_link_libraries(a pthread ws2_32 zmq)
@@ -58,8 +59,13 @@ endif()
 #		)
 
 IF (MSYS)
+
 install(TARGETS a DESTINATION C:\\Programs\\bin)
-ELSE ()
+install(TARGETS d DESTINATION C:\\Programs\\bin)
+
+ELSE (MSYS)
+
 install(TARGETS a DESTINATION ~/bin)
+install(TARGETS d DESTINATION ~/bin)
 
 ENDIF(MSYS)

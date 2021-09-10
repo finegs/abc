@@ -101,5 +101,20 @@
         }
     ],
     "C_Cpp.default.compilerPath": "D:\\Programs\\msys2\\mingw64\\bin\\g++.exe",
-    "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools"
+    "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
+    "cmake.debugConfig": {
+        "args": [
+            "10",
+            "38",
+            "2",
+            "99",
+            "10232",
+            "34",
+            "20",
+            "15",
+            "5",
+            "7",
+            "1231223",
+        ]
+    }
 }
