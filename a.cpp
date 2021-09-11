@@ -7,7 +7,6 @@
 #include <crtdbg.h> 
 
 
-
 // 32-bit version
 int hash_fun(unsigned int key, int try_num, int max) {
     return (key + try_num) % max;  // the hash fun returns a number bounded by the number of slots.
@@ -47,10 +46,10 @@ int hash_insert(struct key_value_pair *data, struct hash_table *hash_table) {
         if (NULL == hash_table->elements[hash]) { // an unallocated slot
             hash_table->elements[hash] = data;
             hash_table->number_of_elements++;
-            return RC_OK;
+            return OK;
         }
     }
-    return RC_ERROR;
+    return EXIT_FAILURE;
 }
 
 
@@ -121,7 +120,7 @@ int allocate_the_dictionary(struct hash_table *pHashTable) {
     //  pHashTable->elements[i]->key = 0;
     //}
 
-    return RC_OK;
+    return OK;
 }
 
 
@@ -139,12 +138,12 @@ int make_dict_entry(int a_key, char * buffer, struct key_value_pair *pMyStruct) 
     pMyStruct->pValue = (char *) malloc(len + 1); // add one for the null terminator byte
     if (NULL == pMyStruct->pValue) {
         printf("Failed to allocate the buffer for the dictionary string value.");
-        return RC_ERROR;
+        return EXIT_FAILURE;
     }
     strcpy(pMyStruct->pValue, buffer);
     pMyStruct->key = a_key;
 
-    return RC_OK;
+    return OK;
 }
 
 
@@ -156,31 +155,31 @@ int add_key_val_pair_to_dict(struct hash_table *pHashTable, int key, char *pBuff
 
     if (NULL == pHashTable) {
         printf("Hash table is null.\n");
-        return RC_ERROR;
+        return EXIT_FAILURE;
     }
 
     // Allocate the dictionary key value pair struct
     pKeyValuePair = (struct key_value_pair *) malloc(sizeof(struct key_value_pair));
     if (NULL == pKeyValuePair) {
         printf("Failed to allocate key value pair struct.\n");
-        return RC_ERROR;
+        return EXIT_FAILURE;
     }
 
 
     rc = make_dict_entry(key, pBuff, pKeyValuePair);  // a_hash_table[1221] = "abba"
-    if (RC_ERROR == rc) {
+    if (EXIT_FAILURE == rc) {
         printf("Failed to add buff to key value pair struct.\n");
-        return RC_ERROR;
+        return EXIT_FAILURE;
     }
 
 
     rc = hash_insert(pKeyValuePair, pHashTable);
-    if (RC_ERROR == rc) {
+    if (EXIT_FAILURE == rc) {
         printf("insert has failed!\n");
-        return RC_ERROR;
+        return EXIT_FAILURE;
     }
 
-    return RC_OK;
+    return OK;
 }
 
 
@@ -218,34 +217,34 @@ int main(int argc, char *argv[]) {
     allocate_the_dictionary(&a_hash_table);
 
     rc = add_key_val_pair_to_dict(&a_hash_table, 1221, "abba");
-    if (RC_ERROR == rc) {
+    if (EXIT_FAILURE == rc) {
         printf("insert has failed!\n");
-        return RC_ERROR;
+        return EXIT_FAILURE;
     }
     rc = add_key_val_pair_to_dict(&a_hash_table, 2211, "bbaa");
-    if (RC_ERROR == rc) {
+    if (EXIT_FAILURE == rc) {
         printf("insert has failed!\n");
-        return RC_ERROR;
+        return EXIT_FAILURE;
     }
     rc = add_key_val_pair_to_dict(&a_hash_table, 1122, "aabb");
-    if (RC_ERROR == rc) {
+    if (EXIT_FAILURE == rc) {
         printf("insert has failed!\n");
-        return RC_ERROR;
+        return EXIT_FAILURE;
     }
     rc = add_key_val_pair_to_dict(&a_hash_table, 2112, "baab");
-    if (RC_ERROR == rc) {
+    if (EXIT_FAILURE == rc) {
         printf("insert has failed!\n");
-        return RC_ERROR;
+        return EXIT_FAILURE;
     }
     rc = add_key_val_pair_to_dict(&a_hash_table, 1212, "abab");
-    if (RC_ERROR == rc) {
+    if (EXIT_FAILURE == rc) {
         printf("insert has failed!\n");
-        return RC_ERROR;
+        return EXIT_FAILURE;
     }
     rc = add_key_val_pair_to_dict(&a_hash_table, 2121, "baba");
-    if (RC_ERROR == rc) {
+    if (EXIT_FAILURE == rc) {
         printf("insert has failed!\n");
-        return RC_ERROR;
+        return EXIT_FAILURE;
     }
 
 
