@@ -26,7 +26,7 @@ int main(int argc, char* argv[]) {
     char* src = (char*)malloc(256);
     if(argc > 0)
         mstrcpy(src, argv[1]);
-    els 
+	else 
         mstrcpy(src, "abc");
     
     char dst[256];
