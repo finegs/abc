@@ -114,7 +114,8 @@ int allocate_the_dictionary(struct hash_table *pHashTable) {
     //  // all that he could see was babylon
     //  pa_slot = (struct key_value_pair *)  malloc(sizeof(struct key_value_pair));
     //  if (NULL == pa_slot) {
-
+    //      printf("alloc of slot failed\n");
+    //      while (1);
     //  }
     //  pHashTable->elements[i] = pa_slot;
     //  pHashTable->elements[i]->key = 0;
