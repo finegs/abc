@@ -96,13 +96,13 @@ void init(int m) {
 
 	M = m;
 
-	for(register int i = 1;i < M+1;++i) {
+	for(int i = 1;i < M+1;++i) {
 		(s[i].h).n = &(s[i].t);
 		(s[i].t).p = &(s[i].h);
 	}
 
 
-	for (register int i = 0;i < MAX_TABLE;++i) {
+	for (int i = 0;i < MAX_TABLE;++i) {
 		(nameHash[i].h).n = &(nameHash[i].t);
 		(nameHash[i].t).p = &(nameHash[i].h);
 
@@ -184,7 +184,6 @@ int moveType(char mType[MAX_TAG_LEN], int mFrom, int mTo) {
 	}
 	return ret;
 }
-
 
 
 

@@ -33,7 +33,6 @@ endif(MSYS)
 include_directories(.)
 
 add_executable(a a.cpp)
-add_executable(c c.c)
 add_executable(d d.cpp)
 
 IF(MSYS)
