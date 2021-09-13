@@ -23,7 +23,7 @@ void mstrcpy(char dst[], const char src[]) {
 int mstrcmp(const char str1[], const char str2[]) {
   int i = 0;
   while(str1[i] != '\0' && str1[i] == str2[i]) ++i;
-  return str1[i]-str2[2];
+  return str1[i]-str2[i];
 }
 
 struct Node {
@@ -146,7 +146,7 @@ int main(int argc, char* argv[]) {
   }
 
   string* s = NULL;
-  for (size_t i = 0; i < argc-i; ++i)
+  for (size_t i = 0; i < argc-1; ++i)
   {
     s = (string*)m.get(argv[i+1]);
     printf("list[%d]=%s\n", i, s  ? s->str : "") ;
