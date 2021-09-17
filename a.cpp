@@ -1,6 +1,7 @@
 #if 1
 #include <stdio.h>
 #include <malloc.h>
+#include <memory>
 
 void mmemset(void* p, char c, size_t l) {
   char* cp = (char*)p;
@@ -54,7 +55,7 @@ struct HashMap {
     for (Node* p = nodeList[0]; p != nodeList[max_size-1]; ++p)
     {
       if(!p) continue;
-      destroy(p->data);
+      destroy(p);
       free(p);
     }
     free(nodeList);
@@ -112,49 +113,115 @@ struct HashMap {
   size_t max_size;
 };
 
-struct string {
-  string(const char str[]) 
+struct mstring {
+  mstring(const char str[]) 
     :len{DEFAULT_STRING_SIZE}
     {
-      mmemset(this->str, 0, DEFAULT_STRING_SIZE);
+      this->str = (char*)malloc(len+1);
+      if(!this->str) { fprintf(stderr, "fail to malloc %s:%d %s\n", __FILE__, __LINE__, __FUNCTION__);len = 0; return; }
       mstrcpy(this->str, str);
+      this->str[len] = '\0';
     }
-  char str[DEFAULT_STRING_SIZE];
+
+    mstring(const mstring& o) {
+      docopy(o);
+    }
+
+    mstring& operator=(const mstring& o) {
+      if(this==&o) return *this;
+      docopy(o);
+      return *this;
+    }
+
+    mstring(mstring&& o) {
+      if(str) free(str);
+      domove(std::forward<mstring>(o));
+    }
+
+    mstring& operator=(mstring&& o) {
+      if(this==&o) return *this;
+      domove(std::forward<mstring>(o));
+    }
+
+    void docopy(const mstring& o) {
+      if(this->str) free(this->str);
+      this->len = o.len;
+      this->str = (char*)malloc(len+1);
+      if(!this->str) { fprintf(stderr, "fail to malloc %s:%d %s\n", __FILE__, __LINE__, __FUNCTION__);len = 0; return; }
+      mstrcpy(this->str, o.str);
+      this->str[len] = '\0';
+   }
+
+   void domove(mstring&& o) {
+     if(this==&o) return;
+     if(str) free(str);
+     str = std::move(o.str);
+     len = o.len;
+   }
+
+    ~mstring() {
+      if(!str) return;
+      free(str);
+      str = nullptr;
+      len = 0;
+    }
+  char* str;
   size_t len;
+
 };
 
 size_t string_hash(void* key, size_t mod) {
   return mstrhash((const char*)key, mod);
 }
 
-int string_key_match(void* key1, void* key2) {
+int string_match(void* key1, void* key2) {
   return mstrcmp((const char*)key1, (const char*)key2) == 0;
 }
 
-void string_destroy(void* data) {
-  string* s = (string*)data;
-  free(s);
+
+struct mynode {
+  mstring* key;
+  int point;
+
+  ~mynode() {
+    if(key) delete(key);
+  }
+};
+
+void node_destroy(void* data) {
+  Node* n = (Node*)data;
+  while(n) {
+    if(n->data) delete((mynode*)n->data);
+    Node* prev = n;
+    n = n->next;
+    delete(prev);
+  }
 }
 
 int main(int argc, char* argv[]) {
   
-  HashMap m{string_hash, string_key_match, string_destroy};
+  printf("#1.---------------------\n");
+  HashMap m{string_hash, string_match, node_destroy};
   for (size_t i = 0; i < argc-1; ++i)
   {
-    string* s  = new string{argv[i+1]};
-    m.insert(s->str, s);
+    mstring* s  = new mstring{argv[i+1]};
+    mynode* node = new mynode{s, 0};
+    m.insert(s->str, node);
   }
 
-  string* s = NULL;
+  printf("#2.---------------------\n");
+  mynode* node = NULL;
   for (size_t i = 0; i < argc-1; ++i)
   {
-    s = (string*)m.get(argv[i+1]);
-    printf("list[%d]=%s\n", i, s  ? s->str : "") ;
+    node = (mynode*)m.get(argv[i+1]);
+    if(node)
+      printf("\t[%5d] : map[%10s]={%s,%d}\n", i, argv[i+1], node->key ? node->key->str : "", node ? node->point : -1) ;
+    else
+      printf("\t[%5d] : map[%10s]=\n", i, argv[i+1]) ;
   }
   
   return 0;
 }
-
 
 #endif
 
