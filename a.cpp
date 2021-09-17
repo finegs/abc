@@ -1,4 +1,293 @@
 #if 1
+#include <stdio.h>
+#include <malloc.h>
+
+void mmemset(void* p, char c, size_t l) {
+  char* cp = (char*)p;
+  while(l--) *cp++ = c;
+}
+
+size_t mstrhash(const char str[], size_t mod) {
+  size_t h = 5381;
+  char c = 0;
+  while((c=*str++) != '\0') {
+    h = ((h<<5)+h+c)%mod;
+  }
+  return h % mod;
+}
+void mstrcpy(char dst[], const char src[]) {
+  int i =0;
+  while((dst[i] = src[i]) != '\0') ++i;
+}
+
+int mstrcmp(const char str1[], const char str2[]) {
+  int i = 0;
+  while(str1[i] != '\0' && str1[i] == str2[i]) ++i;
+  return str1[i]-str2[i];
+}
+
+struct Node {
+  void* key;
+  void* data;
+  Node* next;
+};
+
+#define DEFAULT_HASH_MAP_MAX_SIZE 100000
+#define DEFAULT_STRING_SIZE 256
+struct HashMap {
+  HashMap(
+   size_t (*key_hash)(void* data, size_t mod),
+   int (*key_match)(void* key1, void* key2),
+   void (*destroy)(void* data),
+   size_t max_size = DEFAULT_HASH_MAP_MAX_SIZE)
+    : key_hash{key_hash}, 
+      key_match{key_match}, 
+      destroy{destroy}, 
+      size{0}, 
+      max_size{max_size}
+  {
+      nodeList = (Node**)malloc(max_size*sizeof(Node*));
+      mmemset(nodeList, 0, sizeof(Node*)*max_size);
+  }
+
+  ~HashMap() {
+    for (Node* p = nodeList[0]; p != nodeList[max_size-1]; ++p)
+    {
+      if(!p) continue;
+      destroy(p->data);
+      free(p);
+    }
+    free(nodeList);
+    nodeList = NULL;
+  }
+
+  void insert(void* key, void* data) {
+    size_t h = key_hash(key, max_size);
+    Node* prev = NULL;
+    Node* node = nodeList[h];
+    while(node && !key_match(key, node->key)) {
+      prev = node;
+      node = node->next;
+    }
+
+    if(node) { // update
+      destroy(node->data);
+      node->key = key;
+      node->data = data;  
+    }
+    else { // insert
+      node = (Node*)malloc(sizeof(Node));
+      mmemset(node, 0, sizeof(Node));
+      node->key = key;
+      node->data = data;
+
+      if(prev) {
+        node->next = prev->next;
+        prev->next = node; 
+      }
+      else {
+        nodeList[h] = node;
+      }
+      size++;
+    }
+  }
+
+  void* get(void* key) const {
+    size_t h = key_hash(key, max_size);
+    Node* prev = NULL;
+    Node* node = nodeList[h];
+    while(node && !key_match(key, node->key)) {
+      prev = node;
+      node = node->next;
+    }
+    if(node) return node->data;
+    return NULL;
+  }
+
+  size_t (*key_hash)(void* data, size_t mod);
+  int (*key_match)(void* key1, void*key2);
+  void (*destroy)(void* data);
+  Node** nodeList;
+  size_t size;
+  size_t max_size;
+};
+
+struct string {
+  string(const char str[]) 
+    :len{DEFAULT_STRING_SIZE}
+    {
+      mmemset(this->str, 0, DEFAULT_STRING_SIZE);
+      mstrcpy(this->str, str);
+    }
+  char str[DEFAULT_STRING_SIZE];
+  size_t len;
+};
+
+size_t string_hash(void* key, size_t mod) {
+  return mstrhash((const char*)key, mod);
+}
+
+int string_key_match(void* key1, void* key2) {
+  return mstrcmp((const char*)key1, (const char*)key2) == 0;
+}
+
+void string_destroy(void* data) {
+  string* s = (string*)data;
+  free(s);
+}
+
+int main(int argc, char* argv[]) {
+  
+  HashMap m{string_hash, string_key_match, string_destroy};
+  for (size_t i = 0; i < argc-1; ++i)
+  {
+    string* s  = new string{argv[i+1]};
+    m.insert(s->str, s);
+  }
+
+  string* s = NULL;
+  for (size_t i = 0; i < argc-1; ++i)
+  {
+    s = (string*)m.get(argv[i+1]);
+    printf("list[%d]=%s\n", i, s  ? s->str : "") ;
+  }
+  
+  return 0;
+}
+
+
+#endif
+
+
+#if 0
+#include <stdio.h>
+#include <malloc.h>
+#include <time.h>
+
+/* returns an array of arrays of char*, all of which NULL */
+char ***alloc_matrix(unsigned rows, unsigned columns) {
+    char ***matrix = (char***)malloc(rows * sizeof(char **));
+    unsigned row = 0;
+    unsigned column = 0;
+    if (!matrix) abort();
+
+    for (row = 0; row < rows; row++) {
+        matrix[row] = (char**)calloc(columns, sizeof(char *));
+        if (!matrix[row]) abort();
+        for (column = 0; column < columns; column++) {
+            matrix[row][column] = NULL;
+        }
+    }
+    return matrix;
+}
+
+/* deallocates an array of arrays of char*, calling free() on each */
+void free_matrix(char ***matrix, unsigned rows, unsigned columns) {
+    unsigned row = 0;
+    unsigned column = 0;
+    for (row = 0; row < rows; row++) {
+        for (column = 0; column < columns; column++) {
+            /*    printf("column %d row %d\n", column, row);*/
+            free(matrix[row][column]);
+        }
+        free(matrix[row]);
+    }
+    free(matrix);
+}
+
+
+int main(int argc, char **argv) {
+    if(argc < 2) { printf("Usage : %s size1 size2\n", argv[0]); return 0; }
+    printf("Start.\n");
+     int i;
+    srand(time(NULL));
+    int randomnumber;
+    int size = atoi(argv[1]);
+    void *p[size];
+    for (i = 0; i < size; i++) {
+        randomnumber = rand() % 10;
+        p[i] = malloc(1024 * 1024 * randomnumber);
+    }
+
+    for (i = size-1; i >= 0; i--) {
+        free(p[i]);
+    }
+
+    int x = atoi(argv[2]);
+    char *** matrix = alloc_matrix(x, x);
+    free_matrix(matrix, x, x);
+    printf("End.\n");
+    return (0);
+}
+
+#endif
+
+#if 0
+#include <stdio.h>
+#include <malloc.h>
+
+static void mmemset(void* ptr, char c, size_t len) {
+  char* cp = (char*)ptr;
+  while(len--) {
+    *cp++ = c;
+  }
+}
+static void mstrcpy(char a[], char b[]) {
+  int i = 0;
+  while((a[i] = b[i]) != '\0') {++i;}
+}
+
+static int mstrcmp(const char a[], const char b[]) {
+  int i = 0;
+  while((a[i] != '\0') && a[i] == b[i]) ++i;
+  return a[i] - b[i];
+}
+
+static const size_t NAME_LEN = 16;
+
+struct Node {
+  char name[16];
+  Node* next;
+};
+
+struct NodeMap {
+  size_t len;
+  Node** nodeList;
+  NodeMap(size_t len = 100000) :len(len) {
+    nodeList = (Node**)malloc(sizeof(Node*)*len);
+    for(int i = 0;i < len;++i) {
+     nodeList[i] = (Node*)malloc(sizeof(Node));
+     mmemset(nodeList[i]->name, 0, NAME_LEN);
+   }
+  }
+
+  ~NodeMap() {
+    for(int i = 0;i < len;++i) {
+     free(nodeList[i]);
+   }
+   free(nodeList);
+   printf("~NodeMap()\n");
+  }
+};
+
+NodeMap nodeMap;
+
+int main(int argc, char* argv[]) {
+
+  for(int i =1;i<argc;++i) {
+    mstrcpy(nodeMap.nodeList[i-1]->name, argv[i]); 
+  }
+
+  for(int i = 1;i<argc;++i) {
+    printf("nodeMap.nodeList[%d]=%s\n", i, nodeMap.nodeList[i-1]->name);
+  }
+
+  return 0;
+}
+
+#endif
+
+#if 0
 
 
 #include <stdio.h> #define parent(x) (x-1)/2 void heap(int *data, int num){ for(int i=1; i<num; i++){ int child = i; while(child > 0){ int root = parent(child); if(data[root] < data[child]){ int temp = data[root]; data[root] = data[child]; data[child] = temp; } child = root; } } } int main(void){ int num = 9; int data[] = {15, 4, 8, 11, 6, 3, 1, 6, 5}; heap(data, num); // 힙을 만든다. for(int i=num-1; i>=0; i--){ // 가장큰 숫자(root)를 맨 마지막 원소와 스왑 int temp = data[i]; data[i] = data[0]; data[0] = temp; // 맨마지막원소(가장큰원소)를 제외하고 다시 힙을 만든다. heap(data, i); } // 결과 출력 for(int i=0; i<num; i++){ printf("%d ", data[i]); } return 0; }
