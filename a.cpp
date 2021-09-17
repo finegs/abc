@@ -1,5 +1,191 @@
 #if 1
 
+
+#include <stdio.h> #define parent(x) (x-1)/2 void heap(int *data, int num){ for(int i=1; i<num; i++){ int child = i; while(child > 0){ int root = parent(child); if(data[root] < data[child]){ int temp = data[root]; data[root] = data[child]; data[child] = temp; } child = root; } } } int main(void){ int num = 9; int data[] = {15, 4, 8, 11, 6, 3, 1, 6, 5}; heap(data, num); // 힙을 만든다. for(int i=num-1; i>=0; i--){ // 가장큰 숫자(root)를 맨 마지막 원소와 스왑 int temp = data[i]; data[i] = data[0]; data[0] = temp; // 맨마지막원소(가장큰원소)를 제외하고 다시 힙을 만든다. heap(data, i); } // 결과 출력 for(int i=0; i<num; i++){ printf("%d ", data[i]); } return 0; }
+
+
+
+
+
+
+
+
+#endif
+#if 0
+
+#include <stdio.h>
+ 
+void swap(int* a, int* b)
+{
+    int t = *a;
+    *a = *b;
+    *b = t;
+}
+ 
+void maxHeapify(int array[], int size, int index)
+{
+    int largest = index;    // Initialize the largest as root
+    int left = (index << 1) + 1;   // left = 2*index + 1
+    int right = (index + 1) << 1;    // right = 2*index + 2
+ 
+    // See if left child of root exists and is greater than root
+    if (left < size && array[left] > array[largest])
+        largest = left;
+ 
+    // See if right child of root exists and is greater than the largest so far
+    f (right < size && array[right] > array[largest])
+        largest = right;
+ 
+    // Change root, if needed
+    if (largest != index)
+    {
+        swap(&array[largest], &array[index]);
+        maxHeapify(array, size, largest);
+    }
+}
+ 
+void heapSort(int array[], int size)
+{
+    int i;
+    // Create an initial max heap.
+    // Start from bottommost and rightmost internal mode and
+    // heapify all internal modes in bottom up way
+    for (i = (size - 2) / 2; i >= 0; i--)
+        maxHeapify(array, size, i);
+ 
+    // Repeat reduce and heapify steps while heap size is greater than 1.
+    while (size > 1)
+    {
+        // The largest item in Heap is stored at the end.
+        swap(&array[0], &array[size - 1]);
+        // Reduce heap size
+        size--;
+        // Heapify the root of tree
+        maxHeapify(array, size, 0);
+    }
+}
+ 
+void printArray(int arr[], int size)
+{
+    int i;
+    for (i = 0; i < size; i++)
+        printf("%d ", arr[i]);
+    printf("\n");
+}
+ 
+int main(int argc, char** argv)
+{
+    int data[] = { 3,7,2,11,6,8,5,12,2,14,13,9,1,10,4 };
+    int size = sizeof(data) / sizeof(int);
+ 
+    heapSort(data, size);
+    printf("Sorted data is\n");
+    printArray(data, size);
+ 
+    return 0;
+}
+
+
+#endif
+#if 0
+
+#include <stdio.h>
+#include <malloc.h>
+
+struct Node {
+  void* data;
+};
+
+struct Heap {
+  Heap(int (*data_comp)(void*,void*), 
+    void (*data_swap)(void* a, void* b), 
+    void (*data_destroy)(void**), 
+    size_t max_size = 10000) 
+      : data_comp(data_comp), 
+        data_swap(data_swap), 
+        data_destroy(data_destroy), 
+        size(0), 
+        max_size(max_size) {
+      nodeList = (Node**)malloc(sizeof(int*)*max_size);
+      for (size_t i = 0; i < max_size; i++)
+      {
+        nodeList = NULL;
+      }
+  }
+
+  ~Heap() {
+    for (size_t i = 0; i < max_size; i++)
+    {
+      if(nodeList[i]) data_destroy(nodeList[i]);
+    }
+    free(nodeList);
+    nodeList = NULL;
+  }
+
+  void insert(void* data) {
+    if(size>=max_size) {
+      if(nodeList = (Node**)realloc(nodeList, max_size * 2)) {
+          max_size *= 2;
+          for (size_t i = size; i < max_size; i++) nodeList[i] = NULL;
+      }
+      else {
+        fprintf(stderr, "Fail to realloc(nodeLis, %u\n", max_size*2);
+        return;
+      }
+    }
+
+    size_t cur = size;
+    nodeList[cur] = (Node*)data;
+    size_t p = (cur-1)/2;
+    while(cur>0 && data_comp(nodeList[cur], nodeList[p])>0) {
+      data_swap(nodeList[cur], nodeList[p]);
+      p = (cur-1)/2;
+    }
+
+    size++;
+  }
+
+  void* remove() {
+    Node** node;
+
+    if(size() < 1) return NULL;
+
+    node = nodeList[0];
+    size_t cur = 0, child = cur*2;
+    nodeList[cur] = nodeList[size--];
+    while(child < size) {
+      if(child + 1 < size && data_comp(nodeList[child], nodeList[child+1]) < 0) {
+        child++;
+      }
+      data_swap(nodeList[cur], dataList[child]);
+    }
+
+    return node;
+  }
+  Node **nodeList;
+  int (*data_comp)(void* a, void* b);
+  void (*data_swap)(void* a, void* b);
+  void (*data_destroy)(void** data);
+
+  size_t getSize() { return size; }
+  size_t getMaxSize() { return max_size; }
+
+  size_t size;
+  size_t max_size;
+};
+
+int main(int argc, char* argv[]) {
+
+  return 0;
+}
+
+
+#endif 
+
+
+#if 0
+
+#include <stdio.h>
 #include <string.h>
 
 #define _CRTDBG_MAP_ALLOC
@@ -36,7 +222,12 @@ int hash_insert(struct key_value_pair *data, struct hash_table *hash_table) {
 
 
     if (hash_table->number_of_elements >= hash_table->max) {
-        return 0; // FULL
+        hash_table->elements = (key_value_pair**)realloc(hash_table->elements, hash_table->max = hash_table->number_of_elements*2);
+        for (int i = hash_table->number_of_elements; i < hash_table->max; i++) {
+              hash_table->elements[i] = NULL;
+        }
+
+//        return 0; // FULL
     }
 
     for (try_num = 0; try_num < max_number_of_retries; try_num++) {
@@ -44,9 +235,12 @@ int hash_insert(struct key_value_pair *data, struct hash_table *hash_table) {
         hash = hash_fun(data->key, try_num, hash_table->max);
 
         if (NULL == hash_table->elements[hash]) { // an unallocated slot
-            hash_table->elements[hash] = data;
-            hash_table->number_of_elements++;
-            return OK;
+          hash_table->elements[hash] = data;
+          hash_table->number_of_elements++;
+          return EXIT_SUCCESS;
+        } else if (data->key == hash_table->elements[hash]->key) {
+          hash_table->elements[hash] = data;
+          return EXIT_SUCCESS;
         }
     }
     return EXIT_FAILURE;
@@ -120,7 +314,7 @@ int allocate_the_dictionary(struct hash_table *pHashTable) {
     //  pHashTable->elements[i]->key = 0;
     //}
 
-    return OK;
+    return EXIT_SUCCESS;
 }
 
 
@@ -143,12 +337,12 @@ int make_dict_entry(int a_key, char * buffer, struct key_value_pair *pMyStruct) 
     strcpy(pMyStruct->pValue, buffer);
     pMyStruct->key = a_key;
 
-    return OK;
+    return EXIT_SUCCESS;
 }
 
 
 // Assumes the hash table has already been allocated.
-int add_key_val_pair_to_dict(struct hash_table *pHashTable, int key, char *pBuff) {
+int add_key_val_pair_to_dict(struct hash_table *pHashTable, int key, const char pBuff[]) {
 
     int rc;
     struct key_value_pair *pKeyValuePair;
@@ -179,7 +373,7 @@ int add_key_val_pair_to_dict(struct hash_table *pHashTable, int key, char *pBuff
         return EXIT_FAILURE;
     }
 
-    return OK;
+    return EXIT_SUCCESS;
 }
 
 
