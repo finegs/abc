@@ -1,6 +1,274 @@
 #if 1
 #include <stdio.h>
 #include <malloc.h>
+
+int mstrcmp(const char s1[], const char s2[]) {
+  if(!s1 || !s2) return 0;
+  size_t i = 0;
+  while(s1[i] != '\0' && s1[i] == s2[i]) ++i;
+  return s1[i] - s2[i];
+}
+
+size_t mstrlen(const char s[]) {
+  if(!s) return 0;
+  size_t l = 0;
+  while(s[l] != '\0') ++l;
+  return l;
+}
+
+void mstrcpy(char dst[], const char src[]) {
+  if(!src) return; 
+  size_t i = 0;
+  while((dst[i] = src[i]) != '\0') ++i;
+}
+
+size_t mstrhash(const char s[], size_t mod) {
+  size_t h = 8391;
+  char c =0;
+  while((c = *s++) != '\0') {
+    h  =((h<<5)+h+c) % mod; 
+  }
+  return h%mod;
+}
+
+class AAA {
+  public:
+    AAA(const char str[] = NULL) {
+      size_t len = mstrlen(str);
+      AAA::str = (char*)malloc(len+1);
+      mstrcpy(AAA::str, str);
+      AAA::str[len] = '\0';
+    }
+    ~AAA(){
+      printf("~AAA\n");
+      if(str) free(str);
+    };
+
+    void setStr(const char* str)  {
+      if(AAA::str) free(AAA::str);
+      size_t len = mstrlen(str);
+      AAA::str = (char*)malloc(len+1);
+      mstrcpy(AAA::str, str);
+      AAA::str[len] = '\0';
+    }
+
+    private:
+      char *str;
+};
+
+class AA
+{
+public:
+  AA(AAA* arr) 
+    : arr{arr} {}
+  ~AA() = default;
+
+private:
+  AAA* arr;
+};
+
+int main(int argc, char* argv[]) {
+  AAA arr[argc-1];
+  for (size_t i = 1; i < argc; i++)
+  {
+    arr[i-1].setStr(argv[i]);
+  }
+  
+  AA aa{arr};
+}
+
+#endif
+#if 0
+
+#include <stdio.h>
+#include <malloc.h>
+
+template<typename K, typename V>
+class HashNode {
+  public:
+    HashNode(const K& key, const V& value) 
+      : key(key), value(value), next(nullptr) {}
+
+    K getKey() const { return key; }
+    V getValue() const { return value; }
+    void setValue(V value) { HashNode::value = value; }
+    HashNode* getNext() const { return next; }
+    void setNext(HashNode* next) { HashNode::next = next; }
+  private:
+    K key;
+    V value; 
+    HashNode* next;
+};
+
+template <typename K, unsignd long M>>
+struct HashKeyHash {
+  unsigned long operator()(const K& key) const {
+    return reinterpret_pointer_cast<unsigned long>(key % M);
+  }
+};
+
+// Hash map class template
+template <typename K, typename V, typename F = KeyHash<K>>
+class HashMap {
+public:
+    HashMap() {
+        // construct zero initialized hash table of size
+        table = new HashNode<K, V> *[TABLE_SIZE]();
+    }
+
+    ~HashMap() {
+        // destroy all buckets one by one
+        for (int i = 0; i < TABLE_SIZE; ++i) {
+            HashNode<K, V> *entry = table[i];
+            while (entry != NULL) {
+                HashNode<K, V> *prev = entry;
+                entry = entry->getNext();
+                delete prev;
+            }
+            table[i] = NULL;
+        }
+        // destroy the hash table
+        delete [] table;
+    }
+
+    bool get(const K &key, V &value) {
+        unsigned long hashValue = hashFunc(key);
+        HashNode<K, V> *entry = table[hashValue];
+
+        while (entry != NULL) {
+            if (entry->getKey() == key) {
+                value = entry->getValue();
+                return true;
+            }
+            entry = entry->getNext();
+        }
+        return false;
+    }
+
+    void put(const K &key, const V &value) {
+        unsigned long hashValue = hashFunc(key);
+        HashNode<K, V> *prev = NULL;
+        HashNode<K, V> *entry = table[hashValue];
+
+        while (entry != NULL && entry->getKey() != key) {
+            prev = entry;
+            entry = entry->getNext();
+        }
+
+        if (entry == NULL) {
+            entry = new HashNode<K, V>(key, value);
+            if (prev == NULL) {
+                // insert as first bucket
+                table[hashValue] = entry;
+            } else {
+                prev->setNext(entry);
+            }
+        } else {
+            // just update the value
+            entry->setValue(value);
+        }
+    }
+
+    void remove(const K &key) {
+        unsigned long hashValue = hashFunc(key);
+        HashNode<K, V> *prev = NULL;
+        HashNode<K, V> *entry = table[hashValue];
+
+        while (entry != NULL && entry->getKey() != key) {
+            prev = entry;
+            entry = entry->getNext();
+        }
+
+        if (entry == NULL) {
+            // key not found
+            return;
+        }
+        else {
+            if (prev == NULL) {
+                // remove first bucket of the list
+                table[hashValue] = entry->getNext();
+            } else {
+                prev->setNext(entry->getNext());
+            }
+            delete entry;
+        }
+    }
+
+private:
+    // hash table
+    HashNode<K, V> **table;
+    F hashFunc;
+};
+
+struct mstringkeyhash {
+  unsigned long operator()(MString& o) const {
+    return mstrhash(o.str);
+  }
+};
+
+int mstrcmp(const char s1[], const char s2[]) {
+  size_t i = o;
+  while(s1[i] != '\0' && s1[i] == s2[i]) ++i;
+  return s1[i] - s2[i];
+}
+
+size_t mstrlen(const char s[]) {
+  size_t l = 0;
+  while(s[l] != '\0') ++l;
+  return l;
+}
+
+size_t mstrcpy(char dst[], const char src[]) {
+  size_t i = 0;
+  while((dst[i] = src[i]) != '\0') ++i;
+}
+
+size_t mstrhash(const char s[], size_t mod) {
+  size_t h = 8391;
+  char c =0;
+  while((c = *s++ != '\0') {
+    h  =((h<<5)+h+c) % mod; 
+  }
+  return h%mod;
+}
+struct mstring {
+  mstring(const char str[]) 
+    : len(mstrlen(str+1), capacity{8096}) {
+    str = new char[len+1];
+    mstrcpy(mstring::str, str);
+    mstring::str[len] = '\0';
+  }
+  ~mstring() = default;
+
+  bool operator==(const mstring& o) const {
+    return 0 == mstrcmp(mstring::str, o.str);
+  }
+
+  int compare(const mstring& o) const {
+    return mstrcmp(mstring::str, o.str);
+  }
+  char* str;
+  size_t len;
+  size_t capacity;
+}
+
+
+int main(int argc,char* argv[]) {
+
+  HashMap<mstring, mnode, mstringkeyhash> hmap;
+
+
+
+  return 0;
+}
+
+
+#endif
+
+
+#if 0
+#include <stdio.h>
+#include <malloc.h>
 #include <memory>
 
 void mmemset(void* p, char c, size_t l) {
@@ -8,6 +276,11 @@ void mmemset(void* p, char c, size_t l) {
   while(l--) *cp++ = c;
 }
 
+size_t mstrlen(const char str[]) {
+  size_t l = 0;
+  while(str[l] != '\0') ++l;
+  return l;
+}
 size_t mstrhash(const char str[], size_t mod) {
   size_t h = 5381;
   char c = 0;
@@ -31,6 +304,15 @@ struct Node {
   void* key;
   void* data;
   Node* next;
+
+  ~Node() {
+    Node* n = next;
+    while(n) {
+      Node* p = n;
+      n = n->next;
+      delete(p);
+    }
+  }
 };
 
 #define DEFAULT_HASH_MAP_MAX_SIZE 100000
@@ -40,10 +322,12 @@ struct HashMap {
    size_t (*key_hash)(void* data, size_t mod),
    int (*key_match)(void* key1, void* key2),
    void (*destroy)(void* data),
+   void (*handle)(void* data),
    size_t max_size = DEFAULT_HASH_MAP_MAX_SIZE)
     : key_hash{key_hash}, 
       key_match{key_match}, 
       destroy{destroy}, 
+      handle(handle),
       size{0}, 
       max_size{max_size}
   {
@@ -52,14 +336,44 @@ struct HashMap {
   }
 
   ~HashMap() {
-    for (Node* p = nodeList[0]; p != nodeList[max_size-1]; ++p)
+    for (size_t i = 0; i < max_size; ++i)
     {
-      if(!p) continue;
-      destroy(p);
-      free(p);
+      Node* p = nodeList[i];
+      while(p) {
+        destroy(p->data);
+
+        Node* prev = p;
+        p = p->next;
+        delete(prev);
+      }
     }
     free(nodeList);
     nodeList = NULL;
+  }
+
+  int remove(void* key, void** data) {
+    size_t h = key_hash(key, max_size);
+    Node* prev = NULL;
+    Node* node = nodeList[h];
+    while(node && !key_match(key, node->key)) {
+      prev = node;
+      node = node->next;
+    } 
+
+    if(!node) return -1;
+
+    // Found
+    *data = node->data;
+    if(prev) { // Found in List
+      prev->next  = node->next;
+    }
+    else { // Found in head
+      nodeList[h] = node->next;
+    }
+    node->data = NULL;
+    free(node); 
+    size--;
+    return 0;
   }
 
   void insert(void* key, void* data) {
@@ -72,15 +386,15 @@ struct HashMap {
     }
 
     if(node) { // update
-      destroy(node->data);
       node->key = key;
-      node->data = data;  
+      handle(node->data);
     }
     else { // insert
       node = (Node*)malloc(sizeof(Node));
       mmemset(node, 0, sizeof(Node));
       node->key = key;
       node->data = data;
+      handle(node->data);
 
       if(prev) {
         node->next = prev->next;
@@ -108,10 +422,101 @@ struct HashMap {
   size_t (*key_hash)(void* data, size_t mod);
   int (*key_match)(void* key1, void*key2);
   void (*destroy)(void* data);
+  void (*handle)(void* data);
   Node** nodeList;
   size_t size;
   size_t max_size;
 };
+
+size_t string_hash(void* key, size_t mod) {
+  return mstrhash((const char*)key, mod);
+}
+
+int string_match(void* key1, void* key2) {
+  return mstrcmp((const char*)key1, (const char*)key2) == 0;
+}
+
+struct mynode {
+  char* name; 
+  int point;
+
+  mynode(const char name[], int point = 0)
+    : point{point} {
+      size_t len = mstrlen(name);
+      this->name = (char*)malloc(len+1);
+      mstrcpy(this->name, name);
+      this->name[len] = '\0';
+  };
+
+  ~mynode() {
+    delete(name);
+  }
+};
+
+
+void mynode_destroy(void* data) {
+  mynode* node = (mynode*)data;
+  delete(node);
+}
+
+void mynode_handle(void* data) {
+  mynode* node = (mynode*)data;
+  node->point+=1;
+}
+
+struct mstring;
+
+#if 0
+struct BB {
+  BB() {
+    printf("BB()\n");
+  }
+  ~BB() {
+    printf("~BB()\n");
+  }
+};
+struct AAA {
+  BB bb;
+};
+#endif
+
+int main(int argc, char* argv[]) {
+
+ #if 0 
+  printf("#1.---------------------\n");
+  HashMap m{string_hash, string_match, mynode_destroy, mynode_handle};
+  for (size_t i = 1; i < argc; ++i)
+  {
+    mynode* node = new mynode{argv[i], 0};
+    m.insert(argv[i], node);
+  }
+
+  printf("#2.---------------------\n");
+  mynode* node = NULL;
+  for (size_t i = 1; i < argc; ++i)
+  {
+    char* name = argv[i];
+    node = (mynode*)m.get(name);
+    if(node)
+      printf("\t[%5d] : map[%10s]={%10s,%5d}\n", i, node->name, node->name, node->point) ;
+    else
+      printf("\t[%5d] : map[%10s]=\n", i, name) ;
+  }
+ #endif 
+
+#if 0
+  {
+    printf("#1.--------\n");
+    AAA a;  
+    printf("#2.--------\n");
+    printf("#3.--------\n");
+  }
+#endif
+
+
+
+  return 0;
+}
 
 struct mstring {
   mstring(const char str[]) 
@@ -170,58 +575,6 @@ struct mstring {
 
 };
 
-size_t string_hash(void* key, size_t mod) {
-  return mstrhash((const char*)key, mod);
-}
-
-int string_match(void* key1, void* key2) {
-  return mstrcmp((const char*)key1, (const char*)key2) == 0;
-}
-
-
-struct mynode {
-  mstring* key;
-  int point;
-
-  ~mynode() {
-    if(key) delete(key);
-  }
-};
-
-void node_destroy(void* data) {
-  Node* n = (Node*)data;
-  while(n) {
-    if(n->data) delete((mynode*)n->data);
-    Node* prev = n;
-    n = n->next;
-    delete(prev);
-  }
-}
-
-int main(int argc, char* argv[]) {
-  
-  printf("#1.---------------------\n");
-  HashMap m{string_hash, string_match, node_destroy};
-  for (size_t i = 0; i < argc-1; ++i)
-  {
-    mstring* s  = new mstring{argv[i+1]};
-    mynode* node = new mynode{s, 0};
-    m.insert(s->str, node);
-  }
-
-  printf("#2.---------------------\n");
-  mynode* node = NULL;
-  for (size_t i = 0; i < argc-1; ++i)
-  {
-    node = (mynode*)m.get(argv[i+1]);
-    if(node)
-      printf("\t[%5d] : map[%10s]={%s,%d}\n", i, argv[i+1], node->key ? node->key->str : "", node ? node->point : -1) ;
-    else
-      printf("\t[%5d] : map[%10s]=\n", i, argv[i+1]) ;
-  }
-  
-  return 0;
-}
 
 #endif
 
@@ -828,7 +1181,7 @@ int main(int argc, char *argv[]) {
 
 #define MAP_SIZE 100000
 
-void mstrlen(const char str[]) {
+size_t mstrlen(const char str[]) {
   size_t l = 0;
   int c = 0;
   while(*str++ != '\0') ++l;
