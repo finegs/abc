@@ -1,0 +1,28 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "gdb",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceRoot}/build/${cmake.getLaunchTargetFilenametargetName})",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceRoot}/build",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "miDebuggerPath": "C:/Programs/msys2/mingw64/bin/gdb.exe",
+            "setupCommands": [
+                {
+                    "description": "gdb에 자동 서식 지정 사용",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ]
+        }
+    ]
+}
