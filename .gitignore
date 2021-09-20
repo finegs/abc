@@ -6,3 +6,5 @@ Debug/**/*.*
 **/cscope.*
 cscope.*
 **/tags
+**/CMakefiles/**/*.*
+build/**/*.*
