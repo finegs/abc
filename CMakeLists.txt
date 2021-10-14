@@ -3,7 +3,7 @@ project(abc)
 
 #add_definitions(-Wall -std=c++2a)
 
-set(CMAKE_C_FLAGS "-std=c99")
+set(CMAKE_C_FLAGS "-std=c11")
 set(CMAKE_CXX_FLAGS "-std=c++2a")
 set(CMAKE_BUILD_TYPE Debug)
 
@@ -27,6 +27,7 @@ add_executable(aa aa.cpp List.cpp Util.cpp)
 add_executable(c20 c20.cpp)
 add_executable(app a.cpp Util.cpp)
 add_executable(d d.cpp)
+add_executable(c c.c)
 
 target_link_libraries(a pthread ws2_32 )
 target_link_libraries(a1 pthread ws2_32 zmq)
@@ -39,6 +40,7 @@ target_link_libraries(z pthread ws2_32 zmq)
 target_link_libraries(c20 pthread ws2_32 zmq)
 target_link_libraries(app pthread ws2_32 zmq)
 target_link_libraries(d pthread ws2_32 zmq)
+target_link_libraries(c pthread ws2_32 zmq)
 
 #install(TARGETS a 
 #		RUNTIME DESTINATION bin

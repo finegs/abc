@@ -1,8 +1,10 @@
 //Program.c
 #include "common.h"
 #include "Book.h"
+
 typedef void *Element;
-typedef int (*Compare)(Element , Element);               
+typedef int (*Compare)(Element, Element);               
+void quick_sort(Element *base, int n, Compare compare);
 
 void quick_sort(Element *base, int n, Compare compare)
 {
@@ -93,7 +95,7 @@ void SimulationInit()
     {
         sprintf(title,"%010d",rand());
         sprintf(author,"%010d",rand());
-        books[i] = New_Book(title,author,rand());//랜덤 테스트 용
+        books[i] = Book_New((const char*)title,(const char*)author, rand());//랜덤 테스트 용
         //books[i] = New_Book(title,author,i+1); //순차적 테스트 용
     }
 }
@@ -131,11 +133,11 @@ void Simulation2()
 {
     clock_t st,et;
     st = clock();
-    quick_sort(books,MAX_BOOK/10,CompareByNum);
+    quick_sort((Element*)books, MAX_BOOK/10, CompareByNum);
     et=clock();
     printf("%d개 정렬에 걸린 시간:%d\n",MAX_BOOK/10,et-st);
     st = clock();
-    quick_sort(books,MAX_BOOK,CompareByNum);
+    quick_sort((Element*)books, MAX_BOOK, CompareByNum);
     et=clock();	
     printf("%d개 정렬에 걸린 시간:%d\n",MAX_BOOK,et-st);
 }
@@ -144,7 +146,7 @@ void SimulationClear()
     int i = 0;
     for(i=0; i<MAX_BOOK; ++i)
     {
-        Delete_Book(books[i]);
+        Book_Delete(books[i]);
     }
 }
 int main()

@@ -2,6 +2,7 @@
 // Book.h
 
 #pragma once
+
 #define MAX_TIT_LEN 200
 #define MAX_AUT_LEN 20
 
@@ -12,7 +13,13 @@ struct _Book {
 	int num;
 };
 
-Book* Book_New(const char *title, const char* author);
+// default argument value is supported in c (but c++ is OK)
+//void Book_Book(Book *book,const char *title,const char *author,int no = 0);
+void Book_Book(Book *book,const char *title,const char *author,int no);
+
+// default argument value is supported in c (but c++ is OK)
+//Book* Book_New(const char *title, const char* author, int no = 0);
+Book* Book_New(const char *title, const char* author, int no);
 void Book_Delete(Book* book);
 void Book_View(Book* book);
 int Book_CompareTitle(Book *book,const char *title);
