@@ -14,13 +14,11 @@ void mstrcpy(char* dst, const char* src) {
 	while((c=(*dst++=*src++))!='\0');
 }
 int mstrcmp(const char* a, const char* b) {
-	while(*a==*b&&*a!='\0') {a++;b++;};
+	while(*a!='\0' && *a==*b) {a++;b++;};
 	return *a-*b;
 };
 
-struct AAComparator;
 class AA {
-	friend AAComparator;
 	friend std::less<AA>;
 	friend std::ostream;
 	public:
