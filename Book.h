@@ -18,7 +18,8 @@ struct _Book {
 void Book_Book(Book *book,const char *title,const char *author,int no);
 
 // default argument value is not supported in c (but c++ is OK)
-//Book* Book_New(const char *title, const char* author, int no = 0);
+//void Book_Book(Book *book,const char *title,const char *author,int no = 0);
+void Book_Book(Book *book,const char *title,const char *author,int no);
 Book* Book_New(const char *title, const char* author, int no);
 void Book_Delete(Book* book);
 void Book_View(Book* book);
