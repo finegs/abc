@@ -2,7 +2,11 @@
 #include <malloc.h>
 #include <iostream>
 #include <map>
+#include <set>
 #include <ostream>
+#include <utility>
+#include <cctype>
+#include <cassert>
 
 size_t mstrlen(const char* str) {
 	size_t l = 0;
@@ -16,6 +20,92 @@ void mstrcpy(char* dst, const char* src) {
 int mstrcmp(const char* a, const char* b) {
 	while(*a!='\0' && *a==*b) {a++;b++;};
 	return *a-*b;
+};
+void mmemset(void* dst, char c, size_t len) {
+	char* cc = (char*)dst;
+	while(len-->0) cc[len] = c;
+}
+
+class Item {
+	public:
+	   	Item() : name{nullptr} {}
+		Item(const char* name) {
+			this->name = new char[(size=mstrlen(name))+1];
+			mmemset(this->name, '\0', size+1);
+			mstrcpy(this->name, name);
+		}
+
+		Item(const Item& o) {
+			*this = o;
+		}
+
+		Item& operator=(const Item& o) {
+			if(this==&o) return *this;
+			if(size != o.size) {
+				delete[] name;
+				name = nullptr;
+				size = 0;
+				name = new char[o.size+1];
+				size = o.size;
+			}
+			std::copy(o.name, o.name+o.size, name);
+			return *this;
+		}
+
+		Item(Item&& o) {
+			*this = std::move(o);
+		}
+		Item& operator=(Item&& o) {
+			if(this==&o) return *this;
+			delete[] name;
+			name = std::exchange(o.name, nullptr);
+			size = std::exchange(o.size, 0);
+			return *this;
+		}
+
+		friend std::ostream& operator<<(std::ostream& os, const Item& o) {
+			os << "{\"size\":"<<o.size << ", \"name\":" << o.name << "}";
+			return os;
+		}
+		friend std::istream& operator>>(std::istream& is, Item& o) {
+			// verify no errors are set, flush tied streams, strip leading
+			// whitespace.
+			std::istream::sentry sentry(is);
+			if (!sentry)
+				return is;
+
+			unsigned int size = 0;
+			unsigned int tail = 0;
+			char* temp = 0;
+			int next; // @note int not char (to record EOF).
+
+			while ((next = is.get()) != is.eof() && !std::isspace(next)) {
+				// if temp buffer is exhausted, then double the buffer size.
+				// (base size of 16).
+				if (tail == size) {
+					unsigned int newsize = std::max(2*size, 16u);
+					char* newtemp = new char[newsize+1];
+					memcpy(newtemp, temp, size);
+					delete [] temp;
+					temp = newtemp;
+					size = newsize;
+				}
+				temp[tail++] = next;
+			}
+			// @note because the stream is prepeared with istream::sentry, there
+			// will be at least one non-whitespace character in the stream.
+			assert(temp != 0);
+			temp[tail] = '\0';
+			o = temp;
+			delete [] temp;
+			return is;
+		}
+		~Item() {
+			delete[] name;
+		}
+	private:
+		char* name;
+		size_t size;
 };
 
 class AA {
@@ -98,6 +188,12 @@ namespace std
 			return mstrcmp(a, b) < 0;
 		}
 	};
+	template<> struct less<AA>
+	{
+		bool operator() (const AA& a, const AA& b) const {
+			return mstrcmp(a.key, b.key) < 0;	
+		}
+	};
 }
 
 using namespace std;
@@ -105,22 +201,37 @@ using namespace std;
 int main(int argc, char* argv[]) {
 
 	std::map<const char*, AA> mm;
-	for (int i = 1; i<argc && i+1<argc; i+=2) {
-		AA a{argv[i], argv[i+1]};
-		cout << "["<<i<<"] : "<<a<<std::endl;
-		mm.insert({argv[i], a});
+	std::set<AA> ss;
+	for (int i = 1; i<argc; i++) {
+		if(i%2==1 && i+1<argc) {
+			AA a{argv[i], argv[i+1]};
+			cout << "["<<i<<"] : "<<a<<std::endl;
+			mm.insert({argv[i], a});
+		}
+		ss.insert({argv[i], argv[i]});
 	}
 
-	cout<<"##1 const auto& [key,val]"<<std::endl;
+	cout<<"##1 const auto& [key,val] : map"<<std::endl;
 	for (const auto& [k,v] : mm) {
 		cout << "map["<<k<<"]="<< v << std::endl;
 	}
+
+	cout<<"##1-1 const auto& item : set("<<std::endl;
+	for (const auto& item : ss) {
+		cout << item << ", ";
+	}
+	cout << ")" << std::endl;
 
 	cout<<"##2 map[key]=[val]"<<std::endl;
 	for(int i = 1;i < argc;i+=2) {
 		cout << "map[" << argv[i] << "]" << ":" << mm[argv[i]] << std::endl;
 	}
 	cout << std::endl;
+
+	cout << "#3 Item" << std::endl;
+	Item ii;
+	cin >> ii;
+	cout << "ii:" <<  ii << std::endl;
 
 	return 0;
 }
