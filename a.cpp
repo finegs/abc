@@ -149,7 +149,7 @@ int main(int argc, char* argv[]) {
   for (size_t i = 0; i < argc-1; ++i)
   {
     s = (string*)m.get(argv[i+1]);
-    printf("list[%d]=%s\n", i, s  ? s->str : "") ;
+    printf("list[%lld]=%s\n", i, s  ? s->str : "") ;
   }
   
   return 0;
