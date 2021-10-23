@@ -170,7 +170,6 @@ class AAA {
       mstrcpy(AAA::str, str);
       AAA::str[len] = '\0';
     }
->>>>>>> 300117a3b95f618e018bf9248c08ddfdb0474a7f
 
     private:
       char *str;
