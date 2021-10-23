@@ -90,7 +90,7 @@
             "label": "WSL Bash"
         },
         {
-            "shell": "D:\\Programs\\msys2\\usr\\bin\\bash.exe",
+            "shell": "D:\\Programs\\msys64\\usr\\bin\\bash.exe",
             "label": "MSYS2",
             "args": ["--login", "-i"],
             "env": {
@@ -114,7 +114,14 @@
             "15",
             "5",
             "7",
+<<<<<<< HEAD
             "1231223"
         ]
     }
 }
+=======
+            "1231223",
+        ]
+    }
+}
+>>>>>>> 300117a3b95f618e018bf9248c08ddfdb0474a7f
