@@ -1,4 +1,137 @@
 #if 1
+#include <stdio.h>
+#include <malloc.h>
+
+void mmemset(void*p,char c, size_t l) {
+	char* cc = (char*)p;
+	while(l-->0) cc[l]=c;
+}
+size_t mstrlen(const char str[]) {
+  size_t l = 0;
+  while(str[l] != '\0')l++;
+  return l;
+}
+
+void mstrcpy(char dst[], const char src[]) {
+  int i  = 0;
+  while((dst[i] = src[i]) != '\0') ++i;
+}
+
+int mstrcmp(const char str1[], const char str2[]) {
+  int i  = 0;
+  while(str1[i] != '\0' && str1[i] == str2[i]) ++i;
+  return str1[i]-str2[i];
+}
+
+size_t mstrhash(const char str[], const size_t mode) {
+  size_t h = 8591;
+  char c = 0;
+  while((c=*str++) != '\0') {
+    h = ((h<<5)+h+c)%mode;
+  }
+  return h % mode;
+}
+
+struct Node {
+  Node(const char name[], const char desc[], int point) 
+    : point{point} {
+      mstrcpy(this->name, name);
+      mstrcpy(this->desc, desc);
+  }
+
+  void setDesc(const char desc[]) { mstrcpy(this->desc, desc); }
+  void setPoint(int point) { this->point = point; }
+  void setNext(Node* next) { this->next = next; }
+
+  char name[64];
+  char desc[1024];
+  int point;
+  Node* next;
+};
+
+template<size_t MAP_CAPACITY = 10000>
+struct NodeMap {
+  NodeMap(size_t _mapCapacity = MAP_CAPACITY) 
+          : mapCapacity{_mapCapacity}, mapSize{0} 
+  {
+    nodeList = (Node**)malloc(sizeof(Node*) * mapCapacity);
+    for (size_t i = 0; i < mapCapacity; ++i)
+    {
+      // nodeList[i] = (Node*)malloc(sizeof(Node)); 
+      nodeList[i] = nullptr;
+    }
+  }
+
+  ~NodeMap() {
+    for (size_t i = 0; i < mapCapacity; i++)
+    {
+      if(nodeList[i]) free(nodeList[i]);
+    }
+    free(nodeList);
+  }
+
+  void put(const char name[32], const char desc[128]) {
+    size_t h = mstrhash(name, mapCapacity);
+    Node* prev = nullptr;
+    Node* node = nodeList[h];
+    while(node) {
+      if(mstrcmp(name, node->name) == 0) break;
+      prev = node;
+      node = node->next;
+    }
+
+    if(prev) {
+      if(node) {
+        mstrcpy(node->desc, desc);
+      }
+      else {
+        node = (Node*)malloc(sizeof(Node));
+        mstrcpy(node->name, name);
+        mstrcpy(node->desc, desc);
+
+        prev->next = node;
+
+        mapSize++;
+      }
+    }
+    else {
+      node = (Node*)malloc(sizeof(Node));
+      mstrcpy(node->name, name);
+      mstrcpy(node->desc, desc);
+
+      nodeList[h] = node;
+
+      mapSize++;
+    }
+  }
+
+  Node** nodeList;
+  size_t mapCapacity;
+  size_t mapSize;
+};
+
+
+int main(int argc, char* argv[]) {
+
+  NodeMap<30000> nm;
+
+  printf("#1 mstrcmp(%s,%s)=%s\n", argv[0],argv[0],mstrcmp(argv[0],argv[0])==0? "OK":"NG");
+  char bb[100];
+  mmemset(bb, '\0', 100);
+  mstrcpy(bb, argv[0]);
+  printf("#2 mstrcmp(%s,mstrcpy(%s)=%s\n", argv[0],bb, mstrcmp(argv[0],bb)==0? "OK":"NG");
+
+  for (int i = 1; i < argc; ++i) {
+	  printf("mstrlen(%s)=%d\n", argv[i], mstrlen(argv[i]));
+	  if(i%2==1) 
+		nm.put(argv[i], argv[i+1]);	
+  }
+
+  return 0;
+}
+
+#endif
+#if 0
 
 
 #include <stdio.h>
