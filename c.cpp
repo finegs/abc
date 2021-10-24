@@ -26,14 +26,14 @@ int mstrcmp(const char a[], const char b[]) {
 	return a[c] - b[c];
 }
 
-unsigned long hash(const char* s) {
+unsigned long hash(const char* s, size_t mod) {
 	unsigned long hash = 5381;
 	int c;
 
 	while((c = *s++)) {
-		hash = (((hash<<5) + hash) + c) % MAX_TABLE;
+		hash = (((hash<<5) & hash) + c) % mod;
 	}
-	return hash % MAX_TABLE;
+	return hash % mod;
 }
 
 
@@ -116,7 +116,7 @@ void addHash(const char* src, int Case, Book* ptr, int type_idx) {
 	tmp->addr = ptr;
 	mstrcpy(tmp->str, src);
 
-	int key  = hash(src);
+	int key  = hash(src, MAX_TABLE);
 
 	if(Case == CASE_NAME) {
 		tmp->p = &(nameHash[key].h);
@@ -144,7 +144,7 @@ void add(char mName[MAX_NAME_LEN], int mTypeNum, char mTypes[MAX_N][MAX_TAG_LEN]
 	tmp->mSection = mSection;
 	tmp->mTypeNum = mTypeNum;
 
-	for(register int i = 0;i<mTypeNum;++i) {
+	for(int i = 0;i<mTypeNum;++i) {
 		mstrcpy(tmp->mTypes[i], mTypes[i]);
 	}
 
@@ -157,7 +157,7 @@ void add(char mName[MAX_NAME_LEN], int mTypeNum, char mTypes[MAX_N][MAX_TAG_LEN]
 	addHash(mName, CASE_NAME, tmp, -1);
 
 
-	for(register int i = 0;i<mTypeNum;++i) {
+	for(int i = 0;i<mTypeNum;++i) {
 		addHash(mTypes[i], CASE_TYPE, tmp, i);
 	}
 }
@@ -165,8 +165,8 @@ void add(char mName[MAX_NAME_LEN], int mTypeNum, char mTypes[MAX_N][MAX_TAG_LEN]
 int moveType(char mType[MAX_TAG_LEN], int mFrom, int mTo) {
 	int ret = 0;
 
-	int key = hash(mType);
-	for(register Obj* cur = (typeHash[key].h).n; cur != nullptr;cur = cur->n) {
+	int key = hash(mType, MAX_TABLE);
+	for(Obj* cur = (typeHash[key].h).n; cur != nullptr;cur = cur->n) {
 		if(mstrcmp(cur->str, mType) == 0) {
 			if(cur->addr->mSection == mFrom) {
 				Book* target = cur->addr;
@@ -184,6 +184,5 @@ int moveType(char mType[MAX_TAG_LEN], int mFrom, int mTo) {
 	}
 	return ret;
 }
-
 
 
