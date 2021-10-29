@@ -15,3 +15,4 @@ Debug/**/*.*
 **/*.cmake
 **/*.dll*
 **/Makefile
+**/*.*~
