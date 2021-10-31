@@ -1,0 +1,66 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "inputs": [
+        {
+            "id": "debug-args",
+            "type": "promptString",
+            "description": "Enter string to test",
+            "default": "abcdefg"
+        },
+        {
+            "id":"pickType-mapType",
+            "description": "Select type U or M",
+            "type":"pickString",
+            "options":["u","m"],
+            "default": "d"
+        }
+    ],
+    "configurations": [
+        {
+            "name": "Run:without Debug",
+            "type": "cppvsdbg",
+            "request": "launch",
+//            "program": "${workspaceRoot}\\build\\${fileBasenameNoExtension}.exe)",
+            "program":"${command:cmake.launchTargetPath}",
+            "args": [
+                "${input:debug-args}",
+            ],
+            "stopAtEntry": false,
+            "cwd": "${fileDirname}",
+            "environment": [],
+            "console": "externalTerminal",
+            "externalConsole": true,
+            "preLaunchTask": "CompileActiveFile"
+        },
+        {
+            "name": "Debug:CMake Default Target",
+            "type": "cppdbg",
+            "request": "launch",
+//            "program": "${workspaceFolder}\\build\\${fileBasenameNoExtension}.exe",
+            "program":"${command:cmake.launchTargetPath}",
+            "args": [
+                "${input:debug-args}"
+            ],
+            "stopAtEntry": false,
+//            "cwd": "${fileDirname}",
+//            "cwd": "${workspaceRoot}\\build",
+            "cwd": "${command:cmake.launchTargetDirectory}",
+            "environment": [],
+            "console":"externalTerminal",
+            "additionalSOLibSearchPath": "D:\\Programs\\msys2\\mingw64\\bin;D:\\Programs\\msys2\\usr\\bin",
+             "MIMode": "gdb",
+            "miDebuggerPath": "D:\\Programs\\msys2\\mingw64\\bin\\gdb.exe",
+            "setupCommands": [
+                {
+                    "description": "gdb에 자동 서식 지정 사용",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+            "preLaunchTask": "CMake:BuildDefaultTarget"
+        }
+    ]
+}
