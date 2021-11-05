@@ -1,5 +1,99 @@
 
 #if 1
+
+#include <iostream>
+#include <vector>
+#include <string>
+#include <algorithm>
+#include <unordered_map>
+
+struct Item {
+	int x,y;
+	friend std::ostream;
+	bool operator<(const Item& o) const {
+		return x < o.x || x == o.x ? y < o.y : false;
+	}
+
+	bool operator==(const Item& o) const {
+		return x == o.x && y == o.y;
+	}
+	
+	struct ItemHasher {
+		size_t operator()(const Item& o) const {
+			return o.x << 1 ^ o.y;
+		}
+	};
+};
+
+
+
+std::ostream& operator<<(std::ostream& os, const Item& o) {
+	os << "{" << "\"x:\""<< o.x << ", " << "\"y\":" << o.y << "}";
+	return os;
+}
+
+using namespace std;
+int main(int argc, char* argv[]) {
+
+	vector<std::string> v = {"hi", "hello", "abc"};
+
+	size_t l = 0;
+	cout << "for_each : [";
+	std::for_each(v.cbegin(), v.cend(), [&](auto& s) { cout << (++l>0?",":"") << s << " "; });
+	cout << "]" << endl;
+
+	cout << "for : [";
+	for(const auto& s : v) {
+		cout << (l++>0 ? ", " : "") << s;
+	}
+	cout << "]" << std::endl;;
+
+	vector<Item> vv{{1,2}, {3,4},{5,6}};
+	l = 0;
+	cout << "vv : ";
+	std::for_each(vv.cbegin(), vv.cend(), [&](auto& s) { cout << (l>0?"," :"") << "{" << "x:"<< s.x << ", " << "y:"<< s.y << "}";});
+	cout << "}" << std::endl;
+
+	Item ii{1,1};
+	auto rr = std::find_if_not(vv.cbegin(), vv.cend(), [&](auto& i) { return ii == i; });
+	if(rr != vv.cend()) {
+		cout << "Found " << ii << std::endl;
+	}
+	else {
+		cout << "Not found " << ii << std::endl;
+	}
+
+
+	unordered_map<const char*,Item> um; 
+	um.insert(std::make_pair<const char*, Item>("1_1", {1,1}));
+	um.insert(std::make_pair<const char*, Item>("1_2", {1,2}));
+	um.insert(std::make_pair<const char*, Item>("1_3", {1,3}));
+
+	auto it = um.find("1_1");
+	if(it != um.cend()) 
+		cout << "um.find(\"1_1\") : OK" <<  ", Result : {" << it->first << ", " << it->second << "}";
+	else
+		cout << "um.find(\"1_1\") : NG";
+	cout << std::endl;
+
+	um.erase("1_1");
+
+	it = um.find("1_1");
+	if(it != um.cend()) 
+		cout << "um.find(\"1_1\") : OK" <<  ", Result : {" << it->first << ", " << it->second << "}";
+	else
+		cout << "um.find(\"1_1\") : NG";
+	cout << std::endl;
+
+
+	return EXIT_FAILURE;
+}
+
+
+#endif
+
+
+#if 0
 #include <stdio.h>
 #include <malloc.h>
 
