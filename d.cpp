@@ -28,11 +28,12 @@ void mmemset(void* dst, char c, size_t len) {
 
 class Item {
 	public:
-	   	Item() : name{nullptr} {}
+	   	Item() : name{nullptr}, size{0} {}
 		Item(const char* name) {
 			this->name = new char[(size=mstrlen(name))+1];
-			mmemset(this->name, '\0', size+1);
+			//mmemset(this->name, '\0', size+1);
 			mstrcpy(this->name, name);
+			this->name[size]='\0';
 		}
 
 		Item(const Item& o) {
@@ -79,7 +80,8 @@ class Item {
 			char* temp = 0;
 			int next; // @note int not char (to record EOF).
 
-			while ((next = is.get()) != is.eof() && !std::isspace(next)) {
+//			while ((next = is.get()) != is.eof() && !std::isspace(next)) {
+			while ((next = is.get()) != is.eof() && '\n' !=next) {
 				// if temp buffer is exhausted, then double the buffer size.
 				// (base size of 16).
 				if (tail == size) {
@@ -94,14 +96,35 @@ class Item {
 			}
 			// @note because the stream is prepeared with istream::sentry, there
 			// will be at least one non-whitespace character in the stream.
-			assert(temp != 0);
+			assert(temp != NULL);
 			temp[tail] = '\0';
-			o = temp;
+			o.append(temp); // append 2021-12-04
+			//o = temp;
 			delete [] temp;
 			return is;
 		}
+		void append(const char* str)  {
+			size_t str_len = mstrlen(str);
+			//char* newname = new char[size+str_len+1]{'\0'};
+			size_t newsize = size+str_len;
+			char* newname = new char[newsize+1];
+			assert(newname != NULL);
+			if(name != NULL) mstrcpy(newname, name);
+			mstrcpy(newname+size, str);
+			newname[newsize] = '\0';
+			if(name) delete[] name;
+
+			name = nullptr;
+			size = 0;
+
+			name = newname;
+			size = newsize;
+
+		}
 		~Item() {
-			delete[] name;
+			if(name)delete[] name;
+			name = nullptr;
+			size = 0;
 		}
 	private:
 		char* name;
@@ -211,27 +234,32 @@ int main(int argc, char* argv[]) {
 		ss.insert({argv[i], argv[i]});
 	}
 
-	cout<<"##1 const auto& [key,val] : map"<<std::endl;
+	cout<<"## 1 const auto& [key,val] : map"<<std::endl;
 	for (const auto& [k,v] : mm) {
 		cout << "map["<<k<<"]="<< v << std::endl;
 	}
 
-	cout<<"##1-1 const auto& item : set("<<std::endl;
+	cout<<"## 1-1 const auto& item : set("<<std::endl;
 	for (const auto& item : ss) {
 		cout << item << ", ";
 	}
 	cout << ")" << std::endl;
 
-	cout<<"##2 map[key]=[val]"<<std::endl;
+	cout<<"## 2 map[key]=[val]"<<std::endl;
 	for(int i = 1;i < argc;i+=2) {
 		cout << "map[" << argv[i] << "]" << ":" << mm[argv[i]] << std::endl;
 	}
 	cout << std::endl;
 
-	cout << "#3 Item" << std::endl;
+	cout << "## 3 Item" << std::endl;
 	Item ii;
+	for(int i = 1;i<argc;i++) {
+		if(i>1) ii.append(" ");
+		ii.append(argv[i]);
+	}
+	ii.append(" ");
 	cin >> ii;
-	cout << "ii:" <<  ii << std::endl;
+	cout << "## 3 ii:" <<  ii << std::endl;
 
 	return 0;
 }
