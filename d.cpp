@@ -23,13 +23,14 @@ unsigned int mstrhash(const char str[], unsigned int TABLE_SIZE) {
 }
 
 int main(int argc, char* argv[]) {
-    char* src = (char*)malloc(256);
+//    char* src = (char*)malloc(256);
+    char* src = new char[256+1]{0};
     if(argc > 0)
         mstrcpy(src, argv[1]);
     else 
         mstrcpy(src, "abc");
     
-    char dst[256];
+    char dst[256]{0};
     mstrcpy(dst, src);
     printf("mstrcmp(%s, %s=mstrcpy(%s))=%s\n", src, dst, src, (mstrcmp(src, dst) == 0 ? "true" : "false"));
     printf("mstrhash(%s)=%u\n", src, mstrhash(src, 1000000));

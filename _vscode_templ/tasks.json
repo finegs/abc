@@ -29,7 +29,7 @@
             ],
             "options": {
                 "cwd": "${workspaceRoot}"
-            },
+            }
         },
         {
             "type": "shell",
@@ -50,7 +50,7 @@
             ],
             "group": "build",
             "detail": "cmake current file.",
-            "dependsOn": "cmake_clean_cache",
+            "dependsOn": "cmake_clean_cache"
         },
         {
             "type": "cppbuild",
