@@ -1,3 +1,87 @@
+#include <ratio>
+#if 1
+#include <iostream>
+#include <vector>
+#include <cstring>
+#include <chrono>
+#include <sys/timeb.h>
+#include <ctime>
+#include <cassert>
+
+
+using std::chrono::system_clock;
+
+class Item {
+	private:
+	int a;
+	char* b;
+	public:
+	Item() : a{0}, b{nullptr} {}
+	Item(int a_, const char* b_) : a{a_}, b{nullptr} {
+		b = new char[strlen(b_)+1]{'\0'};
+		strcpy_s(b, strlen(b_), b_);
+	}
+	const int getA() const { return a; }
+	const char* getB() const { return b; }
+};
+
+int sum(std::vector<Item>& list) {
+	int sum = 0;
+	for(auto& i : list) { sum += i.getA(); }
+	return sum;
+}
+int sum2(std::vector<Item>const & list) {
+	int sum = 0;
+	for(auto& i : list) { sum += i.getA(); }
+	return sum;
+}
+
+size_t elapsedmsec(const std::chrono::time_point<std::chrono::system_clock>& start) {
+	auto end = std::chrono::system_clock::now();
+	return std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count();
+}
+
+char* timestamp(char *str) {
+	auto currentTime = system_clock::now();
+
+	auto transformed = currentTime.time_since_epoch().count() / 1000000;
+
+	auto millis = transformed % 1000;
+
+	std::time_t tt = system_clock::to_time_t ( currentTime );
+	struct tm newtime;
+	errno_t rc = localtime_s(&newtime, &tt);
+	assert(ENOMSG != rc);
+	strftime (str, 25,"%Y-%m-%d %H:%M:%S", &newtime);
+	sprintf(str, "%s.%03d", str,(int)millis);
+	return str;
+}
+
+
+int main() {
+	char tmstr[25]{'\0'};
+
+	std::vector<Item> list{{1, "aa"}, {2, "bb"}};
+	std::cout << timestamp(tmstr) << "#1 Start" << std::endl;
+	auto start = std::chrono::system_clock::now();
+	for (int i = 0; i < 10000000; ++i) {
+		sum(list);
+	}
+	std::cout << timestamp(tmstr) << "#1 End : " << ", " << elapsedmsec(start) << std::endl;
+
+	std::cout << timestamp(tmstr) << "#2 Start" << std::endl;
+
+	start = std::chrono::system_clock::now();
+	for (int i = 0; i < 10000000; ++i) {
+		sum2(list);
+	}
+	std::cout << timestamp(tmstr) << "#2 End : " << ", " << elapsedmsec(start) << std::endl;
+
+};
+
+#endif
+#if 0
+
 #include <stdio.h>
 #include <malloc.h>
 
@@ -28,7 +112,7 @@ int main(int argc, char* argv[]) {
 //    char* src = (char*)malloc(256);
     char* src = new char[256+1]{0};
     if(argc > 1)
-        mstrcpy(src, argv[1]);
+		mstrcpy(src, argv[1]);
     else 
         mstrcpy(src, "abc");
     
@@ -39,6 +123,8 @@ int main(int argc, char* argv[]) {
     printf("mstrhash(%s)=%u\n", src, mstrhash(src, 1000000));
 
     delete[] src;
-
+	
     return 0;
 }
+
+#endif
