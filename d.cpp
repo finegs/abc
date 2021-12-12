@@ -60,22 +60,33 @@ char* timestamp(char *str) {
 
 int main() {
 	char tmstr[25]{'\0'};
+	size_t diff{0}, summ{0}, avg{0};
+	size_t cc = 10;
 
 	std::vector<Item> list{{1, "aa"}, {2, "bb"}};
 	std::cout << timestamp(tmstr) << "#1 Start" << std::endl;
-	auto start = std::chrono::system_clock::now();
-	for (int i = 0; i < 10000000; ++i) {
-		sum(list);
+	for (int ii = 0; ii < cc; ++ii) {
+		auto start = std::chrono::system_clock::now();
+		for (int i = 0; i < 10000000; ++i) {
+			sum(list);
+		}
+		diff = elapsedmsec(start);
+		summ+=diff;
 	}
-	std::cout << timestamp(tmstr) << "#1 End : " << ", " << elapsedmsec(start) << std::endl;
+	std::cout << timestamp(tmstr) << "#1 End : " << ", sum="<< summ << ", avg="<< (summ/cc) << diff << std::endl;
 
+
+	summ = avg = diff = 0;
 	std::cout << timestamp(tmstr) << "#2 Start" << std::endl;
-
-	start = std::chrono::system_clock::now();
-	for (int i = 0; i < 10000000; ++i) {
-		sum2(list);
+	for (int ii = 0; ii < cc; ++ii) {
+		auto start = std::chrono::system_clock::now();
+		for (int i = 0; i < 10000000; ++i) {
+			sum2(list);
+		}
+		diff = elapsedmsec(start);
+		summ+=diff;
 	}
-	std::cout << timestamp(tmstr) << "#2 End : " << ", " << elapsedmsec(start) << std::endl;
+	std::cout << timestamp(tmstr) << "#2 End : " << ", sum="<< summ << ", avg="<< (summ/cc) << diff << std::endl;
 
 };
 
