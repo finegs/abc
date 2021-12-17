@@ -99,10 +99,15 @@ void vector2file(const char* file, const std::vector<T>& v)
 int main(int argc, char* argv[])
 {
 	bool verbose = false;
+	bool stdqucksort = false;
 	int osize = 10;
 	char ifile[128]{"input.txt"};
 	char ofile[128]{"output.txt"};
 	std::vector<int> v;
+	char tstr[24]{0};
+
+	std::cout << timestamp(tstr) << " " << (stdqucksort ? "stdqucksort" : "myquicksort" ) << "\n";
+
 	for (int i = 0; i < argc; ++i) {
 		if(!strcmp("-if", argv[i]) && i+1 < argc) {
 			strcpy(ifile, argv[i+1]);	
@@ -125,9 +130,11 @@ int main(int argc, char* argv[])
 				|| !strcmp("--verbose", argv[i])) {
 			verbose = true;
 		}
+		if(!strcmp("-stdquicksort", argv[i])) {
+			stdqucksort = true;
+		}
 	}
 
-	char tstr[24]{0};
 	std::cout << timestamp(tstr) << " Before rand2file" << "\n";
 	rand2file(ifile, osize);
 
@@ -143,7 +150,11 @@ int main(int argc, char* argv[])
 //	}
 	std::cout << timestamp(tstr) << " Before Sort " << "\n";
 	if(verbose) std::cout << timestamp(tstr) << " vector : {" << v << "}\n";
-	quicksort(v, 0, v.size()-1);
+	if(stdqucksort)
+		std::sort(v.begin(), v.end());
+	else
+		quicksort(v, 0, v.size()-1);
+	
 	std::cout << timestamp(tstr) << " After Sort" << "\n";
 	if(verbose) std::cout << timestamp(tstr) << " vector : {" << v << "}\n";
 	vector2file(ofile, v);
