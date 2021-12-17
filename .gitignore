@@ -16,3 +16,6 @@ Debug/**/*.*
 **/*.dll*
 **/Makefile
 **/*.*~
+**/cscope*
+**/tags
+**/cscope.*
