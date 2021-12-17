@@ -1,3 +1,162 @@
+#include <_timeval.h>
+#if 1
+#include <iostream>
+#include <vector>
+#include <fstream>
+#include <cstring>
+#include <ctime>
+#include <sys/timeb.h>
+
+const char* timestamp(char str[24]) {
+	struct timeb tb;
+	struct tm ti;
+	ftime(&tb);
+	localtime_s(&ti, &tb.time);
+	strftime(str, 23, "%Y-%m-%d %H:%M:%S", &ti);
+	sprintf(str, "%s.%03d", str, tb.millitm);
+	return str;
+}
+
+template<typename T>
+std::ostream& operator<<(std::ostream& os, std::vector<T> o) {
+	bool first = true;
+	time_t t;
+	os << " :  size()=" << o.size() << ", values=[";
+	for (const T& t : o) {
+		if(!first) os << ", ";
+		else first = false;
+		os << t;
+	}
+	os << "]";
+	return os;
+}
+
+template<typename T>
+void swap(T &a, T &b) {
+	T t;
+	t = a;
+	a = b;
+	b = t;
+}
+
+template<typename T>
+void quicksort(std::vector<T>& v, int left, int right) 
+{
+	if(left>=right) return;
+	int i = left-1;
+	int pvt = right;
+	for (int j = left; j < right; ++j) {
+		if(v[j]<=v[pvt]) {
+			i++;
+			swap(v[i], v[j]);
+		}
+	}
+	i++;
+	swap(v[i], v[pvt]);
+
+	pvt = i;
+	quicksort(v, left, pvt-1); 
+	quicksort(v, pvt+1, right);
+}
+
+void rand2file(const char* file, int size) {
+	std::ofstream ofs;
+	ofs.open(file, std::ios::out|std::ios::trunc);
+	srand(time(NULL));
+	for (int i = 0; i < size; ++i) {
+		ofs << (i>0?" " : "" ) << rand() % 10000;
+	}
+	ofs<<"\n";
+	ofs.close();
+}
+
+template<typename T>
+std::vector<T> file2vector(const char* file, std::vector<T> &v) 
+{
+	std::ifstream ifs;
+	ifs.open(file, std::ios::in);
+	int i;
+	while(ifs>>i) {
+		v.push_back(i);
+	}
+	ifs.close();
+	return v;
+}
+
+template<typename T>
+void vector2file(const char* file, const std::vector<T>& v) 
+{
+	std::ofstream ofs;
+	ofs.open(file, std::ios::out|std::ios::trunc);
+	for (int i = 0; i < v.size(); ++i) {
+		ofs << (i>0?" ":"") << v[i];
+	}
+	ofs<<"\n";
+	ofs.close();
+}
+
+
+int main(int argc, char* argv[])
+{
+	bool verbose = false;
+	int osize = 10;
+	char ifile[128]{"input.txt"};
+	char ofile[128]{"output.txt"};
+	std::vector<int> v;
+	for (int i = 0; i < argc; ++i) {
+		if(!strcmp("-if", argv[i]) && i+1 < argc) {
+			strcpy(ifile, argv[i+1]);	
+			i++;
+			continue;
+		}  
+
+		if(!strcmp("-of", argv[i]) && i+1 < argc) {
+			strcpy(ofile, argv[i+1]);	
+			i++;
+			continue;
+		}
+
+		if(!strcmp("-n", argv[i]) && i+1 < argc) {
+			osize = atoi(argv[i+1]);	
+			i++;
+			continue;
+		}
+		if(!strcmp("-v", argv[i]) 
+				|| !strcmp("--verbose", argv[i])) {
+			verbose = true;
+		}
+	}
+
+	char tstr[24]{0};
+	std::cout << timestamp(tstr) << " Before rand2file" << "\n";
+	rand2file(ifile, osize);
+
+	std::cout << timestamp(tstr) << " After rand2file" << "\n";
+	v.clear();
+	std::cout << timestamp(tstr) << " Before file2vector" << "\n";
+	file2vector<int>(ifile, v);
+
+	std::cout << timestamp(tstr) << " After file2vector" << "\n";
+//	std::vector<int> v; v.reserve(argc-1);	
+//	for (int i = 1; i < argc; ++i) {
+//		v.push_back(atoi(argv[i]));	
+//	}
+	std::cout << timestamp(tstr) << " Before Sort " << "\n";
+	if(verbose) std::cout << timestamp(tstr) << " vector : {" << v << "}\n";
+	quicksort(v, 0, v.size()-1);
+	std::cout << timestamp(tstr) << " After Sort" << "\n";
+	if(verbose) std::cout << timestamp(tstr) << " vector : {" << v << "}\n";
+	vector2file(ofile, v);
+	
+	if(verbose) std::cout << timestamp(tstr) << " vector : {" << v << "}\n";
+
+	std::cout << timestamp(tstr) << " After  vector2file ""\n";
+	return 0;
+}
+#endif
+
+#if 0
+
 #include <algorithm>
 #include <malloc.h>
 #include <iostream>
@@ -10,7 +169,7 @@
 
 size_t mstrlen(const char* str) {
 	size_t l = 0;
-	while(*str++!='\0') l++;
+	while(*str++!='\0') l++;]
 	return l;
 }
 void mstrcpy(char* dst, const char* src) {
@@ -263,3 +422,5 @@ int main(int argc, char* argv[]) {
 
 	return 0;
 }
+
+#endif
