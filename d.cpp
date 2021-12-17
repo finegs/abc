@@ -106,7 +106,7 @@ int main(int argc, char* argv[])
 	std::vector<int> v;
 	char tstr[24]{0};
 
-	std::cout << timestamp(tstr) << " " << (stdqucksort ? "stdqucksort" : "myquicksort" ) << "\n";
+	std::cout << timestamp(tstr) << "\n";
 
 	for (int i = 0; i < argc; ++i) {
 		if(!strcmp("-if", argv[i]) && i+1 < argc) {
@@ -134,6 +134,8 @@ int main(int argc, char* argv[])
 			stdqucksort = true;
 		}
 	}
+
+	std::cout << timestamp(tstr) << " " << (stdqucksort ? "stdqucksort" : "myquicksort" ) << "\n";
 
 	std::cout << timestamp(tstr) << " Before rand2file" << "\n";
 	rand2file(ifile, osize);
