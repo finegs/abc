@@ -102,9 +102,24 @@
     ],
     "C_Cpp.default.compilerPath": "D:\\Programs\\msys2\\mingw64\\bin\\g++.exe",
     "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
+    "inputs": [
+        {
+           "id":"AppName",
+           "description": "Application Name",
+           "default": "${fileBasenameNoExtension}",
+           "type":"promptString"
+        }
+        ,{
+            "id":"pickType-mapType",
+            "description": "Select type U or M",
+            "type":"pickString",
+            "options":["u","m"],
+            "default": "d"
+        }
+    ],
     "cmake.debugConfig": {
         "args": [
-            "10",
+            "1000",
             "38",
             "2",
             "99",
@@ -114,14 +129,7 @@
             "15",
             "5",
             "7",
-<<<<<<< HEAD
             "1231223"
         ]
     }
 }
-=======
-            "1231223",
-        ]
-    }
-}
->>>>>>> 300117a3b95f618e018bf9248c08ddfdb0474a7f

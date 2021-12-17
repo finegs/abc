@@ -26,7 +26,7 @@
 //            "program": "${fileDirname}\\build\\${input:AppName}.exe",
             "program": "${command:cmake.launchTargetPath}",
             "args": [
-                "${input:pickType-mapType",
+                "${input:pickType-mapType}",
                 "32",
                 "1048576"
             ],
