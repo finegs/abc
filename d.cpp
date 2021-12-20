@@ -1,4 +1,3 @@
-#include <ratio>
 #if 1
 #include <iostream>
 #include <vector>
@@ -10,6 +9,28 @@
 
 
 using std::chrono::system_clock;
+
+class Item2 {
+	public:
+		Item2() : name{'\0'}{}
+		Item2(const char* name_) : name{'\0'} {
+			strncpy_s(name, 1000000, name_, strlen(name_));
+		}
+
+		const char* getName() const { return name; }
+		void setName(const char* name_) {
+			strncpy_s(name, 1000000, name_, strlen(name_));
+		}
+		friend std::ostream& operator<<(std::ostream& os, const Item2& o) {
+			os << "{";
+			os << "\"name\"" << ":" << "\"" << o.name << "\"";
+			os << "}";
+			return os;
+		}
+
+	private:
+	char name[1000000];
+};
 
 class Item {
 	private:
@@ -57,13 +78,30 @@ char* timestamp(char *str) {
 	return str;
 }
 
+template<typename T>
+std::ostream& operator<<(std::ostream& os, std::vector<T>& v) {
+	bool first = true;
+	os << "[";
+	for(auto& o : v) { os << (first ? "" : ", ") << o; first = false; }
+	os << "]";
+	return os;
+}
 
-int main() {
+
+int main(int argc,char* argv[]) {
 	char tmstr[25]{'\0'};
 	size_t diff{0}, summ{0}, avg{0};
 	size_t cc = 10;
 
-	std::vector<Item> list{{1, "aa"}, {2, "bb"}};
+	std::vector<Item> list;
+	std::vector<Item2> list2;
+	for (int i = 1; i < argc; ++i) {
+		list.push_back({i, argv[i]});	
+		for (int j = 0; j < 5300; ++j) {
+			list2.push_back({argv[i]});
+		}
+	}
+
 	std::cout << timestamp(tmstr) << "#1 Start" << std::endl;
 	for (int ii = 0; ii < cc; ++ii) {
 		auto start = std::chrono::system_clock::now();
@@ -73,8 +111,7 @@ int main() {
 		diff = elapsedmsec(start);
 		summ+=diff;
 	}
-	std::cout << timestamp(tmstr) << "#1 End : " << ", sum="<< summ << ", avg="<< (summ/cc) << diff << std::endl;
-
+	std::cout << timestamp(tmstr) << "#1 End : " << ", sum="<< summ << ", avg="<< (summ/(double)cc) << diff << std::endl;
 
 	summ = avg = diff = 0;
 	std::cout << timestamp(tmstr) << "#2 Start" << std::endl;
@@ -86,7 +123,9 @@ int main() {
 		diff = elapsedmsec(start);
 		summ+=diff;
 	}
-	std::cout << timestamp(tmstr) << "#2 End : " << ", sum="<< summ << ", avg="<< (summ/cc) << diff << std::endl;
+	std::cout << timestamp(tmstr) << "#2 End : " << ", sum="<< summ << ", avg=" << summ/(double)cc << diff << std::endl;
+
+	std::cout << timestamp(tmstr) << list2 << "\n";
 
 };
 
