@@ -6,9 +6,15 @@
 #include <sys/timeb.h>
 #include <ctime>
 #include <cassert>
+#include <cmath>
 
 
 using std::chrono::system_clock;
+
+// added by SGK 20211228
+#ifndef TIME_UTC
+#define TIME_UTC time(NULL)
+#endif
 
 class Item2 {
 	public:
@@ -75,6 +81,22 @@ char* timestamp(char *str) {
 	assert(ENOMSG != rc);
 	strftime (str, 25,"%Y-%m-%d %H:%M:%S", &newtime);
 	sprintf(str, "%s.%03d", str,(int)millis);
+	return str;
+}
+
+const char* tmstr(char str[25]) {
+
+    //time_t tm;
+    struct timespec ts;
+    struct tm ti;
+
+    //tm = time(NULL);
+    timespec_get(&ts, TIME_UTC);
+    //ti = localtime(&tm);
+    localtime_s(&ti, &ts.tv_sec);
+    
+    strftime(str, 25, "%Y-%m-%d %H:%M:%S", &ti);
+    sprintf(str, "%s.%03ld", str, lround(ts.tv_nsec/1e6));
 	return str;
 }
 
