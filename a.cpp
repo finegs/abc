@@ -67,7 +67,7 @@ int main(int argc, char* argv[]) {
 	unordered_map<const char*,Item> um; 
 	um.insert(std::make_pair<const char*, Item>("1_1", {1,1}));
 	um.insert(std::make_pair<const char*, Item>("1_2", {1,2}));
-	um.insert(std::make_pair<const char*, Item>("1_3", {1,3}));
+	um.insert({{"1_3"}, {1,3}});
 
 	auto it = um.find("1_1");
 	if(it != um.cend()) 

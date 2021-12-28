@@ -18,3 +18,5 @@ Debug/**/*.*
 **/*.*~
 typings/*
 **/*.dat
+**/tags
+**/cscope.*
