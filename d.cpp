@@ -1,4 +1,77 @@
 #if 1
+
+#include <iostream>
+#include <string>
+#include <vector>
+
+class Person
+{
+protected:
+	std::string first;	
+	std::string last;
+	int val;
+public:
+	Person(const std::string& f, const std::string& l, int v)
+		: first{f}, last{l}, val{v} { 
+	}
+	Person(const Person& p) 
+		: first{p.first}, last{p.last}, val{p.val} {
+	}
+	Person(Person&& p)  noexcept
+		: first{std::move(p.first)}, last{std::move(p.last)}, val{p.val} {
+			p.val *= -1;
+	}
+	virtual ~Person() = default; 
+	virtual void print() const = 0;
+
+	friend std::ostream& operator<<(std::ostream& os, const Person& o) {
+		os << "{";
+		os << '"' << "first" << '"' << ":" << '"' << o.first << '"';
+		os << ", \"" << "last" << '"' << ":" << '"' << o.last << '"';
+		os << ", \"" << "val" << '"' << ":" << o.val;
+		os << "}";
+		return os;
+	}
+};
+
+void Person::print() const {
+	std::cout << *this << '\n';
+}
+
+class Customer : public Person {
+	protected:
+	std::vector<int> data;
+
+	public:
+	Customer(const std::string& f, const std::string& l, const int v)
+		: Person{f, l, v} {}
+	virtual void print() const override; 
+//	virtual ~Customer() = default;
+};
+void Customer::print() const {
+	Person::print();
+	
+	bool first = true;
+	for (auto &i : data)
+	{
+		std::cout << (first ? "" : ", ") << i; first = false;
+	}
+}
+
+
+int main() {
+	std::vector<Person> v;
+
+	Customer c1{"Joe", "Fox", 77};
+	v.push_back(std::move(c1));
+	std::cout << c1 << '\n';
+
+	return 0;
+}
+
+
+#endif
+#if 0
 #include <iostream>
 #include <vector>
 #include <cstring>

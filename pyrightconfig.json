@@ -1,0 +1,25 @@
+{
+  "include": ["src"],
+  "exclude": ["doc"],
+
+  "typingsPath": "src/typestubs",
+
+  "reportTypeshedErrors": true,
+  "reportMissingImports": false,
+
+  "pythonVersion": "3.9",
+  "pythonPlatform": "Windows",
+  "typeCheckingMode": "basic",
+
+  "executionEnvironments": [
+    {
+      "root": "src/sdk",
+      "pythonVersion": "3.0",
+      "extraPaths": ["src/backend"]
+    },
+
+    {
+      "root": "src"
+    }
+  ]
+}
