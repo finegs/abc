@@ -4,6 +4,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <sstream>
 #include "u.hpp"
 
 
@@ -89,19 +90,22 @@ Customer::Customer()
 Customer::~Customer() {}
 
 void Customer::print(int n) const {
-	char tstr[25]{'\0'};
-	std::cout << tmstr(tstr) << ":" << this << "\n";
+	char __tmstr[25]{'\0'};
+	std::stringstream ss;
+	ss << this;
+	DBG_LOG(ss.str());
+	std::cout << tmstr(__tmstr) << " : " << this << "{" << first << ", " << last << ", " << val << "}" << "\n";
 }
 
-int main() {
+int main(int argc, char* argv[]) {
 	std::vector<Person*> v;
 
 	//Student student{"First", "Last", 10};
-	Customer* c1 = new Customer{"First", "Last", 10};
-	v.push_back(std::move(c1));
-	c1->print(1);
-//	std::cout << c1 << '\n';
-//
+	for (int i = 0; i < argc; i++) {
+		Customer* c1 = new Customer{argv[i], "Last", i};
+		v.push_back(std::move(c1));
+		c1->print(i);
+	}
 	for(auto& c : v) { c->print(1); delete c; }
 	return 0;
 }
