@@ -1,4 +1,23 @@
 {
+    "C_Cpp.default.compilerPath": "D:\\Programs\\msys2\\mingw64\\bin\\g++.exe",
+    "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
+    "cmake.generator": "MinGW Makefiles",
+    "cmake.parallelJobs": 4,
+    "cmake.debugConfig": {
+        "args": [
+            "10",
+            "38",
+            "2",
+            "99",
+            "10232",
+            "10",
+            "20",
+            "15",
+            "5",
+            "7",
+            "1231223",
+        ]
+    },
     "files.associations": {
         "cstring": "cpp",
         "type_traits": "cpp",
@@ -99,22 +118,5 @@
                 "MSYS2_PATH_TYPE": "inherit"
             }
         }
-    ],
-    "C_Cpp.default.compilerPath": "D:\\Programs\\msys2\\mingw64\\bin\\g++.exe",
-    "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
-    "cmake.debugConfig": {
-        "args": [
-            "10",
-            "38",
-            "2",
-            "99",
-            "10232",
-            "10",
-            "20",
-            "15",
-            "5",
-            "7",
-            "1231223",
-        ]
-    }
+    ]
 }

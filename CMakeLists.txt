@@ -39,10 +39,12 @@ add_executable(colormenu colormenu.cpp)
 
 IF(MSYS)
 target_link_libraries(a pthread ws2_32 zmq)
+target_link_libraries(d pthread ws2_32 zmq)
 target_link_libraries(cc pthread ws2_32 zmq)
 target_link_libraries(colormenu pthread ws2_32 zmq)
 ELSE(MSYS)
 target_link_libraries(a pthread )
+target_link_libraries(d pthread)
 target_link_libraries(cc pthread )
 target_link_libraries(colormenu pthread )
 

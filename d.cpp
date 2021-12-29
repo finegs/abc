@@ -1,76 +1,150 @@
+
 #if 1
 
 #include <iostream>
 #include <string>
 #include <vector>
+#include "u.hpp"
 
-class Person
-{
-protected:
-	std::string first;	
-	std::string last;
-	int val;
-public:
-	Person(const std::string& f, const std::string& l, int v)
-		: first{f}, last{l}, val{v} { 
-	}
-	Person(const Person& p) 
-		: first{p.first}, last{p.last}, val{p.val} {
-	}
-	Person(Person&& p)  noexcept
-		: first{std::move(p.first)}, last{std::move(p.last)}, val{p.val} {
-			p.val *= -1;
-	}
+
+class Person {
+	protected:
+		std::string first;
+		std::string last;
+		int val;
+	public:
+	Person() = default;
+
+	Person(const std::string& f, const std::string& l, int v) 
+		: first{f}, last{l}, val{v} {}
+	Person(const Person& o) = default;
+	Person(Person&& o) = default;
+	Person& operator=(const Person&) = default;
+	Person& operator=(Person&&) = default;
+//	Person(const Person& o)
+//   		: first{o.first}, last{o.last}, val{o.val} 	{
+//	}
+//	Person(Person&& o) noexcept 
+//		: first{std::move(o.first)}, last{std::move(o.last)}, val{o.val} {
+//	}
+//	Person& operator=(const Person& o) {
+//		if(this==&o) return *this;
+//		first = o.first;
+//		last = o.last;
+//		val = o.val;
+//		return *this;
+//	}
+//	Person& operator=(Person&& o) {
+//		if(this==&o) return *this;
+//		first = std::move(o.first);
+//		last = std::move(o.last);
+//		val = o.val;
+//		return *this;
+//	}
 	virtual ~Person() = default; 
-	virtual void print() const = 0;
+	virtual void print(int n) const = 0;
 
-	friend std::ostream& operator<<(std::ostream& os, const Person& o) {
-		os << "{";
+ 	friend std::ostream& operator<<(std::ostream& os, const Person& o) {
+ 		os << "{";
+ 		os << &o;
 		os << '"' << "first" << '"' << ":" << '"' << o.first << '"';
 		os << ", \"" << "last" << '"' << ":" << '"' << o.last << '"';
 		os << ", \"" << "val" << '"' << ":" << o.val;
-		os << "}";
-		return os;
-	}
+ 		os << "}";
+ 		return os;
+ 	}
 };
-
-void Person::print() const {
-	std::cout << *this << '\n';
-}
-
+  
 class Customer : public Person {
 	protected:
-	std::vector<int> data;
+		std::vector<int> data;
 
 	public:
-	Customer(const std::string& f, const std::string& l, const int v)
-		: Person{f, l, v} {}
-	virtual void print() const override; 
-//	virtual ~Customer() = default;
+		Customer();
+		~Customer();
+		Customer(const std::string& f, const std::string& l, int v)
+			: Person(f, l, v)	{
+			data.push_back(v);
+		}
+		Customer(const Customer& o) 
+			:Person(o)	{
+		}
+		Customer(Customer&& o) noexcept
+			: Person(std::forward<Person>(o))	{
+		}
+		Customer& operator=(const Customer& o) {
+			if(this==&o) return *this;
+			Person::operator=(o);	
+			return *this;
+		}
+		Customer& operator=(Customer&& o) {
+			if(this==&o) return *this;
+			Person::operator=(o);
+			return *this;
+		}
+		void print(int n) const override;
 };
-void Customer::print() const {
-	Person::print();
-	
-	bool first = true;
-	for (auto &i : data)
-	{
-		std::cout << (first ? "" : ", ") << i; first = false;
-	}
+Customer::Customer() 
+	: Person(){}
+Customer::~Customer() {}
+
+void Customer::print(int n) const {
+	char tstr[25]{'\0'};
+	std::cout << tmstr(tstr) << ":" << this << "\n";
 }
 
-
 int main() {
-	std::vector<Person> v;
+	std::vector<Person*> v;
 
-	Customer c1{"Joe", "Fox", 77};
+	//Student student{"First", "Last", 10};
+	Customer* c1 = new Customer{"First", "Last", 10};
 	v.push_back(std::move(c1));
-	std::cout << c1 << '\n';
-
+	c1->print(1);
+//	std::cout << c1 << '\n';
+//
+	for(auto& c : v) { c->print(1); delete c; }
 	return 0;
 }
 
+#endif
+
+#if 0
+
+#include <iostream>
+#include <string>
+#include <vector>
+
+struct State {};
+
+class IAListener {
+	public:
+		IAListener() = default;
+		virtual ~IAListener() = default;
+		virtual void onA(State& mState) const = 0;
+};
+
+class A : public IAListener {
+	public:
+	A() = default;
+	~A() = default;
+	void onA(State& mState) const override;
+};
+
+//A::A() {}
+//A::~A() {}
+void A::onA(State& mState) const {
+}
+
+int main() {
+	std::vector<IAListener> data;
+	A a;
+	data.push_back(std::move(a));
+	std::cout << &a;
+	return 0;
+}
 
 #endif
+
 #if 0
 #include <iostream>
 #include <vector>
