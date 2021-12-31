@@ -48,6 +48,30 @@ long millis(){
 }
 
 
+12  inline long curTimeMillis()                                                                                           1 {
+  2     struct timespec _t;
+  3     clock_gettime(CLOCK_REALTIME, &_t);
+  4     return _t.tv_sec * 1000 + lround(_t.tv_nsec / 1e6);
+  5 }
+  6
+  7 inline long curTimeMillis_s(struct timespec *ts)
+  8 {
+  9     clock_gettime(CLOCK_REALTIME, ts);
+ 10     return ts->tv_sec * 1000 + lround(ts->tv_nsec / 1e6);
+ 11 }
+ 12
+ 13 inline const char* tmstr(char* tstr) {
+ 14     struct timespec ts;
+ 15     struct tm ti;
+ 16
+ 17     localtime_r((time_t*)&ts.tv_sec, &ti);
+ 18
+ 19     strftime(tstr, 25, "%Y-%m-%d %H:%M:%S", &ti);
+ 20     sprintf(tstr, "%s.%03d", tstr, (int)lround(ts.tv_nsec/1e6));
+ 21     return tstr;
+ 22 }
+
+
 #ifdef __cplusplus__
 extern }
 #endif
