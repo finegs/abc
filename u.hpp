@@ -11,28 +11,28 @@
 extern "C" {}
 #endif
 
-const char* tmstr(char str[25]);
-#define TIME_UTC time(NULL)
-inline const char* tmstr(char str[25]) {
-
-    //time_t tm;
-    //struct timespec ts;
-    struct tm ti;
-	struct timeval tv;
-	time_t t;
-
-	gettimeofday(&tv, NULL);
-
-    //tm = time(NULL);
-//    timespec_get(&ts, (int)TIME_UTC);
-    //ti = localtime(&tm);
-	t  = tv.tv_sec;
-    localtime_s(&ti, &t);
-    
-    strftime(str, 25, "%Y-%m-%d %H:%M:%S", &ti);
-    sprintf(str, "%s.%03ld", str, lround(tv.tv_usec/1e3));
-	return str;
-}
+//const char* tmstr(char str[25]);
+//#define TIME_UTC time(NULL)
+//inline const char* tmstr(char str[25]) {
+//
+//    //time_t tm;
+//    //struct timespec ts;
+//    struct tm ti;
+//	struct timeval tv;
+//	time_t t;
+//
+//	gettimeofday(&tv, NULL);
+//
+//    //tm = time(NULL);
+////    timespec_get(&ts, (int)TIME_UTC);
+//    //ti = localtime(&tm);
+//	t  = tv.tv_sec;
+//    localtime_s(&ti, &t);
+//    
+//    strftime(str, 25, "%Y-%m-%d %H:%M:%S", &ti);
+//    sprintf(str, "%s.%03ld", str, lround(tv.tv_usec/1e3));
+//	return str;
+//}
 
 
 #ifndef NDEBUG
@@ -47,29 +47,28 @@ long millis(){
     return _t.tv_sec*1000 + lround(_t.tv_nsec/1e6);
 }
 
+inline long curTimeMillis()                                                                                           1 {
+    struct timespec _t;
+    clock_gettime(CLOCK_REALTIME, &_t);
+    return _t.tv_sec * 1000 + lround(_t.tv_nsec / 1e6);
+}
 
-12  inline long curTimeMillis()                                                                                           1 {
-  2     struct timespec _t;
-  3     clock_gettime(CLOCK_REALTIME, &_t);
-  4     return _t.tv_sec * 1000 + lround(_t.tv_nsec / 1e6);
-  5 }
-  6
-  7 inline long curTimeMillis_s(struct timespec *ts)
-  8 {
-  9     clock_gettime(CLOCK_REALTIME, ts);
- 10     return ts->tv_sec * 1000 + lround(ts->tv_nsec / 1e6);
- 11 }
- 12
- 13 inline const char* tmstr(char* tstr) {
- 14     struct timespec ts;
- 15     struct tm ti;
- 16
- 17     localtime_r((time_t*)&ts.tv_sec, &ti);
- 18
- 19     strftime(tstr, 25, "%Y-%m-%d %H:%M:%S", &ti);
- 20     sprintf(tstr, "%s.%03d", tstr, (int)lround(ts.tv_nsec/1e6));
- 21     return tstr;
- 22 }
+inline long curTimeMillis_s(struct timespec *ts)
+{
+    clock_gettime(CLOCK_REALTIME, ts);
+    return ts->tv_sec * 1000 + lround(ts->tv_nsec / 1e6);
+}
+
+inline const char* tmstr(char tstr[25]) {
+    struct timespec ts;
+    struct tm ti;
+
+    localtime_r((time_t*)&ts.tv_sec, &ti);
+
+    strftime(tstr, 25, "%Y-%m-%d %H:%M:%S", &ti);
+    sprintf(tstr, "%s.%03d", tstr, (int)lround(ts.tv_nsec/1e6));
+    return tstr;
+}
 
 
 #ifdef __cplusplus__
