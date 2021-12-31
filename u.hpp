@@ -41,6 +41,12 @@ inline const char* tmstr(char str[25]) {
 #define DEB_LOG(msg) do {} while {false}
 #endif
 
+long millis(){
+    struct timespec _t;
+    clock_gettime(CLOCK_REALTIME, &_t);
+    return _t.tv_sec*1000 + lround(_t.tv_nsec/1e6);
+}
+
 
 #ifdef __cplusplus__
 extern }
