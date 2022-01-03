@@ -3,6 +3,7 @@
 #include <cstdio>
 #include <ctime>
 #include <cmath>
+#include <cstdint>
 #if defined(__MSC_VER)
 #include <windows.h>
 #elif defined(__MINGW32__) || defined(__MINGW64__)
