@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 #include <sstream>
+#include <ranges>
 #include "u.hpp"
 
 
@@ -97,6 +98,19 @@ void Customer::print(int n) const {
 	std::cout << tmstr(__tmstr) << " : " << this << "{" << first << ", " << last << ", " << val << "}" << "\n";
 }
 
+template<typename T>
+//void print(const T& c) {
+void print(T&& c) {
+//void print(auto &&c) {
+
+	//for(const T& e : c) {
+	//for(auto &&e : c) {
+	for(auto &&e : c) {
+		std::cout << e << '\t';
+	}
+	std::cout << '\n';
+}
+
 int main(int argc, char* argv[]) {
 	std::vector<Person*> v;
 
@@ -107,6 +121,12 @@ int main(int argc, char* argv[]) {
 		c1->print(i);
 	}
 	for(auto& c : v) { c->print(1); delete c; }
+
+	getchar();
+
+	std::vector vec{1,2,3,4,5};
+	print(vec);
+	print(vec|std::views::drop(3));
 	return 0;
 }
 

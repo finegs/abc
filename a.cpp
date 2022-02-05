@@ -3,29 +3,33 @@
 
 #include <iostream>
 #include <vector>
-#include <string>
+//#include <string>
 #include <algorithm>
 #include <unordered_map>
 
 struct Item {
 	int x,y;
 	friend std::ostream;
-	bool operator<(const Item& o) const {
-		return x < o.x || x == o.x ? y < o.y : false;
-	}
 
 	bool operator==(const Item& o) const {
 		return x == o.x && y == o.y;
 	}
-	
-	struct ItemHasher {
-		size_t operator()(const Item& o) const {
-			return o.x << 1 ^ o.y;
-		}
-	};
 };
 
-
+template<> struct std::less<Item>
+{
+	bool operator()(const Item& a, const Item& b) const 
+	{
+		return a.x < b.x || a.y < b.y;
+	}
+};
+template<> struct std::hash<Item> 
+{
+	size_t operator()(const Item& o) const
+	{
+		return (o.x<<5)&o.y;
+	}
+};
 
 std::ostream& operator<<(std::ostream& os, const Item& o) {
 	os << "{" << "\"x:\""<< o.x << ", " << "\"y\":" << o.y << "}";
@@ -62,7 +66,6 @@ int main(int argc, char* argv[]) {
 	else {
 		cout << "Not found " << ii << std::endl;
 	}
-
 
 	unordered_map<const char*,Item> um; 
 	um.insert(std::make_pair<const char*, Item>("1_1", {1,1}));
