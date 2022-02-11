@@ -36,30 +36,31 @@ std::ostream& operator<<(std::ostream& os, const Item& o) {
 	return os;
 }
 
+template<typename T>
+std::ostream& operator<<(std::ostream& os, const std::vector<T>& v)
+{
+	char sep[3]{'\0', ' ', '\0'};
+	os << '[';
+	for(auto& o:v) { 
+		os << sep << o; 
+		sep[0] = ','; 
+	}
+	os << ']';
+	return os;
+}
+
 using namespace std;
 int main(int argc, char* argv[]) {
 
 	vector<std::string> v = {"hi", "hello", "abc"};
-
-	size_t l = 0;
-	cout << "for_each : [";
-	std::for_each(v.cbegin(), v.cend(), [&](auto& s) { cout << (++l>0?",":"") << s << " "; });
-	cout << "]" << endl;
-
-	cout << "for : [";
-	for(const auto& s : v) {
-		cout << (l++>0 ? ", " : "") << s;
-	}
-	cout << "]" << std::endl;;
+	cout << "v : " << v << '\n';
 
 	vector<Item> vv{{1,2}, {3,4},{5,6}};
-	l = 0;
-	cout << "vv : ";
-	std::for_each(vv.cbegin(), vv.cend(), [&](auto& s) { cout << (l>0?"," :"") << "{" << "x:"<< s.x << ", " << "y:"<< s.y << "}";});
-	cout << "}" << std::endl;
+	cout << "vv : " << vv << '\n';
 
 	Item ii{1,1};
-	auto rr = std::find_if_not(vv.cbegin(), vv.cend(), [&](auto& i) { return ii == i; });
+//	auto rr = std::find_if_not(vv.cbegin(), vv.cend(), [&](auto& i) { return ii == i; });
+	auto rr = std::find_if(vv.cbegin(), vv.cend(), [&](auto& i) { return ii == i; });
 	if(rr != vv.cend()) {
 		cout << "Found " << ii << std::endl;
 	}
