@@ -2,6 +2,7 @@
 
 #include <cstdio>
 #include <ctime>
+#include <cstdarg>
 #include <cmath>
 #include <cstdint>
 #if defined(__MSC_VER)
@@ -98,6 +99,21 @@ inline const char* tmstr(char* tstr) {
 	return tstr;
 #endif
 
+}
+
+static const char * __err_arg0 = "unknown";
+void merr_setargs0(const char *arg0)
+{
+	__err_arg0 =  arg0;
+}
+void merr_error(const char* fmt, ...)
+{
+	va_list args;
+	fprintf(stderr, "%s: ", __err_arg0);
+	va_start(args, fmt);
+	vfprintf(stderr, fmt, args);
+	va_end(args);
+	exit(1);
 }
 
 

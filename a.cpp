@@ -9,7 +9,21 @@
 
 struct Item {
 	int x,y;
-	friend std::ostream;
+
+	Item() : x{0}, y{0} {}
+	Item(int _x, int _y) : x{_x}, y{_y} {}
+	~Item() = default;
+	Item(const Item& o) { 
+		*this = o; 
+	}	
+	Item& operator=(const Item& o) { 
+		if(this==&o) return *this; 
+		x = o.x; 
+		y = o.y; 
+		return *this;
+	}
+
+	friend std::ostream& operator<<(std::ostream& os, const Item& o);
 
 	bool operator==(const Item& o) const {
 		return x == o.x && y == o.y;
@@ -36,16 +50,20 @@ std::ostream& operator<<(std::ostream& os, const Item& o) {
 	return os;
 }
 
+//template <typename Container,
+//		 std::enable_if_t<std::is_same<decltype(std::declval<Container>().begin()),
+//		 decltype(std::declval<Container>().begin())>::value>* = nullptr>
+//std::ostream& operator<<(std::ostream& os, const Container& v)
 template<typename T>
-std::ostream& operator<<(std::ostream& os, const std::vector<T>& v)
+std::ostream& operator<<(std::ostream& os, std::vector<T>& v)
 {
 	char sep[3]{'\0', ' ', '\0'};
-	os << '[';
+	os << "[";
 	for(auto& o:v) { 
 		os << sep << o; 
 		sep[0] = ','; 
 	}
-	os << ']';
+	os << "]";
 	return os;
 }
 
