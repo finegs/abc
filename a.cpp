@@ -459,12 +459,14 @@ size_t mstrcpy(char dst[], const char src[]) {
 }
 
 size_t mstrhash(const char s[], size_t mod) {
-  size_t h = 8391;
-  char c =0;
-  while((c = *s++ != '\0') {
-    h  =((h<<5)+h+c) % mod; 
+  // size_t h = 16777619UL;
+  size_t h = 5381UL;
+  while(*s) {
+    // h = (h<<5) ^ h + *s++;
+    h = h*33+*s++;
+    h %= mod;
   }
-  return h%mod;
+  return h;
 }
 struct mstring {
   mstring(const char str[]) 

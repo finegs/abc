@@ -117,6 +117,17 @@ void merr_error(const char* fmt, ...)
 }
 
 
+inline size_t mstrhash(const char* s, size_t mod = 1024*1024)
+{
+	size_t h = 5381UL;
+	char c = '\0';
+	while (c = *s++) {
+		h = ((h<<5)+h)+c; /* h*33+c */
+		h %= mod;
+	}
+	return h;
+}
+
 #if defined(__cplusplus)
 }
 #endif

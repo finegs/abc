@@ -6,6 +6,7 @@
 #include <vector>
 #include <sstream>
 #include <ranges>
+#include <unordered_map>
 #include "u.hpp"
 
 
@@ -46,6 +47,9 @@ class Person {
 	virtual ~Person() = default; 
 	virtual void print(int n) const = 0;
 
+	bool operator<(const Person& o) const {
+		return first < o.first || last < o.last || val < o.val;
+	}
  	friend std::ostream& operator<<(std::ostream& os, const Person& o) {
  		os << "{";
  		os << &o;
@@ -98,6 +102,17 @@ void Customer::print(int n) const {
 	std::cout << tmstr(__tmstr) << " : " << this << "{" << first << ", " << last << ", " << val << "}" << "\n";
 }
 
+namespace std
+{
+	template<>
+	struct hash<const char*>
+	{
+		size_t operator()(const char* s) const {
+			return mstrhash(s);
+		}
+	};
+};
+
 template<typename T>
 //void print(const T& c) {
 void print(T&& c) {
@@ -111,16 +126,46 @@ void print(T&& c) {
 	std::cout << '\n';
 }
 
+template<typename T>
+std::ostream& operator<<(std::ostream& os, const std::vector<T>& v) {
+	char sep[3]{'\0', ' ', '\0'};
+	os << '[';
+	for(const T& o : v) { os << sep << o; sep[0]= ','; }
+	os << ']';
+	return os;
+}
+
+template<typename K, typename V>
+std::ostream& operator<<(std::ostream& os, const std::unordered_map<K,V>& m) {
+	char sep[3]{'\0', ' ', '\0'};	os << '[';
+	for(auto &o:m) {
+		os << sep;
+		os << '{';
+		os << '"' << o.first << '"' << ':' << o.second; 
+		os << '}';
+		sep[0]=',';
+	}
+	os << ']';
+	return os;
+}
+
 int main(int argc, char* argv[]) {
 	std::vector<Person*> v;
+	std::unordered_map<const char*, Customer> m;
 
 	//Student student{"First", "Last", 10};
 	for (int i = 0; i < argc; i++) {
 		Customer* c1 = new Customer{argv[i], "Last", i};
+		m.insert({argv[i], *c1});
 		v.push_back(std::move(c1));
+
 		c1->print(i);
 	}
-	for(auto& c : v) { c->print(1); delete c; }
+	std::cout << "v : " << v;
+	std::cout << "m : " << m;
+
+	std::for_each(v.begin(), v.end(), [](auto& o) { delete o;});
+	// for(auto& c : v) { c->print(1); delete c; }
 
 	getchar();
 
@@ -339,16 +384,6 @@ unsigned long mstrcmp(const char str1[], const char str2[]) {
     int i = 0;
     while(str1[i] != '\0' && str1[i] == str2[i]) ++i;
     return str1[i] - str2[i];
-}
-
-unsigned int mstrhash(const char str[], unsigned int TABLE_SIZE) {
-    unsigned int h = 5381;
-    char c = 0;
-    while((c = *str) != '\0') {
-        h = (((h<<5) + h) + c) % TABLE_SIZE;
-		++str;
-    }
-    return h % TABLE_SIZE;
 }
 
 int main(int argc, char* argv[]) {
