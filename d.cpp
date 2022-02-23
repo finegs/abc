@@ -7,9 +7,13 @@
 #include <sstream>
 #include <ranges>
 #include <unordered_map>
+#include <cstring>
 #include "u.hpp"
 
-
+namespace my {
+	const static char obj_sep_default = ',';
+	static char obj_sep = obj_sep_default;
+}
 class Person {
 	protected:
 		std::string first;
@@ -21,9 +25,9 @@ class Person {
 	Person(const std::string& f, const std::string& l, int v) 
 		: first{f}, last{l}, val{v} {}
 	Person(const Person& o) = default;
-	Person(Person&& o) = default;
+	Person(Person&& o) noexcept = default;
 	Person& operator=(const Person&) = default;
-	Person& operator=(Person&&) = default;
+	Person& operator=(Person&&) noexcept = default;
 //	Person(const Person& o)
 //   		: first{o.first}, last{o.last}, val{o.val} 	{
 //	}
@@ -52,7 +56,9 @@ class Person {
 	}
  	friend std::ostream& operator<<(std::ostream& os, const Person& o) {
  		os << "{";
- 		os << &o;
+		#ifndef NDEBUG
+ 		os << "\"&\":"<< &o << ", ";
+		#endif
 		os << '"' << "first" << '"' << ":" << '"' << o.first << '"';
 		os << ", \"" << "last" << '"' << ":" << '"' << o.last << '"';
 		os << ", \"" << "val" << '"' << ":" << o.val;
@@ -83,23 +89,29 @@ class Customer : public Person {
 			Person::operator=(o);	
 			return *this;
 		}
-		Customer& operator=(Customer&& o) {
+		Customer& operator=(Customer&& o) noexcept {
 			if(this==&o) return *this;
 			Person::operator=(o);
 			return *this;
 		}
 		void print(int n) const override;
 };
-Customer::Customer() 
-	: Person(){}
-Customer::~Customer() {}
+Customer::Customer() : Person(){}
+Customer::~Customer() = default;
 
 void Customer::print(int n) const {
 	char __tmstr[25]{'\0'};
 	std::stringstream ss;
-	ss << this;
-	DBG_LOG(ss.str());
-	std::cout << tmstr(__tmstr) << " : " << this << "{" << first << ", " << last << ", " << val << "}" << "\n";
+
+	ss << "{";
+	#ifndef NDEBUG
+	// if constexpr(NDEBUG) {
+	ss << "&=" << this << ", ";
+	// }
+	#endif
+
+	ss << "[" << first << ", " << last << ", " << val << "]" << "}";
+	DBG_LOG2(ss.str().c_str());
 }
 
 namespace std
@@ -109,6 +121,14 @@ namespace std
 	{
 		size_t operator()(const char* s) const {
 			return mstrhash(s);
+		}
+	};
+
+	template<>
+	struct equal_to<const char*>
+	{
+		bool operator()(const char* a, const char* b) const {
+			return strncmp(a,b, strlen(a)) == 0;
 		}
 	};
 };
@@ -130,7 +150,7 @@ template<typename T>
 std::ostream& operator<<(std::ostream& os, const std::vector<T>& v) {
 	char sep[3]{'\0', ' ', '\0'};
 	os << '[';
-	for(const T& o : v) { os << sep << o; sep[0]= ','; }
+	for(const T& o : v) { os << sep << o; sep[0]= my::obj_sep; }
 	os << ']';
 	return os;
 }
@@ -143,11 +163,12 @@ std::ostream& operator<<(std::ostream& os, const std::unordered_map<K,V>& m) {
 		os << '{';
 		os << '"' << o.first << '"' << ':' << o.second; 
 		os << '}';
-		sep[0]=',';
+		sep[0]=my::obj_sep;
 	}
 	os << ']';
 	return os;
 }
+
 
 int main(int argc, char* argv[]) {
 	std::vector<Person*> v;
@@ -161,8 +182,10 @@ int main(int argc, char* argv[]) {
 
 		c1->print(i);
 	}
-	std::cout << "v : " << v;
-	std::cout << "m : " << m;
+	my::obj_sep = '\n';
+	std::cout << "v : " << v << std::endl;
+	my::obj_sep = '\n';
+	std::cout << "m : " << m << std::endl;
 
 	std::for_each(v.begin(), v.end(), [](auto& o) { delete o;});
 	// for(auto& c : v) { c->print(1); delete c; }

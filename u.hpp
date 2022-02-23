@@ -19,9 +19,20 @@ extern "C" {
 
 
 #ifndef NDEBUG
-#define DBG_LOG(msg) do { std::cout << tmstr(__tmstr) << ":" << __FILE__ << ":" << __LINE__ << "): " << msg << '\n'; } while(false)
+#define DBG_LOG(msg) do { std::cout << tmstr(__tmstr) << " : (" << __FILE__ << ":" << __LINE__ << "), " << msg << '\n'; } while(false)
 #else
 #define DEB_LOG(msg) do {} while {false}
+#endif
+
+#ifndef NDEBUG
+#define DBG_LOG2(...) 												\
+		do {														\
+			printf("%s %s:%d", tmstr(__tmstr), __FILE__, __LINE__);	\
+			printf(__VA_ARGS__);									\
+			printf("\n");											\
+		} while(0)
+#else
+		do {} while {false}
 #endif
 
 inline uint64_t curTimeMillis()
