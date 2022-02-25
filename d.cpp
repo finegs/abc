@@ -14,6 +14,35 @@ namespace my {
 	const static char obj_sep_default = ',';
 	static char obj_sep = obj_sep_default;
 }
+
+
+template<typename T>
+std::ostream& operator<<(std::ostream& os, const std::vector<T>& v) {
+	char sep[3]{'\0', ' ', '\0'};
+	os << '[';
+	for(const T& o : v) { 
+		os << sep;
+		// if(std::is_pointer<T*>(v)) 
+		os << sep << o; 
+		sep[0]= my::obj_sep; 
+	}
+	os << ']';
+	return os;
+}
+
+template<typename K, typename V>
+std::ostream& operator<<(std::ostream& os, const std::unordered_map<K,V>& m) {
+	char sep[3]{'\0', ' ', '\0'};	os << '[';
+	for(auto &o:m) {
+		os << sep;
+		os << '{';
+		os << '"' << o.first << '"' << ':' << o.second; 
+		os << '}';
+		sep[0]=my::obj_sep;
+	}
+	os << ']';
+	return os;
+}
 class Person {
 	protected:
 		std::string first;
@@ -54,16 +83,22 @@ class Person {
 	bool operator<(const Person& o) const {
 		return first < o.first || last < o.last || val < o.val;
 	}
- 	friend std::ostream& operator<<(std::ostream& os, const Person& o) {
- 		os << "{";
+	virtual std::ostream& print(std::ostream& os) const {
+		// os << "{";
 		#ifndef NDEBUG
- 		os << "\"&\":"<< &o << ", ";
+ 		os << "\"&\":"<< this << ", ";
 		#endif
-		os << '"' << "first" << '"' << ":" << '"' << o.first << '"';
-		os << ", \"" << "last" << '"' << ":" << '"' << o.last << '"';
-		os << ", \"" << "val" << '"' << ":" << o.val;
- 		os << "}";
- 		return os;
+		os << '"' << "first" << '"' << ":" << '"' << first << '"';
+		os << ", \"" << "last" << '"' << ":" << '"' << last << '"';
+		os << ", \"" << "val" << '"' << ":" << val;
+ 		// os << "}";
+		return os;
+	}
+ 	friend std::ostream& operator<<(std::ostream& os, const Person& o) {
+		 os << "{";
+		 o.print(os);
+		 os << "}";
+		return os;
  	}
 };
   
@@ -91,8 +126,13 @@ class Customer : public Person {
 		}
 		Customer& operator=(Customer&& o) noexcept {
 			if(this==&o) return *this;
-			Person::operator=(o);
+			Person::operator=(std::forward<Person>(o));
 			return *this;
+		}
+		virtual std::ostream& print(std::ostream& os) const {
+			Person::print(os);
+			os << my::obj_sep_default << "\"data\":" << data;
+			return os;
 		}
 		void print(int n) const override;
 };
@@ -110,7 +150,10 @@ void Customer::print(int n) const {
 	// }
 	#endif
 
-	ss << "[" << first << ", " << last << ", " << val << "]" << "}";
+	ss << "[";
+	ss << first << ", " << last << ", " << val;
+	ss << "]";
+	ss << "}";
 	DBG_LOG2(ss.str().c_str());
 }
 
@@ -146,28 +189,6 @@ void print(T&& c) {
 	std::cout << '\n';
 }
 
-template<typename T>
-std::ostream& operator<<(std::ostream& os, const std::vector<T>& v) {
-	char sep[3]{'\0', ' ', '\0'};
-	os << '[';
-	for(const T& o : v) { os << sep << o; sep[0]= my::obj_sep; }
-	os << ']';
-	return os;
-}
-
-template<typename K, typename V>
-std::ostream& operator<<(std::ostream& os, const std::unordered_map<K,V>& m) {
-	char sep[3]{'\0', ' ', '\0'};	os << '[';
-	for(auto &o:m) {
-		os << sep;
-		os << '{';
-		os << '"' << o.first << '"' << ':' << o.second; 
-		os << '}';
-		sep[0]=my::obj_sep;
-	}
-	os << ']';
-	return os;
-}
 
 
 int main(int argc, char* argv[]) {
