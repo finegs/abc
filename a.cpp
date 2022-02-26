@@ -46,7 +46,7 @@ template<> struct std::hash<Item>
 };
 
 std::ostream& operator<<(std::ostream& os, const Item& o) {
-	os << "{" << "\"x:\""<< o.x << ", " << "\"y\":" << o.y << "}";
+	os << "{" << "\"x\":"<< o.x << ", " << "\"y\":" << o.y << "}";
 	return os;
 }
 
