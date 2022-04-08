@@ -1,4 +1,6 @@
 
+import sys
+
 def readLine_file(fileName):
     with open(fileName, "r") as file:
         while True:
@@ -33,6 +35,9 @@ def print_words(story_words):
         print(word)
 
 if __name__ == '__main__':
+    print(f'len(sys.argv):{len(sys.argv)})')
+    if(len(sys.argv) < 2):
+        sys.exit(1)
     url = sys.argv[1]
     words = fetch_words(url)
     print_words(words)
