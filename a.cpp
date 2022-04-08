@@ -6,6 +6,7 @@
 //#include <string>
 #include <algorithm>
 #include <unordered_map>
+#include <functional>
 
 struct Item {
 	int x,y;
@@ -13,7 +14,7 @@ struct Item {
 	Item() : x{0}, y{0} {}
 	Item(int _x, int _y) : x{_x}, y{_y} {}
 	~Item() = default;
-	Item(const Item& o) { 
+	Item(const Item& o) : Item() { 
 		*this = o; 
 	}	
 	Item& operator=(const Item& o) { 
@@ -46,7 +47,7 @@ template<> struct std::hash<Item>
 };
 
 std::ostream& operator<<(std::ostream& os, const Item& o) {
-	os << "{" << "\"x:\""<< o.x << ", " << "\"y\":" << o.y << "}";
+	os << "{" << "\"x\":"<< '"' << o.x << '"' << ", " << "\"y\":" << '"' << o.y <<'"'<< "}";
 	return os;
 }
 
@@ -62,6 +63,20 @@ std::ostream& operator<<(std::ostream& os, std::vector<T>& v)
 	for(auto& o:v) { 
 		os << sep << o; 
 		sep[0] = ','; 
+	}
+	os << "]";
+	return os;
+}
+
+template<typename K, typename V>
+std::ostream& operator<<(std::ostream& os, std::unordered_map<K,V>& m) {
+	char sep[3]{'\0', ' ', '\0'};
+	os << "[";
+	os << "size:" << m.size();
+	os << ",";
+	for(auto& o: m) {
+		os << sep << '{'<< '"' << o.first << '"' << ':' << o.second << '}';
+		sep[0] = ',';
 	}
 	os << "]";
 	return os;
@@ -91,16 +106,23 @@ int main(int argc, char* argv[]) {
 	um.insert(std::make_pair<const char*, Item>("1_2", {1,2}));
 	um.insert({{"1_3"}, {1,3}});
 
-	auto it = um.find("1_1");
-	if(it != um.cend()) 
-		cout << "um.find(\"1_1\") : OK" <<  ", Result : {" << it->first << ", " << it->second << "}";
-	else
-		cout << "um.find(\"1_1\") : NG";
-	cout << std::endl;
+	size_t rc = 0;
+	if((rc  = um.count("1_1"))>0) cout << "um.count(\"1_1\") : " << rc << endl;
+//	auto it = um.find("1_1");
+//	if(it != um.cend()) 
+//		cout << "um.find(\"1_1\") : OK" <<  ", Result : {" << it->first << ", " << it->second << "}";
+//	else
+//		cout << "um.find(\"1_1\") : NG";
+//	cout << std::endl;
 
+//	std::transform(um.begin(), um.end(), um.begin(), [](auto& e) -> std::pair<const char*, Item> { return e;});	
+	cout << "um:" << um << std::endl;
+	std::for_each(um.begin(), um.end(), [&](auto& e) { e.second.x++; e.second.y+=10; um[e.first] = e.second;});
 	um.erase("1_1");
 
-	it = um.find("1_1");
+	cout << "um:" << um << std::endl;
+
+	auto it = um.find("1_1");
 	if(it != um.cend()) 
 		cout << "um.find(\"1_1\") : OK" <<  ", Result : {" << it->first << ", " << it->second << "}";
 	else

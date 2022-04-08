@@ -20,6 +20,15 @@
     ],
     "configurations": [
         {
+            "name": "x86-Debug (all warnings)",
+            "type":"cppdbg",
+            "generator": "Visual Studio 15 2017",
+            "configurationType": "Debug",
+            "buildRoot": "${env.LOCALAPPDATA}\\CMakeBuild\\${workspaceHash}\\build\\${name}",
+            "cmakeCommandArgs": "-DCMAKE_TOOLCHAIN_FILE:FILEPATH=\"${projectDir}\\VS2017Toolchain.cmake\"",
+            "buildCommandArgs": "-m -v:minimal"
+        }
+        ,{
             "name": "Run:without Debug",
             "type": "cppvsdbg",
             "request": "launch",
@@ -34,8 +43,8 @@
             "console": "externalTerminal",
             "externalConsole": true,
             "preLaunchTask": "CompileActiveFile"
-        },
-        {
+        }
+        ,{
             "name": "Debug:CMake Default Target",
             "type": "cppdbg",
             "request": "launch",

@@ -15,6 +15,7 @@ def toUpperFile(fromFile, toFile):
 
 
 import sys
+import calendar
 from urllib.request import urlopen
 
 def fetch_words(url):
@@ -35,4 +36,6 @@ if __name__ == '__main__':
     url = sys.argv[1]
     words = fetch_words(url)
     print_words(words)
+    calendar.setfirstweekday(6)
+    calendar.prmonth(1978, 5)
 

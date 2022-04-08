@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 #include <sstream>
-#include <ranges>
+//#include <ranges>
 #include <unordered_map>
 #include <cstring>
 #include "u.hpp"

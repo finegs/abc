@@ -1,7 +1,7 @@
 {
     "C_Cpp.default.compilerPath": "${default}",
     "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
-    "cmake.generator": "MinGW Makefiles",
+    "cmake.generator": "",
     "cmake.parallelJobs": 4,
     "cmake.debugConfig": {
         "args": [
@@ -141,6 +141,7 @@
             }
         }
     ],
-    "C_Cpp.default.intelliSenseMode": "windows-gcc-x64",
-    "C_Cpp.workspaceSymbols": "All"
+    "C_Cpp.default.intelliSenseMode": "windows-msvc-x64",
+    "C_Cpp.workspaceSymbols": "All",
+    "cmake.cmakePath": "D:\\Programs\\CMake\\bin\\cmake"
 }
