@@ -208,14 +208,26 @@ int main(int argc, char* argv[]) {
 	my::obj_sep = '\n';
 	std::cout << "m : " << m << std::endl;
 
+#if ((defined(_MSVC_LANG) && _MSVC_LANG >= 201703L) || __cplusplus >= 201703L)
+     //C++17 specific stuff here
+	for (auto& o : v) { delete o; }
+#elif ((defined(_MSVC_LANG) && _MSVC_LANG >= 202002L) || __cplusplus >= 202002L)
+	 //C++20 specific stuff here
 	std::for_each(v.begin(), v.end(), [](auto& o) { delete o;});
+#elif ( __GNUC__ > 0 )
+	std::for_each(v.begin(), v.end(), [](auto& o) { delete o;});
+#endif
+
 	// for(auto& c : v) { c->print(1); delete c; }
 
 	getchar();
 
 	std::vector vec{1,2,3,4,5};
 	print(vec);
+//	print(std::views::drop(3));
+#if ( __GNUC__ > 0 ) 
 	print(vec|std::views::drop(3));
+#endif
 	return 0;
 }
 

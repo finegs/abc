@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 3.1)
+
 project(abc)
 
 #add_definitions(-Wall -std=c++2a)
@@ -37,8 +38,11 @@ if (MSYS)
     link_directories(${GTK_LIBRARY_DIRS})
     add_definitions(${GTK_CFLAGS_OTHER})
     add_compile_options(${GTK_CFLAGS_OTHER})
+ELSEIF (MSVC)
 
-endif(MSYS)
+	include_directories($ENV{INCLUDE})
+
+ENDIF(MSYS)
 
 include_directories(.)
 
@@ -57,6 +61,10 @@ target_link_libraries(a ws2_32)
 target_link_libraries(d ws2_32)
 target_link_libraries(cc ws2_32)
 target_link_libraries(colormenu ws2_32)
+
+
+#target_include_directories(hello_g PRIVATE ${GTK_INCLUDE_DIRS})
+
 ELSE(MSYS)
 target_link_libraries(a pthread )
 target_link_libraries(d pthread)

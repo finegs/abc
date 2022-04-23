@@ -1,5 +1,3 @@
-#pragma once
-
 #include <cstdio>
 #include <ctime>
 #include <cstdarg>
@@ -7,6 +5,8 @@
 #include <cstdint>
 #if defined(__MSC_VER)
 #include <windows.h>
+#include <sys/timeb.h>
+#include <ctime>
 #elif defined(__MINGW32__) || defined(__MINGW64__)
 #include <sys/timeb.h>
 #elif defined(__linux__)
@@ -47,9 +47,10 @@ inline uint64_t curTimeMillis()
     _ftime(&timebuffer);
     return (uint64_t)(((timebuffer.time * 1000) + timebuffer.millitm));
 #else
-    struct timeb timebuffer;
-    ftime(&timebuffer);
-    return (uint64_t)(((timebuffer.time * 1000) + timebuffer.millitm));
+	struct timespec ts;
+	timespec_get(&ts, 0);
+	
+    return (uint64_t)(((ts.tv_sec * 1000) + ts.tv_nsec/1e6));
 #endif
 }
 
@@ -63,9 +64,14 @@ inline long curTimeMillis_s(struct timespec *ts)
     _ftime(&timebuffer);
     return (uint64_t)(((timebuffer.time * 1000) + timebuffer.millitm));
 #else
-    struct timeb timebuffer;
-    ftime(&timebuffer);
-    return (uint64_t)(((timebuffer.time * 1000) + timebuffer.millitm));
+	// SYSTEMTIME st;
+    // GetLocalTime(&st);
+    // struct timeb timebuffer;
+    // ftime(&timebuffer);
+
+	timespec_get(ts, 0);
+	
+    return (uint64_t)(((ts->tv_sec * 1000) + ts->tv_nsec/1e6));
 #endif
 }
 
@@ -103,21 +109,27 @@ inline const char* tmstr(char* tstr) {
 #endif
 
 #else
-	SYSTEMTIME st;
-	GetLocalTime(&st);
-	sprintf_s(tstr, "%4u:%02u:%02u %02u:%02u:%02u:%03u",
-			st.wYear, st.wMonth, st.day, st.wHour, st.wMinute, st.wSecond, st.wMilliseconds);
+//	time_t tt = time(NULL);
+	struct tm st;
+	struct timespec ts;
+	timespec_get(&ts, 0);
+//	localtime_s(&st, &tt);
+	localtime_s(&st, (time_t*)&ts.tv_sec);
+	
+	// TODO : milsec is't implemented
+	sprintf(tstr, "%4u:%02u:%02u %02u:%02u:%02u:%03u",
+			st.tm_year+1900, st.tm_mon, st.tm_mday, st.tm_hour, st.tm_min, st.tm_sec, (unsigned int)(ts.tv_nsec/1e6));
 	return tstr;
 #endif
 
 }
 
 static const char * __err_arg0 = "unknown";
-void merr_setargs0(const char *arg0)
+inline void merr_setargs0(const char *arg0)
 {
 	__err_arg0 =  arg0;
 }
-void merr_error(const char* fmt, ...)
+inline void merr_error(const char* fmt, ...)
 {
 	va_list args;
 	fprintf(stderr, "%s: ", __err_arg0);
@@ -132,9 +144,10 @@ inline size_t mstrhash(const char* s, size_t mod = 1024*1024)
 {
 	size_t h = 5381UL;
 	char c = '\0';
-	while (c = *s++) {
+	while ('\0' != (c = s[0])) {
 		h = ((h<<5)+h)+c; /* h*33+c */
 		h %= mod;
+		s++;
 	}
 	return h;
 }
