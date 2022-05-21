@@ -43,7 +43,7 @@ template<> struct std::hash<Item>
 	}
 };
 
-std::ostream& operator<<(std::ostream& os, const Item& o) {
+inline std::ostream& operator<<(std::ostream& os, const Item& o) {
 	os << "{" << "\"x\":"<< '"' << o.x << '"' << ", " << "\"y\":" << '"' << o.y <<'"'<< "}";
 	return os;
 }
@@ -79,5 +79,15 @@ std::ostream& operator<<(std::ostream& os, std::unordered_map<K,V>& m) {
 	return os;
 }
 
+template <class ForwardIterator, class T>
+ForwardIterator mysearch(ForwardIterator start, ForwardIterator end, T key) {
+	while(start != end) {
+		if(*start == key) {
+			return start;
+		}
+		start++;
+	}
+	return end;
+}
 
 #endif /* end of include guard: ITEM_HPP_C84IZPJQ */

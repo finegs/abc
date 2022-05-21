@@ -23,11 +23,26 @@ int main(int argc, char* argv[]) {
 		v.push_back("abc");
 		v.push_back("hello");
 	}
-
 	cout << "v : " << v << '\n';
 
-	vector<Item> vv{{1,2}, {3,4},{5,6}};
+	if (v.end() != mysearch(v.begin(), v.end(), v[0])) {
+		cout << v[0] << " is founded\n";
+	}
+	else {
+		cout << v[0] << " is not found\n";
+	}
+
+	vector<Item> vv{{1,2}, {3,4}, {5,6}};
 	cout << "vv : " << vv << '\n';
+
+
+	Item vv0 = Item{1,2};
+	if(vv.end() != mysearch(vv.begin(), vv.end(), vv0)) {
+		cout << vv0 << " is found\n";
+	}
+	else {
+		cout << vv0 << " is not found\n";
+	}
 
 	Item ii{1,1};
 //	auto rr = std::find_if_not(vv.cbegin(), vv.cend(), [&](auto& i) { return ii == i; });
