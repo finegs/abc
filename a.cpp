@@ -1,6 +1,23 @@
 
-
 #if 1
+
+#include <iostream>
+#include <string>
+
+struct TrieNode {
+  int score=0;
+  bool isTerminal = false;
+  TrieNode* children['Z'-'a'];
+
+  TrieNode() : score{0} {
+    for(TrieNode child : children) child = nullptr;
+  }
+};
+
+#endif
+
+
+#if 0
 
 #include <iostream>
 #include <vector>

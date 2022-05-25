@@ -71,7 +71,7 @@ inline long curTimeMillis_s(struct timespec *ts)
 
 	timespec_get(ts, 0);
 	
-    return (uint64_t)(((ts->tv_sec * 1000) + ts->tv_nsec/1e6));
+    return (long)(uint64_t)(((ts->tv_sec * 1000) + ts->tv_nsec/1e6));
 #endif
 }
 
@@ -117,7 +117,7 @@ inline const char* tmstr(char* tstr) {
 	localtime_s(&st, (time_t*)&ts.tv_sec);
 	
 	// TODO : milsec is't implemented
-	sprintf(tstr, "%4u:%02u:%02u %02u:%02u:%02u:%03u",
+	sprintf_s(tstr, 25, "%4u:%02u:%02u %02u:%02u:%02u:%03u",
 			st.tm_year+1900, st.tm_mon, st.tm_mday, st.tm_hour, st.tm_min, st.tm_sec, (unsigned int)(ts.tv_nsec/1e6));
 	return tstr;
 #endif
