@@ -3,16 +3,125 @@
 
 #include <iostream>
 #include <string>
+#include <unordered_map>
+
+using namespace std;
 
 struct TrieNode {
   int score=0;
   bool isTerminal = false;
-  TrieNode* children['Z'-'a'];
+  TrieNode* children[int('z'-'a')];
 
   TrieNode() : score{0} {
-    for(TrieNode child : children) child = nullptr;
+    for(TrieNode* child : children) child = nullptr;
   }
 };
+
+class MapSum {
+  private:
+  TrieNode* root;
+  unordered_map<string, int> mpp;
+
+  public:
+    MapSum() {
+      root = new TrieNode();
+    }
+
+    void insert(string str, int score) {
+      int diff = score-mpp[str];
+      TrieNode* pCur = root;
+      for(int i = 0;i<str.size();i++) {
+        int idx = str[i]-'a';
+        if(pCur->children[idx]==NULL) {
+          pCur->children[idx] = new TrieNode();
+        }
+        pCur=pCur->children[idx];
+        pCur->score += diff;
+      }
+
+      mpp[str] = score;
+      pCur->isTerminal = true;
+    }
+
+    int remove(string str, int& score) {
+      TrieNode* parent = NULL;
+      TrieNode* cur = root;
+      int idx;
+      for(int i = 0;i<str.size();i++) {
+        idx = str[i]-'a';
+        if(cur->children[idx] == NULL) return 1;
+        parent = cur;
+        cur = cur->children[idx];
+      }
+
+      if(cur) {
+        score = cur->score;
+        if(parent) parent->children[idx] = NULL;
+        free(cur);
+      }
+      else {
+        return 1;
+      }
+      return 0;
+    }
+
+    void getSum(int& res, TrieNode* parent) {
+      if(nullptr == parent) parent = this->root;
+      if(parent->isTerminal) {
+        res+=parent->score;
+      }
+      for(char c = 'a';c<='z';c++) {
+        int idx = c-'a';
+        if(parent ->children[idx]!=NULL) {
+          getSum(res, parent->children[idx]);
+        }
+      }
+    }
+
+    int score(string str) {
+      TrieNode* pCur = root;
+      for(int i = 0; str.size();i++) {
+        int idx = str[i]-'a';
+        if(pCur->children[idx] == NULL) return 0;
+        pCur = pCur->children[idx];
+      }
+      return pCur->score;
+    }
+};
+
+
+int main(int argc, char* argv[]) {
+
+  using namespace std;
+  MapSum ms;
+  string ss{"abc"};
+
+  ms.insert("a", 0);
+  ms.insert("ab", 0);
+  ms.insert("abc", 1);
+
+  cout << "\"score(\":a\") : " << ms.score("a") << endl;
+  cout << "\"score(\":ab\") : " << ms.score("ab") << endl;
+  cout << "\"score(\":abc\") : " << ms.score("abc") << endl;
+
+  return 0;
+}
+
+#endif
+
+#if 0
+
+#include <cstdio>
+#include <iostream>
+
+int main(int argc, char* argv[]) {
+  using namespace std;
+  for (size_t i = 0; i < 128; i++)
+  {
+    cout << "(uint32_t)'" << (char)i << "':" << (uint32_t)i << endl;
+  }
+  return 0;
+}
 
 #endif
 
@@ -241,6 +350,7 @@ int main(int argc, char* argv[]) {
 }
 
 #endif
+
 #if 0
 =======
   if(!src) return; 
@@ -304,6 +414,7 @@ int main(int argc, char* argv[]) {
 }
 
 #endif
+
 #if 0
 
 #include <stdio.h>
@@ -492,7 +603,6 @@ int main(int argc,char* argv[]) {
 
 
 #endif
-
 
 #if 0
 #include <stdio.h>
@@ -806,7 +916,6 @@ struct mstring {
 
 #endif
 
-
 #if 0
 #include <stdio.h>
 #include <malloc.h>
@@ -1011,6 +1120,7 @@ int main(int argc, char** argv)
 
 
 #endif
+
 #if 0
 
 #include <stdio.h>
@@ -1105,7 +1215,6 @@ int main(int argc, char* argv[]) {
 
 
 #endif 
-
 
 #if 0
 
@@ -1635,6 +1744,7 @@ int main(int argc, char* argv[]) {
 
 
 #endif
+
 #if 0
 #include <iostream>
 #include <vector>

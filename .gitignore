@@ -22,3 +22,4 @@ typings/*
 **/tags
 **/cscope.*
 **/.cache
+a.obj

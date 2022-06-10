@@ -21,7 +21,7 @@ const BLOCKS = {
 };
 const movingItem = {
     type:"tree",
-    direction: 3,
+    direction: 0,
     top: 0,
     left: 0,
 };
@@ -72,9 +72,9 @@ function renderBlocks(moveType="") {
             tempMovingItem = {...movingItem}
             setTimeout(()=> {
                 renderBlocks()
-                if(moveType === "top") {
+                if(moveType === "top") {                                                                                                                                                                                                                                                                                                                                                                                                                                                                         
                     seizeBlock();
-                }
+                }                                                         
                 renderBlocks()
             }, 0);
             return true;
@@ -89,11 +89,20 @@ function renderBlocks(moveType="") {
 }
 
 function seizeBlock() {
-    console.log('seize block');
+    // console.log('seize block');
+
+    const movingBlocks = document.querySelectorAll(".moving");
+    movingBlocks.forEach(moving=>{
+        moving.classList.remove("moving");
+        moving.classList.add("seized");
+    })
 }
 
 function checkempty(target) {
-    return target ? true : false
+    if(!target || target.classList.contains("seized")) {
+        return false;
+    }
+    return true;
 }
 
 function moveBlock(moveType, amount) {

@@ -19,7 +19,6 @@
         }
     ],
     "configurations": [
-        
         {
             "name":"Python: Current File",
             "type":"python",
@@ -30,7 +29,7 @@
         {
             "name": "x86-Debug (all warnings)",
             "type":"cppdbg",
-            "generator": "Visual Studio 15 2017",
+            "generator": "Visual Studio 17 2022",
             "configurationType": "Debug",
             "buildRoot": "${env.LOCALAPPDATA}\\CMakeBuild\\${workspaceHash}\\build\\${name}",
             "cmakeCommandArgs": "-DCMAKE_TOOLCHAIN_FILE:FILEPATH=\"${projectDir}\\VS2017Toolchain.cmake\"",
