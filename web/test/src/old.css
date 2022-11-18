@@ -1,0 +1,25 @@
+
+html,
+body {
+  height: 100%;
+  padding: 0;
+  margin: 0;
+}
+.list .row {
+  display: flex;
+}
+
+.list .row .data-cell,
+.data-header-cell {
+  position: relative !important;
+  width: auto !important;
+}
+
+revogr-focus,
+.selection-border-range,
+.edit-input-wrapper {
+  width: 100% !important;
+}
+.header-wrapper {
+  display: none;
+}
