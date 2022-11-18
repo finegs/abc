@@ -32,7 +32,7 @@ export default {
   name: "App",
   data() {
     return {
-      rows: generateFakeDataRows(1000000),
+      rows: generateFakeDataRows(10000),
       columns: [ 
         { name:'Name', prop: 'name', autoSize:true, sortable:true, order:'asc', filter:'string'}, 
         { name:'Value', prop: 'value', autoSize:true, sortable:true, order:'asc', filter:'number'} 
