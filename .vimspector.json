@@ -46,7 +46,7 @@
 		  "debugOptions": [],
 		  "MIMode": "gdb",
 		  "cwd": "${cwd}",
-		  "program": "${fileDirname}/build/${fileBasenameNoExtension}"
+		  "program": "${fileDirname}/build/Debug/${fileBasenameNoExtension}"
 		}
 	  },
 	  "Java - Launch": {

@@ -5,10 +5,11 @@
 #include <string>
 #include <vector>
 #include <sstream>
-//#include <ranges>
 #include <unordered_map>
 #include <cstring>
 #include "u.hpp"
+#include <algorithm>
+#include <ranges>
 
 namespace my {
 	const static char obj_sep_default = ',';
@@ -129,7 +130,7 @@ class Customer : public Person {
 			Person::operator=(std::forward<Person>(o));
 			return *this;
 		}
-		virtual std::ostream& print(std::ostream& os) const {
+		virtual std::ostream& print(std::ostream& os) const override {
 			Person::print(os);
 			os << my::obj_sep_default << "\"data\":" << data;
 			return os;
@@ -222,11 +223,12 @@ int main(int argc, char* argv[]) {
 
 	getchar();
 
-	std::vector vec{1,2,3,4,5};
+	std::vector<int> vec{1,2,3,4,5};
 	print(vec);
-//	print(std::views::drop(3));
+//	print(std::ranges::views::drop(3));
 #if ( __GNUC__ > 0 ) 
-	print(vec|std::views::drop(3));
+	auto rng = std::ranges::views::all(vec) | std::ranges::views::drop(3);
+	std::cout << rng << std::endl;
 #endif
 	return 0;
 }
