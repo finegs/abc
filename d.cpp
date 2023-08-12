@@ -225,9 +225,9 @@ int main(int argc, char* argv[]) {
 
 	std::vector<int> vec{1,2,3,4,5};
 	print(vec);
-//	print(std::ranges::views::drop(3));
+//	print(std::views::drop(3));
 #if ( __GNUC__ > 0 ) 
-	auto rng = std::ranges::views::all(vec) | std::ranges::views::drop(3);
+	auto rng = std::views::all(vec) | std::views::drop(3);
 	std::cout << rng << std::endl;
 #endif
 	return 0;
