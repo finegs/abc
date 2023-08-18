@@ -30,7 +30,7 @@ class MapSum {
     void insert(string str, int score) {
       int diff = score-mpp[str];
       TrieNode* pCur = root;
-      for(int i = 0;i<str.size();i++) {
+      for(size_t i = 0;i<str.size();i++) {
         int idx = str[i]-'a';
         if(pCur->children[idx]==NULL) {
           pCur->children[idx] = new TrieNode();
@@ -47,7 +47,7 @@ class MapSum {
       TrieNode* parent = NULL;
       TrieNode* cur = root;
       int idx;
-      for(int i = 0;i<str.size();i++) {
+      for(size_t i = 0;i<str.size();i++) {
         idx = str[i]-'a';
         if(cur->children[idx] == NULL) return 1;
         parent = cur;
@@ -80,7 +80,7 @@ class MapSum {
 
     int score(string str) {
       TrieNode* pCur = root;
-      for(int i = 0; str.size();i++) {
+      for(size_t i = 0; str.size();i++) {
         int idx = str[i]-'a';
         if(pCur->children[idx] == NULL) return 0;
         pCur = pCur->children[idx];
@@ -1012,14 +1012,14 @@ struct NodeMap {
   Node** nodeList;
   NodeMap(size_t len = 100000) :len(len) {
     nodeList = (Node**)malloc(sizeof(Node*)*len);
-    for(int i = 0;i < len;++i) {
+    for(size_t i = 0;i < len;++i) {
      nodeList[i] = (Node*)malloc(sizeof(Node));
      mmemset(nodeList[i]->name, 0, NAME_LEN);
    }
   }
 
   ~NodeMap() {
-    for(int i = 0;i < len;++i) {
+    for(size_t i = 0;i < len;++i) {
      free(nodeList[i]);
    }
    free(nodeList);
@@ -1031,11 +1031,11 @@ NodeMap nodeMap;
 
 int main(int argc, char* argv[]) {
 
-  for(int i =1;i<argc;++i) {
+  for(size_t i =1;i<argc;++i) {
     mstrcpy(nodeMap.nodeList[i-1]->name, argv[i]); 
   }
 
-  for(int i = 1;i<argc;++i) {
+  for(size_t i = 1;i<argc;++i) {
     printf("nodeMap.nodeList[%d]=%s\n", i, nodeMap.nodeList[i-1]->name);
   }
 
