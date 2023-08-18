@@ -38,38 +38,53 @@ if (MSYS)
     link_directories(${GTK_LIBRARY_DIRS})
     add_definitions(${GTK_CFLAGS_OTHER})
     add_compile_options(${GTK_CFLAGS_OTHER})
+
 ELSEIF (MSVC)
 
 	include_directories($ENV{INCLUDE})
+
+ELSE (MSYS)
+	
+	find_package(PkgConfig REQUIRED)
+    pkg_check_modules(GTK REQUIRED gtk+-3.0)
+    
+    include_directories(${GTK_INCLUDE_DIRS})
+    link_directories(${GTK_LIBRARY_DIRS})
+    add_definitions(${GTK_CFLAGS_OTHER})
+	add_compile_options(${GTK_CFLAGS_OTHER})
 
 ENDIF(MSYS)
 
 include_directories(.)
 
 add_executable(a a.cpp)
+add_executable(b b.cpp)
 add_executable(d d.cpp)
 add_executable(cc cc.cpp)
 add_executable(colormenu colormenu.cpp)
 
 IF(MSYS)
-target_link_libraries(a pthread ws2_32 zmq)
-target_link_libraries(d pthread ws2_32 zmq)
-target_link_libraries(cc pthread ws2_32 zmq)
-target_link_libraries(colormenu pthread ws2_32 zmq)
-ELSEIF(MSVC)
-target_link_libraries(a ws2_32)
-target_link_libraries(d ws2_32)
-target_link_libraries(cc ws2_32)
-target_link_libraries(colormenu ws2_32)
 
+	target_link_libraries(a pthread ws2_32 zmq)
+	target_link_libraries(b pthread ws2_32 zmq)
+	target_link_libraries(d pthread ws2_32 zmq)
+	target_link_libraries(cc pthread ws2_32 zmq)
+	target_link_libraries(colormenu pthread ws2_32 zmq)
+
+ELSEIF(MSVC)
+	
+	target_link_libraries(a ws2_32)
+	target_link_libraries(d ws2_32)
+	target_link_libraries(cc ws2_32)
+	target_link_libraries(colormenu ws2_32)
 
 #target_include_directories(hello_g PRIVATE ${GTK_INCLUDE_DIRS})
 
 ELSE(MSYS)
-target_link_libraries(a pthread )
-target_link_libraries(d pthread)
-target_link_libraries(cc pthread )
-target_link_libraries(colormenu pthread )
+	target_link_libraries(a pthread )
+	target_link_libraries(d pthread)
+	target_link_libraries(cc pthread )
+	target_link_libraries(colormenu pthread )
 
 ENDIF(MSYS)
 
@@ -82,20 +97,16 @@ if(MSYS)
 
 endif()
 
-#install(TARGETS a 
-#		RUNTIME DESTINATION bin
-#		LIBRARY DESTINATION lib
-#		ARCHIVE DESTINATION lib/static
-#		)
+IF (MSYS OR MSVC)
 
-IF (MSYS)
+	install(TARGETS a DESTINATION C:\\Programs\\bin)
+	install(TARGETS b DESTINATION C:\\Programs\\bin)
+	install(TARGETS d DESTINATION C:\\Programs\\bin)
 
-install(TARGETS a DESTINATION C:\\Programs\\bin)
-install(TARGETS d DESTINATION C:\\Programs\\bin)
+ELSE (MSYS OR MSVC)
 
-ELSE (MSYS)
+	install(TARGETS a DESTINATION ~/bin)
+	install(TARGETS b DESTINATION ~/bin)
+	install(TARGETS d DESTINATION ~/bin)
 
-install(TARGETS a DESTINATION ~/bin)
-install(TARGETS d DESTINATION ~/bin)
-
-ENDIF(MSYS)
+ENDIF(MSYS OR MSVC)
