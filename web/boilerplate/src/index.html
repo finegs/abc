@@ -5,5 +5,16 @@
 		<title>Boilerplate</title>
 	</head>
 	<body>
+		<main>
+		  <div class="new-note">
+			<input type="text" name="title" id="title" placeholder="Title">
+			<textarea name="content" id="content" placeholder="Start writing"></textarea>
+			<div id="form-error"></div>
+		  </div>
+		  <div class="button-container">
+			<button class="add-btn" onclick="addNote()">Add note</button>
+		  </div>
+		  <div id="notes-wrapper"></div>
+		</main>
 	</body>
 </html>
