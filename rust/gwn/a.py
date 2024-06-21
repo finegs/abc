@@ -37,5 +37,3 @@ X = [
 
 matrix =  vectorizer.fit_transform(X)
 
-logger.info("maxtrix.shape : {}".format(matrix.shape))
-
