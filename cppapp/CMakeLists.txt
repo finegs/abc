@@ -32,7 +32,7 @@ if (MSYS)
 
     # gcc `pkg-config --cflags gtk+-3.0` -o hello-world-gtk hello-world-gtk.c `pkg-config --libs gtk+-3.0`
     find_package(PkgConfig REQUIRED)
-    pkg_check_modules(GTK REQUIRED gtk+-3.0)
+    pkg_check_modules(GTK REQUIRED gtk4)
     
     include_directories(${GTK_INCLUDE_DIRS})
     link_directories(${GTK_LIBRARY_DIRS})
@@ -46,7 +46,7 @@ ELSEIF (MSVC)
 ELSE (MSYS)
 	
 	find_package(PkgConfig REQUIRED)
-    pkg_check_modules(GTK REQUIRED gtk+-3.0)
+    pkg_check_modules(GTK REQUIRED gtk4)
     
     include_directories(${GTK_INCLUDE_DIRS})
     link_directories(${GTK_LIBRARY_DIRS})
