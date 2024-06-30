@@ -226,22 +226,13 @@ int main(int argc, char* argv[]) {
 	std::vector<int> vec{1,2,3,4,5};
 	print(vec);
 //	print(std::views::drop(3));
-<<<<<<< HEAD
-/* #if ( __GNUC__ > 0 ) */ 
-/* 	print(vec|std::view::drop(3)); */
-/* #endif */
-=======
-<<<<<<< HEAD:d.cpp
 #if ( __GNUC__ > 0 ) 
 	auto rng = std::views::all(vec) | std::views::drop(3);
 	std::cout << rng << std::endl;
 #endif
-=======
 /* #if ( __GNUC__ > 0 ) */ 
 /* 	print(vec|std::view::drop(3)); */
 /* #endif */
->>>>>>> bdd6f03 (cppapp is created and move *.c[pp] to cppapp):cppapp/d.cpp
->>>>>>> 61da02b6f42cc491c4588a3070ed9a1984ad7194
 	return 0;
 }
 

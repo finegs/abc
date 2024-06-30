@@ -1,11 +1,7 @@
-<<<<<<< HEAD
 #include <stdio.h>
-
-=======
 #include <cstdio>
 #include <iostream>
 
-<<<<<<< HEAD:b.cpp
 template <typename Test> 
 void test (Test t)
 {
@@ -48,17 +44,4 @@ int main (int argc, char *argv[]) {
     else { usage(); return 1; }
 
     return 0;
-=======
->>>>>>> 61da02b6f42cc491c4588a3070ed9a1984ad7194
-
-int main() {
-
-	const char* a = "ab0";
-	printf("%c\n", (*((a++)+1))+2);
-	printf("%s\n", a);
-	return 0;
-<<<<<<< HEAD
-=======
->>>>>>> bdd6f03 (cppapp is created and move *.c[pp] to cppapp):cppapp/b.cpp
->>>>>>> 61da02b6f42cc491c4588a3070ed9a1984ad7194
 }
