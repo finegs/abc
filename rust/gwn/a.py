@@ -1,5 +1,6 @@
 import logging
 
+from scipy.sparse import csr_matrix
 from lenlp import sparse
 
 # 로거 세팅
@@ -23,17 +24,22 @@ logger.addHandler(handler)
 logger.addHandler(handler_critical)
 
 vectorizer = sparse.CountVectorizer(
-	    ngram_range=(3, 5), # range of n-grams
+	    # ngram_range=(3, 5), # range of n-grams
 	    analyzer="char_wb", # word, char, char_wb
-	    normalize=True, # lowercase and strip accents
+	    normalize=False, # lowercase and strip accents
 	    stop_words=["based"], # list of stop words
 	
 )
 
 X = [
 	"Hello World",
-	"Rust based vectorizer"
+	"Rust based vectorizer",
+	"안녕 여러분",
+	"오늘 즐거운 날입니다"
 ]
 
 matrix =  vectorizer.fit_transform(X)
+
+logger.info("matrix.shape : {}".format(matrix.shape))
+logger.info("matrix : {}".format(matrix))
 
