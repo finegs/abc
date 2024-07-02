@@ -31,7 +31,7 @@
 		  "program": "${file}"
 		}
 	  },
-	  "C - Launch": {
+	  "C/Cpp - Launch": {
 		"adapter": "vscode-cpptools",
 		"configuration": {
 		  "name": "Cpp: Launch current file",
@@ -46,7 +46,7 @@
 		  "debugOptions": [],
 		  "MIMode": "gdb",
 		  "cwd": "${cwd}",
-		  "program": "${fileDirname}/build/Debug/${fileBasenameNoExtension}"
+		  "program": "${workspaceFolder}/build/Debug/${fileBasenameNoExtension}"
 		}
 	  },
 	  "Java - Launch": {

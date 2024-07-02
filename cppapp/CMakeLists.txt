@@ -46,11 +46,11 @@ ELSEIF (MSVC)
 ELSE (MSYS)
 	
 	find_package(PkgConfig REQUIRED)
-    pkg_check_modules(GTK REQUIRED gtk4)
+  pkg_check_modules(GTK REQUIRED gtk4)
     
-    include_directories(${GTK_INCLUDE_DIRS})
-    link_directories(${GTK_LIBRARY_DIRS})
-    add_definitions(${GTK_CFLAGS_OTHER})
+	include_directories(${GTK_INCLUDE_DIRS})
+	link_directories(${GTK_LIBRARY_DIRS})
+	add_definitions(${GTK_CFLAGS_OTHER})
 	add_compile_options(${GTK_CFLAGS_OTHER})
 
 ENDIF(MSYS)
