@@ -13,8 +13,8 @@ struct Log {
   int id, x1, x2, y;
 
   bool operator<(const Log& o) const {
-    if (x1 == o.x1) return x2 < o.x2;
-    return x1 > o.x1; 
+    if (x1 == o.x1) return x2 > o.x2;
+    return x1 < o.x1; 
   }
 
   friend std::ostream& operator<<(std::ostream& os, const Log& o) {
