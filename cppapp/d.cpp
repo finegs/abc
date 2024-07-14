@@ -227,8 +227,9 @@ int main(int argc, char* argv[]) {
 	print(vec);
 //	print(std::views::drop(3));
 #if ( __GNUC__ > 0 ) 
-	auto rng = std::views::all(vec) | std::views::drop(3);
-	std::cout << rng << std::endl;
+	/* auto rng = std::views::all(vec) | std::views::drop(3); */
+	/* std::cout << rng << std::endl; */
+	std::cout << vec << std::endl;
 #endif
 /* #if ( __GNUC__ > 0 ) */ 
 /* 	print(vec|std::view::drop(3)); */
