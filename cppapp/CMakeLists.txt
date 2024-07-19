@@ -109,7 +109,7 @@ endif()
 IF (MSYS OR MSVC)
 
 	install(TARGETS trie_sum DESTINATION C:\\Programs\\bin)
-	install(TARGETS tt DESTINATION C:\\Programs\\\bin)
+	install(TARGETS tt DESTINATION C:\\Programs\\bin)
 	install(TARGETS a DESTINATION C:\\Programs\\bin)
 	install(TARGETS b DESTINATION C:\\Programs\\bin)
 	install(TARGETS d DESTINATION C:\\Programs\\bin)
