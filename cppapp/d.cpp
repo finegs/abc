@@ -1,4 +1,5 @@
 
+#include <ostream>
 #if 1
 
 #include <iostream>
@@ -11,39 +12,25 @@
 #include <algorithm>
 #include <ranges>
 
+std::ostream& operator<<(std::ostream& os, const char* o) {
+	os << o;
+	return os;
+}
+
 namespace my {
 	const static char obj_sep_default = ',';
 	static char obj_sep = obj_sep_default;
-}
 
-
-template<typename T>
-std::ostream& operator<<(std::ostream& os, const std::vector<T>& v) {
-	char sep[3]{'\0', ' ', '\0'};
-	os << '[';
-	for(const T& o : v) { 
-		os << sep;
-		// if(std::is_pointer<T*>(v)) 
-		os << sep << o; 
-		sep[0]= my::obj_sep; 
+	template <typename It>
+	inline std::ostream& display(std::ostream& os, It begin, It end) {
+		char sep[3]{'\0', ' ', '\0'};
+		for(auto& cur=begin;cur!=end;++cur) {
+			os << sep << *cur; sep[0]=',';
+		}
+		return os;
 	}
-	os << ']';
-	return os;
-}
+};
 
-template<typename K, typename V>
-std::ostream& operator<<(std::ostream& os, const std::unordered_map<K,V>& m) {
-	char sep[3]{'\0', ' ', '\0'};	os << '[';
-	for(auto &o:m) {
-		os << sep;
-		os << '{';
-		os << '"' << o.first << '"' << ':' << o.second; 
-		os << '}';
-		sep[0]=my::obj_sep;
-	}
-	os << ']';
-	return os;
-}
 class Person {
 	protected:
 		std::string first;
@@ -84,6 +71,7 @@ class Person {
 	bool operator<(const Person& o) const {
 		return first < o.first || last < o.last || val < o.val;
 	}
+	
 	virtual std::ostream& print(std::ostream& os) const {
 		// os << "{";
 		#ifndef NDEBUG
@@ -131,8 +119,8 @@ class Customer : public Person {
 			return *this;
 		}
 		virtual std::ostream& print(std::ostream& os) const override {
-			Person::print(os);
-			os << my::obj_sep_default << "\"data\":" << data;
+			Person::print(os) << my::obj_sep_default;
+			os << "\"data\":"; my::display(std::cout, data.begin(), data.end());
 			return os;
 		}
 		void print(int n) const override;
@@ -177,20 +165,11 @@ namespace std
 	};
 };
 
-template<typename T>
-//void print(const T& c) {
-void print(T&& c) {
-//void print(auto &&c) {
-
-	//for(const T& e : c) {
-	//for(auto &&e : c) {
-	for(auto &&e : c) {
-		std::cout << e << '\t';
-	}
-	std::cout << '\n';
+using KeyCustomer = std::pair<const char*, Customer>;
+std::ostream& operator<<(std::ostream& os, const KeyCustomer& o) {
+	os << '{' << o.first << ':' << o.second << '}';
+	return os;
 }
-
-
 
 int main(int argc, char* argv[]) {
 	std::vector<Person*> v;
@@ -205,9 +184,9 @@ int main(int argc, char* argv[]) {
 		c1->print(i);
 	}
 	my::obj_sep = '\n';
-	std::cout << "v : " << v << std::endl;
+	std::cout << "v : "; my::display(std::cout, v.begin(), v.end()) << std::endl;
 	my::obj_sep = '\n';
-	std::cout << "m : " << m << std::endl;
+	std::cout << "m : "; my::display(std::cout, m.begin(), m.end()) << std::endl;
 
 #if ((defined(_MSVC_LANG) && _MSVC_LANG >= 201703L) || __cplusplus >= 201703L)
      //C++17 specific stuff here
@@ -224,17 +203,7 @@ int main(int argc, char* argv[]) {
 	getchar();
 
 	std::vector<int> vec{1,2,3,4,5};
-	print(vec);
-//	print(std::views::drop(3));
-#if ( __GNUC__ > 0 ) 
-	/* auto rng = std::views::all(vec) | std::views::drop(3); */
-	/* std::cout << rng << std::endl; */
-	std::cout << vec << std::endl;
-#endif
-/* #if ( __GNUC__ > 0 ) */ 
-/* 	print(vec|std::view::drop(3)); */
-/* #endif */
-	return 0;
+	my::display(std::cout, vec.begin(), vec.end());
 }
 
 #endif

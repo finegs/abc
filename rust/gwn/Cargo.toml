@@ -9,8 +9,8 @@ edition = "2021"
 plotpy = "1.0.0"
 
 
-[[bin]]
-name = "plot"
-test = false
-bench = false
-path = "src/plot.rs"
+#[[bin]]
+#name = "plot"
+#test = false
+#bench = false
+#path = "src/plot.rs"

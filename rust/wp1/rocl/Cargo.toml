@@ -1,0 +1,12 @@
+# [PROJECT_DIR]/rocl/Cargo.toml
+[package]
+name = "rocl"
+version.workspace = true
+authors.workspace = true
+description.workspace = true
+documentation.workspace = true
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+librocl = { path = "../librocl" }
+opencl3 = { workspace = true}

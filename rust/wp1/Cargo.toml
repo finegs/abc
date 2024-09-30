@@ -1,0 +1,18 @@
+[workspace]
+members = [ "librocl", "rocl" ]
+default-members = [ "rocl" ]
+
+[workspace.package]
+version = "0.0.1"
+authors = ["FineGs"]
+description = "A short description of my package"
+documentation = "http://github.com/finegs"
+
+
+[workspace.dependencies]
+libc = "0.2"
+serde_json = "1.0"
+rand = "0.8.5"
+regex = { version = "1.6.0", default-features = false, features = ["std"] }
+opencl3 = { version = ">=0.9", features = [ "CL_VERSION_2_1", "CL_VERSION_2_2", "CL_VERSION_3_0", "cl_khr_gl_sharing", "cl_khr_dx9_media_sharing", "serde"] }
+

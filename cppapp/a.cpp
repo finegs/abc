@@ -15,6 +15,20 @@
 using namespace std;
 using IntPair = std::pair<int, int>;
 
+std::ostream& operator<<(std::ostream& os, const IntPair& o) {
+    os << '{' << o.first << ':' << o.second << '}';
+    return os;
+}
+
+template<typename It>
+std::ostream& display(std::ostream& os, It begin, It end) {
+    char sep[3]{'\0', ' ', '\0'};
+    for(auto& cur = begin;cur != end; ++cur) {
+       os << sep << *cur;  sep[0]=',';
+    }
+    return os;
+}
+
 auto item_hasher = [](const IntPair& o) { return std::hash<int>()(o.first); };
 auto item_less = [](const IntPair& a, const IntPair& b) { return a.first < b.first; };
 auto item_grater = [](const IntPair& a, const IntPair& b) { return a.first > b.first; };
@@ -24,29 +38,21 @@ set<IntPair, decltype(item_less)> items{};
 
 int main()
 {
-    int tc = 1;
+    int tc = 0;
+    // init set
     items.insert({11,1});
     items.insert({2,2});
     items.insert({1,2});
 
-    // item display
-    char sep[3]{'\0', ' ', '\0'};
-    std::function<void(const IntPair& o)> item_display = [&sep](const auto& o) { 
-                cout << sep << '{' << o.first << ',' << o.second << '}'; 
-                sep[0]=','; 
-    };   
-
-
-    // #1 set
-    cout << "#" << ++tc << std::endl;
-    for_each(items.begin(), items.end(), item_display);
+    // display set #1
+    cout << "#" << ++tc <<  ':'; display(std::cout, items.begin(), items.end());
     cout << std::endl;
 
-    // #2 set
+    // init ordered_set
     unordered_set<IntPair, decltype(item_hasher), decltype(item_equal_to)> hset(items.begin(), items.end());
-    cout << "#" << ++tc << std::endl;
-    sep[0]='\0';
-    for_each(hset.begin(), hset.end(), item_display);
+
+    // display unordered_set #2
+    cout << "#" << ++tc << ':'; display(std::cout, hset.begin(), hset.end());
     cout << std::endl;
 }
 
