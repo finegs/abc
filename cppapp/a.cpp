@@ -34,10 +34,35 @@ std::ostream& operator<<(std::ostream& os, const std::pair<first, second>& o) {
 }
 template<typename It>
 std::ostream& display(std::ostream& os, It begin, It end) {
+    bool  is_large =  (std::distance(begin, end )  >  20) ?  true : false;
     char sep[3]{'\0', ' ', '\0'};
-    for(auto& cur = begin;cur != end; ++cur) {
-       os << sep << *cur;  sep[0]='\n';
+    if  (is_large) {
+        sep[0] = '\0';
+        //
+        //  first 3
+        auto nxt3_iter = std::next(begin, 3);
+
+        for(auto& cur = begin;cur != nxt3_iter; ++cur) {
+            os << sep << *cur;  sep[0]='\n';
+        }
+        os <<  std::endl;
+
+        os << "..." << std::endl;
+        //  last 3 
+        auto pr3_iter  = std::next(end, -3);
+
+        sep[0] = '\0';
+        for(auto& cur = pr3_iter;cur != end; ++cur) {
+            os << sep << *cur;  sep[0]='\n';
+        }
     }
+    else {
+        sep[0] = '\0';
+        for(auto& cur = begin;cur != end; ++cur) {
+           os << sep << *cur;  sep[0]='\n';
+        }
+    }
+
     return os;
 }
 
@@ -48,22 +73,53 @@ auto item_equal_to = [](const IntPair& a, const IntPair& b) { return a.first == 
 
 auto myrec_hasher = [](const MyRec& o) { return std::hash<int>()( std::get<0>(o) ); };
 
-set<IntPair, decltype(item_less)> items{};
+set<IntPair, decltype(item_less)> item_set{};
+unordered_set<IntPair,  decltype(item_hasher)>  item_unordered_set{};
 unordered_map<MyRec, MyRec, decltype(myrec_hasher)> recs{
     {{1, 1.0, "aa"}, {1, 10.1, "aa's desc"}},
     {{2, 2.0, "bb"}, {2, 20.1, "bb's desc"}},
     {{1, 11.0, "11111"}, {2, 20.1, "111111"}},
 };
 
+template<typename T>
+std::vector<T> fill(std::vector<T>&  v, size_t  count, std::function<size_t(size_t)> g) {
+    v.resize(count);
+    for (size_t i = 0;i<count;i++) v[i] = g(i);
+    return v;
+}
+
+void init_item_set(set<IntPair,  decltype(item_less)>& s, size_t count) {
+    for (size_t i = 0 ; i< count; i++) {
+        s.insert({i, i}); 
+    }
+}
+
+void init_item_unorderd_set(unordered_set<IntPair,  decltype(item_hasher)>& s, size_t count) {
+    for (size_t i = 0 ; i< count; i++) {
+        s.insert({i, i}); 
+    }
+}
+struct _MyInitiator {
+    _MyInitiator() {
+        init_item_set(item_set, 1000);
+        init_item_unorderd_set(item_unordered_set, 1000);
+    }
+} MyInitiator;
+
+_MyInitiator myInitiator;
+
 int main()
 {
     int tc = 0;
+    
+    // display #
+    cout << "#" << ++tc << ':'; display(std::cout, item_set.begin(), item_set.end()); cout << std::endl;
 
     auto e1 = std::make_tuple(1, 1.0, "a is changed");
     recs.insert({e1, e1});
 
-    // display #1
-    cout << "#" << ++tc << ':'; display(std::cout, recs.begin(), recs.end());
+    // display #
+    cout << "#" << ++tc << ':'; display(std::cout, recs.begin(), recs.end()); cout << std::endl;
 
 #if 0
     // init set
