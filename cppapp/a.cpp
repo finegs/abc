@@ -72,13 +72,53 @@ auto item_grater = [](const IntPair& a, const IntPair& b) { return a.first > b.f
 auto item_equal_to = [](const IntPair& a, const IntPair& b) { return a.first == b.first; };
 
 auto myrec_hasher = [](const MyRec& o) { return std::hash<int>()( std::get<0>(o) ); };
+auto myrec_equal_to = [](const MyRec& a, const MyRec& b) { return std::get<0>(a) == std::get<0>(b)
+                                                               && std::get<1>(a) == std::get<1>(b)
+                                                               && std::get<2>(a) == std::get<2>(b); };
 
-set<IntPair, decltype(item_less)> item_set{};
+/*
+ *
+ * struct hash_tuple {
+    template <std::size_t...Index>
+    size_t recursive_hash(const auto &x) const{
+        return (boost::get<Index>(x) ^ ... );
+    }
+
+    template <template <typename> class Ts,typename...Args>
+    size_t operator()(const Ts<Args...>& x) const{
+        return recursive_hash<std::make_integer_sequence<int,sizeof...(Args)>>(x);
+    }
+};
+
 unordered_set<IntPair,  decltype(item_hasher)>  item_unordered_set{};
-unordered_map<MyRec, MyRec, decltype(myrec_hasher)> recs{
-    {{1, 1.0, "aa"}, {1, 10.1, "aa's desc"}},
-    {{2, 2.0, "bb"}, {2, 20.1, "bb's desc"}},
-    {{1, 11.0, "11111"}, {2, 20.1, "111111"}},
+using Map = std::unordered_map<Key, int, hash_tuple>;
+
+// define a hash function for this tuple
+struct KeyHash : public std::unary_function<MyTuple, std::size_t> {
+    std::size_t operator()(const MyTuple& k) const {
+        // the magic operation below makes collisions less likely than just the standard XOR
+        std::size_t seed = std::hash<int>()(std::get<0>(k));
+        seed ^= std::hash<char>()(std::get<1>(k)) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+        return seed ^ (std::hash<char>()(std::get<2>(k)) + 0x9e3779b9 + (seed << 6) + (seed >> 2));
+    }
+};
+
+// define the comparison operator for this tuple
+struct KeyEqual : public std::binary_function<MyTuple, MyTuple, bool> {
+    bool operator()(const MyTuple& v0, const MyTuple& v1) const {
+        return (std::get<0>(v0) == std::get<0>(v1) && std::get<1>(v0) == std::get<1>(v1) &&
+                std::get<2>(v0) == std::get<2>(v1));
+    }
+};
+
+typedef unordered_map<MyTuple, int, KeyHash, KeyEqual> MyMap;
+ */
+std::set<IntPair, decltype(item_less)> item_set{};
+std::unordered_set<IntPair,  decltype(item_hasher)>  item_unordered_set{};
+std::unordered_map<MyRec, MyRec, decltype(myrec_hasher)> recs{
+    {{1, 1.0, "aa"}, {1, 1.0001, "aa"}},
+    {{2, 2.0, "bb"}, {2, 2.0101, "bb"}},
+    {{1, 11.0, "11111"}, {2, 11.0001, "11111"}},
 };
 
 template<typename T>
@@ -99,14 +139,14 @@ void init_item_unorderd_set(unordered_set<IntPair,  decltype(item_hasher)>& s, s
         s.insert({i, i}); 
     }
 }
-struct _MyInitiator {
+typedef struct _MyInitiator {
     _MyInitiator() {
         init_item_set(item_set, 1000);
         init_item_unorderd_set(item_unordered_set, 1000);
     }
 } MyInitiator;
 
-_MyInitiator myInitiator;
+MyInitiator myInitiator;
 
 int main()
 {
@@ -115,8 +155,13 @@ int main()
     // display #
     cout << "#" << ++tc << ':'; display(std::cout, item_set.begin(), item_set.end()); cout << std::endl;
 
-    auto e1 = std::make_tuple(1, 1.0, "a is changed");
-    recs.insert({e1, e1});
+    MyRec rr = std::make_tuple(1, 1.0, "aa");
+    cout << "hash(1) : " << std::hash<int>()(1) << std::endl;
+    cout << "recs[" << rr << " : " << recs[rr] << std::endl;
+    cout << "hash(" << std::get<0>(rr) << ") : " << std::hash<int>()(std::get<0>(recs[rr])) << std::endl;
+
+    auto e1 = std::make_tuple(1, 1.0, "aa");
+    recs.insert_or_assign(e1, e1);
 
     // display #
     cout << "#" << ++tc << ':'; display(std::cout, recs.begin(), recs.end()); cout << std::endl;
