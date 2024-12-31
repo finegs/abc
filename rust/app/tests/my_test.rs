@@ -5,6 +5,20 @@ mod my_tests {
     use std::cell::RefCell;
 
     #[test]
+    fn block_borrow_test() {
+       let mut s = "hello".to_owned(); 
+       {
+           let s1 = &mut s;
+           s1.push_str(" Appended in block.");
+           println!("{s1}");
+       }
+
+       let mut s1 = s.clone();
+       s1.push_str(" Appended.");
+       println!("{s}, {s1}");
+    }
+
+    #[test]
     fn borrow_test() {
        let s = Rc::new(RefCell::new("hello".to_owned())); 
        let s1 = s.clone();

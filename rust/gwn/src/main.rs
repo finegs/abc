@@ -1,4 +1,4 @@
-use std::fmt::{Display, self};
+use std::fmt;
 
 struct Item {
     id : Option<u32>,
