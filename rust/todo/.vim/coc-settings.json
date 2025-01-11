@@ -1,0 +1,4 @@
+{
+	"rust-analyzer.cargo.features": ["sqlite", "mysql"],
+	"rust-analyzer.check.features": ["sqlite", "mysql"]
+}

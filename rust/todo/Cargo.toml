@@ -10,7 +10,12 @@ cors = "0.1.0"
 dotenv = "0.15.0"
 serde = { version = "1.0.217", features = ["derive"] }
 serde_json = "1.0.134"
-sqlx = { version = "0.8.2", features = ["runtime-async-std-native-tls", "mysql", "chrono", "uuid"] }
+sqlx = { version = "0.8.2", features = ["runtime-async-std-native-tls", "mysql", "chrono", "uuid", "mysql"] }
 tokio = { version = "1.42.0", features = ["full"] }
 tower-http = "0.6.2"
 uuid = { version = "1.11.0", features = ["serde", "v4"] }
+
+
+[features]
+sqlite = []
+mysql =  []

@@ -14,9 +14,6 @@ use crate::{
     AppState,
 };
 
-// ...
-// ...
-
 // Convert DB Model to Response
 fn to_note_response(note: &NoteModel) -> NoteModelResponse {
     NoteModelResponse {
@@ -25,7 +22,7 @@ fn to_note_response(note: &NoteModel) -> NoteModelResponse {
         content: note.content.to_owned(),
         is_published: note.is_published.to_owned(),
         created_at: note.created_at.to_owned(),
-        updated_at: note.updated_at.to_owned.to_owned(),
+        updated_at: note.updated_at.to_owned(),
     }
 }
 
