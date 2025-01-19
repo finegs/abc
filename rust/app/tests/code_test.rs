@@ -1,6 +1,8 @@
-use std::cell::{Cell, RefCell};
 #[cfg(test)]
+use std::cell::{Cell, RefCell};
 use std::rc::Rc;
+
+#[allow(unused_imports)]
 use std::sync::RwLock;
 
 use app_util::log::tlog;
