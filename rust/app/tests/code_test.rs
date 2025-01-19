@@ -1,6 +1,7 @@
+#![allow(unused)]
 #[cfg(test)]
 use std::cell::{Cell, RefCell};
-use std::rc::Rc;
+use std::{ops::Deref, rc::Rc};
 
 #[allow(unused_imports)]
 use std::sync::RwLock;
@@ -161,4 +162,51 @@ fn arc_mutex_refcell_test() {
     // 결과를 출력합니다.
     let data_locked = data.lock().unwrap();
     tlog(format!("data: {:?}", data_locked.borrow()));
+}
+
+
+#[test]
+fn refcell_2_test() {
+    #[derive(Debug)]
+    struct Wallet {
+        balance: Rc<RefCell<i64>>,
+    }
+
+    impl Wallet {
+        pub fn new(balance: i64) -> Self {
+           Self { balance : Rc::new(RefCell::new(balance)) }
+        }
+
+        pub fn deposit(&self, amount: i64) {
+           let mut ref_cell = self.balance.borrow_mut();
+           *ref_cell += amount;
+        }
+
+        pub fn withrawal(&self, amount: i64) {
+           let mut ref_cell = self.balance.borrow_mut();
+           *ref_cell -= amount;
+        }
+
+        pub fn get_balance_value(&self) -> i64 {
+            *self.balance.borrow()
+        }
+
+        pub fn get_balance(&self) -> Rc<RefCell<i64>> {
+           self.balance.clone()
+        }
+    }
+
+    let  w = Wallet::new(0);
+
+    w.deposit(10);
+    w.withrawal(5);
+
+    let bc =  w.get_balance().clone();
+
+    *bc.borrow_mut() += 10;
+
+    assert_ne!(w.get_balance_value(), 10);
+    assert_eq!(w.get_balance_value(), 15);
+    assert_eq!(*bc.borrow(), 15);
+
 }
