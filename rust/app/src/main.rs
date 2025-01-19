@@ -1,3 +1,7 @@
+pub mod util;
+
+use crate::util::log;
+
 fn main() {
-    println!("hello world");
+    log::tlog(format!("hello world"));
 }

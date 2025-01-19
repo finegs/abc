@@ -4,3 +4,12 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+chrono = { version = ">=0.4.39" }
+
+[lib]
+name = "app_util"
+path = "src/util/mod.rs"
+crate-type = ["lib"]
+edition =  "2021"
+test = true
+#required_features = []
