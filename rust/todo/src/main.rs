@@ -1,6 +1,7 @@
 mod model;
 mod schema;
 mod handler;
+mod db;
 
 use std::sync::Arc;
 
@@ -8,13 +9,13 @@ use axum::{response::IntoResponse, routing::get, Json, Router};
 use tokio::net::TcpListener;
 
 use dotenv::dotenv;
-use sqlx::{database, mysql::{MySqlPool, MySqlPoolOptions}};
+use sqlx::{database, mysql::{MySqlPool, MySqlPoolOptions}, Database};
 
-pub struct AppState<'c, D> 
+pub struct AppState<DB> 
 where 
-    D: Clone + for<'c> sqlx::Executor<'c>
+    DB: sqlx::Database
 {
-    conn_pool: D
+    conn_pool: sqlx::Pool<DB>
 }
 
 #[tokio::main]
@@ -28,10 +29,10 @@ async fn main()  {
     #[cfg(any(feature = "mysql", feature = "sqlite"))] 
     {
         #[cfg(feature = "mysql")]
-        let pool = create_mysql_conn_pool(database_url.as_str());
+        let pool = create_mysql_conn_pool(database_url.as_str()).await;
 
         #[cfg(feature = "sqlite")]
-        let pool = create_sqlite_conn_pool(database_url.as_str());
+        let pool = create_sqlite_conn_pool(database_url.as_str()).await;
 
         #[cfg(any(feature = "mysql", feature = "sqlite"))]
         let app =  Router::new()

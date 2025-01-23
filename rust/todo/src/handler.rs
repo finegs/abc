@@ -43,7 +43,7 @@ pub async fn note_list_handler(
         limit as i32,
         offset as i32
     )
-    .fetch_all(&data.db)
+    .fetch_all(&data.conn_pool)
     .await
     .map_err(|e| {
         let error_response = serde_json::json!({
@@ -78,7 +78,7 @@ pub async fn create_note_handler(
         .bind(&id)
         .bind(&body.title)
         .bind(&body.content)
-        .execute(&data.db)
+        .execute(&data.conn_pool)
         .await
         .map_err(|err: sqlx::Error| err.to_string());
 
@@ -100,7 +100,7 @@ pub async fn create_note_handler(
 
     // Get insereted note by ID
     let note = sqlx::query_as!(NoteModel, r#"SELECT * FROM notes WHERE id = ?"#, &id)
-        .fetch_one(&data.db)
+        .fetch_one(&data.conn_pool)
         .await
         .map_err(|e| {
             (
@@ -130,7 +130,7 @@ pub async fn get_note_handler(
         r#"SELECT * FROM notes WHERE id = ?"#,
         &id
     )
-    .fetch_one(&data.db)
+    .fetch_one(&data.conn_pool)
     .await;
 
     // check & response
@@ -172,7 +172,7 @@ pub async fn edit_note_handler(
         r#"SELECT * FROM notes WHERE id = ?"#,
         &id
     )
-    .fetch_one(&data.db)
+    .fetch_one(&data.conn_pool)
     .await;
 
     // fetch the result
@@ -207,7 +207,7 @@ pub async fn edit_note_handler(
             .bind(&body.content.unwrap_or_else(|| note.content))
             .bind(i8_is_published)
             .bind(&id)
-            .execute(&data.db)
+            .execute(&data.conn_pool)
             .await
             .map_err(|e| {
                 (
@@ -234,7 +234,7 @@ pub async fn edit_note_handler(
         r#"SELECT * FROM notes WHERE id = ?"#,
         &id
     )
-    .fetch_one(&data.db)
+    .fetch_one(&data.conn_pool)
     .await
     .map_err(|e| {
         (
@@ -259,7 +259,7 @@ pub async fn delete_note_handler(
 ) -> Result<impl IntoResponse, (StatusCode, Json<serde_json::Value>)> {
     // delete with query macro
     let query_result = sqlx::query!(r#"DELETE FROM notes WHERE id = ?"#, &id)
-        .execute(&data.db)
+        .execute(&data.conn_pool)
         .await
         .map_err(|e| {
             (
