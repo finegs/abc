@@ -26,9 +26,11 @@ fn to_note_response(note: &NoteModel) -> NoteModelResponse {
     }
 }
 
-pub async fn note_list_handler(
+pub async fn note_list_handler<DB>
+    where 
+        DB:  sqlx::Database (
     opts: Option<Query<FilterOptions>>,
-    State(data): State<Arc<AppState>>,
+    State(data): State<Arc<AppState<DB>>>,
 ) -> Result<impl IntoResponse, (StatusCode, Json<serde_json::Value>)> {
     // Param
     let Query(opts) = opts.unwrap_or_default();
