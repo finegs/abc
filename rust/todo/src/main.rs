@@ -2,20 +2,39 @@ mod model;
 mod schema;
 mod handler;
 
-use std::sync::Arc;
+use std::{borrow::Borrow, sync::Arc};
 
 use axum::{response::IntoResponse, routing::get, Json, Router};
 use tokio::net::TcpListener;
 
 use dotenv::dotenv;
-use sqlx::{database, mysql::{MySqlPool, MySqlPoolOptions}};
+use sqlx::database;
 
-pub struct AppState<'c, D> 
-where 
-    D: Clone + for<'c> sqlx::Executor<'c>
-{
-    conn_pool: D
+#[cfg(feature="sqlite")]
+use sqlx::{ sqlite::{SqlitePool, SqlitePoolOptions}};
+
+#[cfg(feature="mysql")]
+use sqlx::{ mysql::{MySqlPool, MySqlPoolOptions}};
+
+#[cfg(feature="sqlite")]
+pub struct AppState{
+    conn_pool: SqlitePool,
 }
+
+#[cfg(feature="mysql")]
+pub struct AppState{
+    conn_pool: MySqlPool,
+}
+
+// trait ToSqlExecutor<'a> {
+//    fn to_sql_executor(&'a self) -> &'a  sqlx::AnyConnection;
+// }
+
+// impl<'a, DB> ToSqlExecutor<'a> for AppState<DB> {
+//    fn to_sql_executor(&'a self) -> &'a sqlx::AnyConnection {
+//         self.conn_pool.into()
+//    } 
+// }
 
 #[tokio::main]
 async fn main()  {
@@ -28,10 +47,10 @@ async fn main()  {
     #[cfg(any(feature = "mysql", feature = "sqlite"))] 
     {
         #[cfg(feature = "mysql")]
-        let pool = create_mysql_conn_pool(database_url.as_str());
+        let pool = create_mysql_conn_pool(database_url.as_str()).await;
 
         #[cfg(feature = "sqlite")]
-        let pool = create_sqlite_conn_pool(database_url.as_str());
+        let pool = create_sqlite_conn_pool(database_url.as_str()).await;
 
         #[cfg(any(feature = "mysql", feature = "sqlite"))]
         let app =  Router::new()
@@ -60,6 +79,7 @@ pub async fn health_check_handler() -> impl  IntoResponse {
     Json(json_response)
 }
 
+#[cfg(feature="mysql")]
 async fn create_mysql_conn_pool(db_url: &str) -> sqlx::mysql::MySqlPool {
 
     match MySqlPoolOptions::new()
@@ -80,7 +100,10 @@ async fn create_mysql_conn_pool(db_url: &str) -> sqlx::mysql::MySqlPool {
 
 async fn create_sqlite_conn_pool(db_url: &str) -> sqlx::sqlite::SqlitePool {
     match sqlx::sqlite::SqlitePool::connect("sqlite:mydb.db").await {
-        Ok(pool) => pool,
+        Ok(pool) => {
+            println!("✅ Connection to the database is successful!");
+            pool
+        },
         Err(err) => {
             eprintln!("fail to  create_sqlite_conn_pool. err = {}", err);
             std::process::exit(1);

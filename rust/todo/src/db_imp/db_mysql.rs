@@ -1,4 +1,6 @@
 
+use sqlx::mysql::{self, MySqlPool, MySqlPoolOptions};
+
 async fn create_conn_pool(db_url: &str) -> sqlx::mysql::MySqlPool {
 
     match MySqlPoolOptions::new()

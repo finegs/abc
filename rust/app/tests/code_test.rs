@@ -1,7 +1,7 @@
 #![allow(unused)]
 #[cfg(test)]
 use std::cell::{Cell, RefCell};
-use std::{ops::Deref, rc::Rc};
+use std::{clone, ops::Deref, rc::Rc};
 
 #[allow(unused_imports)]
 use std::sync::RwLock;
@@ -9,7 +9,8 @@ use std::sync::RwLock;
 use app_util::log::tlog;
 
 #[test]
-fn deref_test() {
+fn deref_test() 
+{
     let a = 1;
     let b = &1;
     assert_eq!(1, a);
@@ -17,7 +18,8 @@ fn deref_test() {
 }
 
 #[test]
-fn block_borrow_test() {
+fn block_borrow_test() 
+{
     let mut s = "hello".to_owned();
     {
         let s1 = &mut s;
@@ -208,5 +210,48 @@ fn refcell_2_test() {
     assert_ne!(w.get_balance_value(), 10);
     assert_eq!(w.get_balance_value(), 15);
     assert_eq!(*bc.borrow(), 15);
+
+}
+
+#[test]
+fn generic_impl_fn_test() {
+    fn parse_csv_document<R>(src: R) -> std::io::Result<Vec<Vec<String>>> 
+        where 
+            R: std::io::BufRead 
+    {
+        src.lines()
+            .map(|line| {
+                // For each line in the source
+                line.map(|line| {
+                    // If the line was read successfully, process it, if not, return the error
+                    line.split(',') // Split the line separated by commas
+                        .map(|entry| String::from(entry.trim())) // Remove leading and trailing whitespace
+                        .collect() // Collect all strings in a row into a Vec<String>
+                })
+            })
+            .collect() // Collect all lines into a Vec<Vec<String>>
+    }
+
+    // parse_csv_document(std::io::Empty()); 
+    // This is the exact same function, but its return type uses `impl Trait`.
+    // Look how much simpler it is!
+    fn combine_vecs<T>(
+        v: Vec<T>,
+        u: Vec<T>,
+    ) -> impl Iterator<Item=T> 
+        where
+            T:  Clone
+    {
+        v.into_iter().chain(u.into_iter()).cycle()
+    }
+
+    let a = vec![1,2,3];
+    let b = vec![4,5];
+
+    let mut ss = String::new();
+    a.into_iter().for_each(|e| {
+        ss.push_str(e.to_string().to_string().as_str());
+    });
+    println!("ss is [{}]", ss);
 
 }

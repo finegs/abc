@@ -26,11 +26,9 @@ fn to_note_response(note: &NoteModel) -> NoteModelResponse {
     }
 }
 
-pub async fn note_list_handler<DB>
-    where 
-        DB:  sqlx::Database (
+pub async fn note_list_handle(
     opts: Option<Query<FilterOptions>>,
-    State(data): State<Arc<AppState<DB>>>,
+    State(data): State<Arc<AppState>>,
 ) -> Result<impl IntoResponse, (StatusCode, Json<serde_json::Value>)> {
     // Param
     let Query(opts) = opts.unwrap_or_default();
@@ -38,6 +36,18 @@ pub async fn note_list_handler<DB>
     let limit = opts.limit.unwrap_or(10);
     let offset = (opts.page.unwrap_or(1) - 1) * limit;
 
+    let conn = match &data.conn_pool.acquire().await {
+        Ok(conn) => conn,
+        Err(e) => {
+
+            let error_response = serde_json::json!({
+                "status": "error",
+                "message": format!("Database error: { }", e),
+            });
+            eprintln!("fail to acquire connect. {}", &error_response);
+            return Err((StatusCode::INTERNAL_SERVER_ERROR, Json(error_response)));
+        }
+    };
     // Query with macro
     let notes = sqlx::query_as!(
         NoteModel,
@@ -45,7 +55,7 @@ pub async fn note_list_handler<DB>
         limit as i32,
         offset as i32
     )
-    .fetch_all(&data.conn_pool)
+    .fetch_all(conn)
     .await
     .map_err(|e| {
         let error_response = serde_json::json!({
