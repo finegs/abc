@@ -1,6 +1,9 @@
+#[allow(unused)]
+
 mod model;
 mod schema;
 mod handler;
+mod appstate;
 
 use std::{borrow::Borrow, sync::Arc};
 
@@ -10,31 +13,10 @@ use tokio::net::TcpListener;
 use dotenv::dotenv;
 use sqlx::database;
 
-#[cfg(feature="sqlite")]
-use sqlx::{ sqlite::{SqlitePool, SqlitePoolOptions}};
+use appstate::AppState;
 
-#[cfg(feature="mysql")]
-use sqlx::{ mysql::{MySqlPool, MySqlPoolOptions}};
-
-#[cfg(feature="sqlite")]
-pub struct AppState{
-    conn_pool: SqlitePool,
-}
-
-#[cfg(feature="mysql")]
-pub struct AppState{
-    conn_pool: MySqlPool,
-}
-
-// trait ToSqlExecutor<'a> {
-//    fn to_sql_executor(&'a self) -> &'a  sqlx::AnyConnection;
-// }
-
-// impl<'a, DB> ToSqlExecutor<'a> for AppState<DB> {
-//    fn to_sql_executor(&'a self) -> &'a sqlx::AnyConnection {
-//         self.conn_pool.into()
-//    } 
-// }
+// TODO : check crud with  db (CRUD  BOOK)[https://wolfy.tistory.com/335]
+// FIXME: 
 
 #[tokio::main]
 async fn main()  {
@@ -54,8 +36,9 @@ async fn main()  {
 
         #[cfg(any(feature = "mysql", feature = "sqlite"))]
         let app =  Router::new()
-                    .route("/api/healthcheck", get(health_check_handler))
-                    .with_state(Arc::new(AppState{ conn_pool: pool.clone() }));
+                    .route("/api/healthcheck", 
+                        get(health_check_handler))
+                    .with_state(Arc::new(AppState{conn_pool: pool.clone() }));
 
         println!("✅  Server started successfully at 0.0.0.0:8080");
 
@@ -79,10 +62,10 @@ pub async fn health_check_handler() -> impl  IntoResponse {
     Json(json_response)
 }
 
-#[cfg(feature="mysql")]
+#[cfg(feature = "mysql")]
 async fn create_mysql_conn_pool(db_url: &str) -> sqlx::mysql::MySqlPool {
 
-    match MySqlPoolOptions::new()
+    match sqlx::mysql::MySqlPoolOptions::new()
         .max_connections(10)
         .connect(&db_url)
         .await
@@ -98,8 +81,10 @@ async fn create_mysql_conn_pool(db_url: &str) -> sqlx::mysql::MySqlPool {
     }
 }
 
+#[cfg(feature = "sqlite")]
 async fn create_sqlite_conn_pool(db_url: &str) -> sqlx::sqlite::SqlitePool {
-    match sqlx::sqlite::SqlitePool::connect("sqlite:mydb.db").await {
+    // let db_url =  "sqlite::mydb.db";
+    match sqlx::sqlite::SqlitePool::connect(&db_url).await {
         Ok(pool) => {
             println!("✅ Connection to the database is successful!");
             pool

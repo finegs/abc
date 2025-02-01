@@ -36,40 +36,25 @@ pub async fn note_list_handle(
     let limit = opts.limit.unwrap_or(10);
     let offset = (opts.page.unwrap_or(1) - 1) * limit;
 
-    let conn = match &data.conn_pool.acquire().await {
-        Ok(conn) => conn,
-        Err(e) => {
-
+    // Query with macro
+    let notes = sqlx::query_as::<_, NoteModel>(r#"SELECT * FROM notes ORDER by id LIMIT $1 OFFSET $2"#)
+        .bind(limit as i32)
+        .bind(offset as i32)
+        .fetch_all(&data.conn_pool)
+        .await
+        .map_err(|e| {
             let error_response = serde_json::json!({
                 "status": "error",
                 "message": format!("Database error: { }", e),
             });
-            eprintln!("fail to acquire connect. {}", &error_response);
-            return Err((StatusCode::INTERNAL_SERVER_ERROR, Json(error_response)));
-        }
-    };
-    // Query with macro
-    let notes = sqlx::query_as!(
-        NoteModel,
-        r#"SELECT * FROM notes ORDER by id LIMIT ? OFFSET ?"#,
-        limit as i32,
-        offset as i32
-    )
-    .fetch_all(conn)
-    .await
-    .map_err(|e| {
-        let error_response = serde_json::json!({
-            "status": "error",
-            "message": format!("Database error: { }", e),
-        });
-        (StatusCode::INTERNAL_SERVER_ERROR, Json(error_response))
-    })?;
+            (StatusCode::INTERNAL_SERVER_ERROR, Json(error_response))
+        })?;
 
     // Response
     let note_responses = notes
-        .iter()
-        .map(|note| to_note_response(&note))
-        .collect::<Vec<NoteModelResponse>>();
+                                                .iter()
+                                                .map(|note| to_note_response(&note))
+                                                .collect::<Vec<NoteModelResponse>>();
 
     let json_response = serde_json::json!({
         "status": "ok",
@@ -86,7 +71,7 @@ pub async fn create_note_handler(
 ) -> Result<impl IntoResponse, (StatusCode, Json<serde_json::Value>)> {
     // Insert
     let id = uuid::Uuid::new_v4().to_string();
-    let query_result = sqlx::query(r#"INSERT INTO notes (id, title, content) VALUES (?, ?, ?)"#)
+    let query_result = sqlx::query(r#"INSERT INTO notes (id, title, content) VALUES ($1, $2, $3)"#)
         .bind(&id)
         .bind(&body.title)
         .bind(&body.content)
@@ -111,7 +96,8 @@ pub async fn create_note_handler(
     }
 
     // Get insereted note by ID
-    let note = sqlx::query_as!(NoteModel, r#"SELECT * FROM notes WHERE id = ?"#, &id)
+    let note = sqlx::query_as::<_, NoteModel>(r#"SELECT * FROM notes WHERE id = %1"#)
+        .bind(&id)
         .fetch_one(&data.conn_pool)
         .await
         .map_err(|e| {
@@ -137,13 +123,11 @@ pub async fn get_note_handler(
     State(data): State<Arc<AppState>>,
 ) -> Result<impl IntoResponse, (StatusCode, Json<serde_json::Value>)> {
     // get using query macro
-    let query_result = sqlx::query_as!(
-        NoteModel,
-        r#"SELECT * FROM notes WHERE id = ?"#,
-        &id
-    )
-    .fetch_one(&data.conn_pool)
-    .await;
+    let query_result = sqlx::query_as::<_, NoteModel>(
+        r#"SELECT * FROM notes WHERE id = ?"#)
+        .bind(&id)
+        .fetch_one(&data.conn_pool)
+        .await;
 
     // check & response
     match query_result {
@@ -179,13 +163,11 @@ pub async fn edit_note_handler(
     Json(body): Json<UpdateNoteSchema>,
 ) -> Result<impl IntoResponse, (StatusCode, Json<serde_json::Value>)> {
     // validate note with query macro
-    let query_result = sqlx::query_as!(
-        NoteModel,
-        r#"SELECT * FROM notes WHERE id = ?"#,
-        &id
-    )
-    .fetch_one(&data.conn_pool)
-    .await;
+    let query_result = sqlx::query_as::<_, NoteModel>(
+        r#"SELECT * FROM notes WHERE id = $1"#)
+        .bind(&id)
+        .fetch_one(&data.conn_pool)
+        .await;
 
     // fetch the result
     let note = match query_result {
@@ -214,7 +196,7 @@ pub async fn edit_note_handler(
 
     // Update (if empty, use old value)
     let update_result =
-        sqlx::query(r#"UPDATE notes SET title = ?, content = ?, is_published = ? WHERE id = ?"#)
+        sqlx::query(r#"UPDATE notes SET title = $1, content = $2, is_published = $3 WHERE id = $4"#)
             .bind(&body.title.unwrap_or_else(|| note.title))
             .bind(&body.content.unwrap_or_else(|| note.content))
             .bind(i8_is_published)
@@ -241,19 +223,17 @@ pub async fn edit_note_handler(
     }
 
     // get updated data
-    let updated_note = sqlx::query_as!(
-        NoteModel,
-        r#"SELECT * FROM notes WHERE id = ?"#,
-        &id
-    )
-    .fetch_one(&data.conn_pool)
-    .await
-    .map_err(|e| {
-        (
-            StatusCode::INTERNAL_SERVER_ERROR,
-            Json(json!({"status": "error","message": format!("{:?}", e)})),
-        )
-    })?;
+    let updated_note = sqlx::query_as::<_, NoteModel>(
+        r#"SELECT * FROM notes WHERE id = ?"#)
+        .bind(&id)
+        .fetch_one(&data.conn_pool)
+        .await
+        .map_err(|e| {
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(json!({"status": "error","message": format!("{:?}", e)})),
+            )
+        })?;
 
     let note_response = serde_json::json!({
         "status": "success",
@@ -270,7 +250,8 @@ pub async fn delete_note_handler(
     State(data): State<Arc<AppState>>,
 ) -> Result<impl IntoResponse, (StatusCode, Json<serde_json::Value>)> {
     // delete with query macro
-    let query_result = sqlx::query!(r#"DELETE FROM notes WHERE id = ?"#, &id)
+    let query_result = sqlx::query(r#"DELETE FROM notes WHERE id = $1"#)
+        .bind(&id)
         .execute(&data.conn_pool)
         .await
         .map_err(|e| {

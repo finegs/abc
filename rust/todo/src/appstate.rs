@@ -1,17 +1,17 @@
+#[allow(unused)]
+
 #[cfg(feature="sqlite")]
 use sqlx::SqlitePool;
 
-#[derive(Debug)]
-#[cfg(feature="sqlite")]
-struct AppState {
-    db_conn: sqlx::SqlitePool,
-}
-
-#[cfg(feature="mysql")]
-use sqlx::MySqlPool;
+// #[cfg(feature="mysql")]
+// use sqlx::MySqlPool;
 
 #[derive(Debug)]
-#[cfg(feature="mysql")]
-struct AppState {
-    db_conn: sqlx::MySqlPool,
+pub  struct AppState {
+
+    // #[cfg(feature="mysql")]
+    // pub conn_pool: sqlx::MySqlPool,
+
+    #[cfg(feature="sqlite")]
+    pub conn_pool: sqlx::SqlitePool,
 }
