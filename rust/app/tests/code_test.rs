@@ -440,7 +440,8 @@ fn dijkstra_test() {
         vec![Edge { node: 0, cost: 7 },
              Edge { node: 4, cost: 2 }],
         // Node 4
-        vec![]];
+        vec![]
+    ];
 
     assert_eq!(shortest_path(&graph, 0, 1), Some(1));
     assert_eq!(shortest_path(&graph, 0, 3), Some(3));
