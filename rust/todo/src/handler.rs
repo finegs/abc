@@ -47,8 +47,31 @@ pub async fn note_list_handle(
                 "status": "error",
                 "message": format!("Database error: { }", e),
             });
+<<<<<<< Updated upstream
             (StatusCode::INTERNAL_SERVER_ERROR, Json(error_response))
         })?;
+=======
+            eprintln!("fail to acquire connect. {}", &error_response);
+            return Err((StatusCode::INTERNAL_SERVER_ERROR, Json(error_response)));
+        }
+    };
+    // Query with macro
+    let notes = sqlx::query_as!(
+        NoteModel,
+        r#"SELECT * FROM notes ORDER by id LIMIT ? OFFSET ?"#,
+        limit as i32,
+        offset as i32
+    )
+    .fetch_all(&mut conn)
+    .await
+    .map_err(|e| {
+        let error_response = serde_json::json!({
+            "status": "error",
+            "message": format!("Database error: { }", e),
+        });
+        (StatusCode::INTERNAL_SERVER_ERROR, Json(error_response))
+    })?;
+>>>>>>> Stashed changes
 
     // Response
     let note_responses = notes

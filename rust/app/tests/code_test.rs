@@ -1,12 +1,46 @@
 #![allow(unused)]
 #[cfg(test)]
 use std::cell::{Cell, RefCell};
-use std::{clone, ops::Deref, rc::Rc};
+use std::{clone, fmt::Display, ops::Deref, rc::Rc};
 
 #[allow(unused_imports)]
 use std::sync::RwLock;
 
 use app_util::log::tlog;
+
+#[test]
+fn trait_1_test() {
+
+    use std::ops::{Add, AddAssign};
+
+   struct Item(u32, String);
+
+   impl Add<Item> for Item {
+       type Output = Item;
+      
+       fn add(self, rhs: Item) -> Self::Output {
+            Item (  
+                self.0 + rhs.0,
+                self.1.clone().add(rhs.1.as_str())
+            )  
+       }
+   }
+
+   impl AddAssign<Item> for Item {
+      fn add_assign(&mut self, rhs: Item) {
+          self.0 += rhs.0;
+          self.1.push_str(rhs.1.as_str());
+      } 
+   }
+
+   impl Display for Item {
+       fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+           write!(f, "({}, {})", self.0, self.1)
+       }
+   }
+
+   let  i1 = Item(1, "111".into());
+}
 
 #[test]
 fn deref_test() 
@@ -259,7 +293,6 @@ fn generic_impl_fn_test() {
 #[test]
 fn test_generic_with_trait() {
 
-
     pub trait Summary {
         fn summarize(&self) -> String;
     }
@@ -449,3 +482,4 @@ fn dijkstra_test() {
     assert_eq!(shortest_path(&graph, 0, 4), Some(5));
     assert_eq!(shortest_path(&graph, 4, 0), None);
 }
+
