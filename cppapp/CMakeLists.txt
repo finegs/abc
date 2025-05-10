@@ -20,7 +20,7 @@ ELSE(MSVC) ## xNIX, MSYS
 ENDIF(MSVC)
 
 # find dependencies
-if (MSVC)
+IF(MSVC)
 
 	include_directories($ENV{INCLUDE})
 

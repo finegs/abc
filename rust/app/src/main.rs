@@ -3,5 +3,6 @@ pub mod util;
 use crate::util::log;
 
 fn main() {
-    log::tlog(format!("hello world"));
+    let a = String::from("a");
+    log::tlog(format!("hello world. a : ${a}"));
 }
