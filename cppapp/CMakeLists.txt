@@ -1,105 +1,115 @@
-cmake_minimum_required(VERSION 3.1)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.1)
 
-project(abc)
+PROJECT(abc)
 
-set(CMAKE_BUILD_TYPE Debug)
+SET(CMAKE_BUILD_TYPE Debug)
 
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+SET(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 IF(MSVC)
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /MDd /Zi /Ob0 /Od /RTC1 /std:c17")
-  set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS} /MDd /Zi /Ob0 /Od /RTC1 /std:c17")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MDd /Zi /Ob0 /Od /RTC1 /std:c++17")
-  set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MDd /Zi /Ob0 /Od /RTC1 /std:c++17")
-  set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MD /O2 /Ob2 /DNDEBUG /std:c++17")
-ELSE(MSVC) ## xNIX, MSYS
-	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O2 -std=c17")
-	set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS} -g -O0 -std=c17")
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2 -std=c++20")
-  set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g -O0 -std=c++2a")
-ENDIF(MSVC)
+  SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /MDd /Zi /Ob0 /Od /RTC1 /std:c17")
+  SET(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS} /MDd /Zi /Ob0 /Od /RTC1 /std:c17")
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MDd /Zi /Ob0 /Od /RTC1 /std:c++17")
+  SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MDd \
+                                                      /Zi \
+                                                      /Ob0 \
+                                                      /Od \
+                                                      /RTC1 \
+                                                      /std:c++17")
+  SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MD \
+                                                      /O2 \
+                                                      /Ob2 \
+                                                      /DNDEBUG \
+                                                      /std:c++17")
+ELSE() ## xNIX, MSYS
+  SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O2 -std=c17")
+  SET(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS} -g -O0 -std=c17")
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2 -std=c++20")
+  SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g -O0 -std=c++2a")
+ENDIF()
 
 # find dependencies
 IF(MSVC)
 
-	include_directories($ENV{INCLUDE})
+  INCLUDE_DIRECTORIES($ENV{INCLUDE})
 
-ELSE (MSVC)
+ELSE()
 
-    # gcc `pkg-config --cflags gtk+-3.0` -o hello-world-gtk hello-world-gtk.c `pkg-config --libs gtk+-3.0`
-    find_package(PkgConfig REQUIRED)
-    pkg_check_modules(GTK REQUIRED gtk4)
-    
-    include_directories(${GTK_INCLUDE_DIRS})
-    link_directories(${GTK_LIBRARY_DIRS})
-    add_definitions(${GTK_CFLAGS_OTHER})
-    add_compile_options(${GTK_CFLAGS_OTHER})
+  # gcc `pkg-config --cflags gtk+-3.0` -o hello-world-gtk \
+  # hello-world-gtk.c `pkg-config --libs gtk+-3.0`
+  FIND_PACKAGE(PkgConfig REQUIRED)
+  PKG_CHECK_MODULES(GTK REQUIRED gtk4)
 
-ENDIF(MSVC)
+  INCLUDE_DIRECTORIES(${GTK_INCLUDE_DIRS})
+  LINK_DIRECTORIES(${GTK_LIBRARY_DIRS})
+  ADD_DEFINITIONS(${GTK_CFLAGS_OTHER})
+  ADD_COMPILE_OPTIONS(${GTK_CFLAGS_OTHER})
 
-include_directories(.)
+ENDIF()
 
-add_executable(a a.cpp)
-add_executable(b b.cpp)
-add_executable(d d.cpp)
-add_executable(tt tt.cpp)
-add_executable(trie_sum trie_sum.cpp)
-add_executable(colormenu colormenu.cpp)
-add_executable(scoville scoville.cpp)
+INCLUDE_DIRECTORIES(.)
+
+ADD_EXECUTABLE(a a.cpp)
+ADD_EXECUTABLE(b b.cpp)
+ADD_EXECUTABLE(d d.cpp)
+ADD_EXECUTABLE(tt tt.cpp)
+ADD_EXECUTABLE(trie_sum trie_sum.cpp)
+ADD_EXECUTABLE(colormenu colormenu.cpp)
+ADD_EXECUTABLE(scoville scoville.cpp)
 
 IF(MSYS)
 
-	target_link_libraries(a pthread ws2_32 zmq)
-	target_link_libraries(b pthread ws2_32 zmq)
-	target_link_libraries(d pthread ws2_32 zmq)
-	target_link_libraries(tt pthread ws2_32 zmq)
-	target_link_libraries(trie_sum pthread ws2_32 zmq)
-	target_link_libraries(colormenu pthread ws2_32 zmq)
+  TARGET_LINK_LIBRARIES(a pthread ws2_32 zmq)
+  TARGET_LINK_LIBRARIES(b pthread ws2_32 zmq)
+  TARGET_LINK_LIBRARIES(d pthread ws2_32 zmq)
+  TARGET_LINK_LIBRARIES(tt pthread ws2_32 zmq)
+  TARGET_LINK_LIBRARIES(trie_sum pthread ws2_32 zmq)
+  TARGET_LINK_LIBRARIES(colormenu pthread ws2_32 zmq)
 
 ELSEIF(MSVC)
-	
-	target_link_libraries(a ws2_32)
-	target_link_libraries(b ws2_32)
-	target_link_libraries(d ws2_32)
-	target_link_libraries(tt ws2_32)
-	target_link_libraries(trie_sum ws2_32)
-	target_link_libraries(colormenu ws2_32)
 
-#target_include_directories(hello_g PRIVATE ${GTK_INCLUDE_DIRS})
+  TARGET_LINK_LIBRARIES(a ws2_32)
+  TARGET_LINK_LIBRARIES(b ws2_32)
+  TARGET_LINK_LIBRARIES(d ws2_32)
+  TARGET_LINK_LIBRARIES(tt ws2_32)
+  TARGET_LINK_LIBRARIES(trie_sum ws2_32)
+  TARGET_LINK_LIBRARIES(colormenu ws2_32)
 
-ELSE(MSYS)
-	target_link_libraries(a pthread)
-	target_link_libraries(b pthread)
-	target_link_libraries(d pthread)
-	target_link_libraries(tt pthread)
-	target_link_libraries(trie_sum pthread )
-	target_link_libraries(colormenu pthread )
+  #TARGET_INCLUDE_DIRECTORIES(hello_g PRIVATE ${GTK_INCLUDE_DIRS})
 
-ENDIF(MSYS)
+ELSE()
+  TARGET_LINK_LIBRARIES(a pthread)
+  TARGET_LINK_LIBRARIES(b pthread)
+  TARGET_LINK_LIBRARIES(d pthread)
+  TARGET_LINK_LIBRARIES(tt pthread)
+  TARGET_LINK_LIBRARIES(trie_sum pthread)
+  TARGET_LINK_LIBRARIES(colormenu pthread)
 
-if(MSYS)
+ENDIF()
 
-#target_compile_definitions(hello_g PRIVATE ${GTK_CFLAGS_OTHER})
-#target_include_directories(hello_g PRIVATE ${GTK_INCLUDE_DIRS})
-#target_link_directories(hello_g PRIVATE ${GTK_LIBRARY_DIRS})
-#target_link_libraries(hello_g PRIVATE ${GTK_LIBRARIES} ws2_32 zmq)
+IF(MSYS)
 
-endif()
+  #TARGET_COMPILE_DEFINITIONS(hello_g PRIVATE ${GTK_CFLAGS_OTHER})
+  #TARGET_INCLUDE_DIRECTORIES(hello_g PRIVATE ${GTK_INCLUDE_DIRS})
+  #TARGET_LINK_DIRECTORIES(hello_g PRIVATE ${GTK_LIBRARY_DIRS})
+  #TARGET_LINK_LIBRARIES(hello_g PRIVATE ${GTK_LIBRARIES} ws2_32 zmq)
 
-IF (MSYS OR MSVC)
+ENDIF()
 
-	install(TARGETS trie_sum DESTINATION C:\\Programs\\bin)
-	install(TARGETS tt DESTINATION C:\\Programs\\bin)
-	install(TARGETS a DESTINATION C:\\Programs\\bin)
-	install(TARGETS b DESTINATION C:\\Programs\\bin)
-	install(TARGETS d DESTINATION C:\\Programs\\bin)
+IF(MSYS OR MSVC)
 
-ELSE (MSYS OR MSVC)
+  INSTALL(TARGETS trie_sum DESTINATION C:\\Programs\\bin)
+  INSTALL(TARGETS tt DESTINATION C:\\Programs\\bin)
+  INSTALL(TARGETS a DESTINATION C:\\Programs\\bin)
+  INSTALL(TARGETS b DESTINATION C:\\Programs\\bin)
+  INSTALL(TARGETS d DESTINATION C:\\Programs\\bin)
 
-	install(TARGETS trie_sum DESTINATION ~/bin)
-	install(TARGETS tt DESTINATION ~/bin)
-	install(TARGETS a DESTINATION ~/bin)
-	install(TARGETS b DESTINATION ~/bin)
-	install(TARGETS d DESTINATION ~/bin)
+ELSE()
 
-ENDIF(MSYS OR MSVC)
+  INSTALL(TARGETS trie_sum DESTINATION ~/bin)
+  INSTALL(TARGETS tt DESTINATION ~/bin)
+  INSTALL(TARGETS a DESTINATION ~/bin)
+  INSTALL(TARGETS b DESTINATION ~/bin)
+  INSTALL(TARGETS d DESTINATION ~/bin)
+
+ENDIF()
