@@ -57,6 +57,8 @@ ADD_EXECUTABLE(trie_sum trie_sum.cpp)
 ADD_EXECUTABLE(colormenu colormenu.cpp)
 ADD_EXECUTABLE(scoville scoville.cpp)
 
+ADD_EXECUTABLE(algo algo.cpp)
+
 IF(MSYS)
 
   TARGET_LINK_LIBRARIES(a pthread ws2_32 zmq)
