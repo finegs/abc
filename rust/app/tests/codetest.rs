@@ -9,8 +9,7 @@ use std::sync::RwLock;
 use app_util::log::tlog;
 
 #[test]
-fn deref_test() 
-{
+fn deref_test() {
     let a = 1;
     let b = &1;
     assert_eq!(1, a);
@@ -18,8 +17,7 @@ fn deref_test()
 }
 
 #[test]
-fn block_borrow_test() 
-{
+fn block_borrow_test() {
     let mut s = "hello".to_owned();
     {
         let s1 = &mut s;
@@ -166,7 +164,6 @@ fn arc_mutex_refcell_test() {
     tlog(format!("data: {:?}", data_locked.borrow()));
 }
 
-
 #[test]
 fn refcell_2_test() {
     #[derive(Debug)]
@@ -176,17 +173,19 @@ fn refcell_2_test() {
 
     impl Wallet {
         pub fn new(balance: i64) -> Self {
-           Self { balance : Rc::new(RefCell::new(balance)) }
+            Self {
+                balance: Rc::new(RefCell::new(balance)),
+            }
         }
 
         pub fn deposit(&self, amount: i64) {
-           let mut ref_cell = self.balance.borrow_mut();
-           *ref_cell += amount;
+            let mut ref_cell = self.balance.borrow_mut();
+            *ref_cell += amount;
         }
 
         pub fn withrawal(&self, amount: i64) {
-           let mut ref_cell = self.balance.borrow_mut();
-           *ref_cell -= amount;
+            let mut ref_cell = self.balance.borrow_mut();
+            *ref_cell -= amount;
         }
 
         pub fn get_balance_value(&self) -> i64 {
@@ -194,30 +193,29 @@ fn refcell_2_test() {
         }
 
         pub fn get_balance(&self) -> Rc<RefCell<i64>> {
-           self.balance.clone()
+            self.balance.clone()
         }
     }
 
-    let  w = Wallet::new(0);
+    let w = Wallet::new(0);
 
     w.deposit(10);
     w.withrawal(5);
 
-    let bc =  w.get_balance().clone();
+    let bc = w.get_balance().clone();
 
     *bc.borrow_mut() += 10;
 
     assert_ne!(w.get_balance_value(), 10);
     assert_eq!(w.get_balance_value(), 15);
     assert_eq!(*bc.borrow(), 15);
-
 }
 
 #[test]
 fn generic_impl_fn_test() {
-    fn parse_csv_document<R>(src: R) -> std::io::Result<Vec<Vec<String>>> 
-        where 
-            R: std::io::BufRead 
+    fn parse_csv_document<R>(src: R) -> std::io::Result<Vec<Vec<String>>>
+    where
+        R: std::io::BufRead,
     {
         src.lines()
             .map(|line| {
@@ -232,34 +230,29 @@ fn generic_impl_fn_test() {
             .collect() // Collect all lines into a Vec<Vec<String>>
     }
 
-    // parse_csv_document(std::io::Empty()); 
+    // parse_csv_document(std::io::Empty());
     // This is the exact same function, but its return type uses `impl Trait`.
     // Look how much simpler it is!
-    fn combine_vecs<T>(
-        v: Vec<T>,
-        u: Vec<T>,
-    ) -> impl Iterator<Item=T> 
-        where
-            T:  Clone
+    fn combine_vecs<T>(a: Vec<T>, b: Vec<T>) -> impl Iterator<Item = T>
+    where
+        T: Clone,
     {
-        v.into_iter().chain(u.into_iter()).cycle()
+        a.into_iter().chain(b).cycle()
     }
 
-    let a = vec![1,2,3];
-    let b = vec![4,5];
+    let a = vec![1, 2, 3];
+    let b = vec![4, 5];
+    let ab = combine_vecs(a, b).collect::<Vec<i32>>();
 
     let mut ss = String::new();
     a.into_iter().for_each(|e| {
         ss.push_str(e.to_string().to_string().as_str());
     });
     println!("ss is [{}]", ss);
-
 }
 
 #[test]
 fn test_generic_with_trait() {
-
-
     pub trait Summary {
         fn summarize(&self) -> String;
     }
@@ -268,7 +261,7 @@ fn test_generic_with_trait() {
     struct Article {
         title: String,
         author: String,
-        content: String
+        content: String,
     }
 
     impl Summary for Article {
@@ -284,7 +277,7 @@ fn test_generic_with_trait() {
     }
 
     impl Summary for Tweet {
-        fn summarize(&self) -> String{
+        fn summarize(&self) -> String {
             format!("@{}: {}", self.username, self.content)
         }
     }
@@ -304,18 +297,18 @@ fn test_generic_with_trait() {
         println!("Breaking news! {}", item.summarize());
     }
 
-    let a = Article{
-                                title: "title".into(),
-                                author: "aa".into(),
-                                content: "...".into()
-                            };
-
-    let b = Tweet{
-        username: "user-01".into(),
-        content: "....".into()
+    let a = Article {
+        title: "title".into(),
+        author: "aa".into(),
+        content: "...".into(),
     };
 
-    let ss: Vec<&dyn Summary>  = vec![&a, &b];
+    let b = Tweet {
+        username: "user-01".into(),
+        content: "....".into(),
+    };
+
+    let ss: Vec<&dyn Summary> = vec![&a, &b];
 
     notify(&article);
     notify(&tweet);
@@ -323,7 +316,6 @@ fn test_generic_with_trait() {
     for (i, s) in ss.iter().enumerate() {
         println!("[{}] : {}", i, s.summarize());
     }
-        
 }
 
 #[test]
@@ -345,7 +337,9 @@ fn dijkstra_test() {
             // Notice that we flip the ordering on costs.
             // In case of a tie we compare positions - this step is necessary
             // to make implementations of `PartialEq` and `Ord` consistent.
-            other.cost.cmp(&self.cost)
+            other
+                .cost
+                .cmp(&self.cost)
                 .then_with(|| self.position.cmp(&other.position))
         }
     }
@@ -377,20 +371,30 @@ fn dijkstra_test() {
 
         // We're at `start`, with a zero cost
         dist[start] = 0;
-        heap.push(State { cost: 0, position: start });
+        heap.push(State {
+            cost: 0,
+            position: start,
+        });
 
         // Examine the frontier with lower cost nodes first (min-heap)
         while let Some(State { cost, position }) = heap.pop() {
             // Alternatively we could have continued to find all shortest paths
-            if position == goal { return Some(cost); }
+            if position == goal {
+                return Some(cost);
+            }
 
             // Important as we may have already found a better way
-            if cost > dist[position] { continue; }
+            if cost > dist[position] {
+                continue;
+            }
 
             // For each node we can reach, see if we can find a way with
             // a lower cost going through this node
             for edge in &adj_list[position] {
-                let next = State { cost: cost + edge.cost, position: edge.node };
+                let next = State {
+                    cost: cost + edge.cost,
+                    position: edge.node,
+                };
 
                 // If so, add it to the frontier and continue
                 if next.cost < dist[next.position] {
@@ -428,19 +432,19 @@ fn dijkstra_test() {
     // Chosen for its efficiency.
     let graph = vec![
         // Node 0
-        vec![Edge { node: 2, cost: 10 },
-             Edge { node: 1, cost: 1 }],
+        vec![Edge { node: 2, cost: 10 }, Edge { node: 1, cost: 1 }],
         // Node 1
         vec![Edge { node: 3, cost: 2 }],
         // Node 2
-        vec![Edge { node: 1, cost: 1 },
-             Edge { node: 3, cost: 3 },
-             Edge { node: 4, cost: 1 }],
+        vec![
+            Edge { node: 1, cost: 1 },
+            Edge { node: 3, cost: 3 },
+            Edge { node: 4, cost: 1 },
+        ],
         // Node 3
-        vec![Edge { node: 0, cost: 7 },
-             Edge { node: 4, cost: 2 }],
+        vec![Edge { node: 0, cost: 7 }, Edge { node: 4, cost: 2 }],
         // Node 4
-        vec![]
+        vec![],
     ];
 
     assert_eq!(shortest_path(&graph, 0, 1), Some(1));
