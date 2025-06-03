@@ -5,6 +5,8 @@ where
     left + right
 }
 
+#[macro_export]
+
 macro_rules! calculate {
     // The pattern for a single `eval`
     (eval $e:expr) => {
