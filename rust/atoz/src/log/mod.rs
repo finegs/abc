@@ -1,31 +1,37 @@
-#[macro_export]
-macro_rules! log {
-    ( $( $arg:expr ),* ) => {
-        println!("{}", tslog!($($arg),*));
-    };
+use std::time::{SystemTime, UNIX_EPOCH};
+
+pub mod log_macro;
+
+pub fn now_u128() -> u128 {
+    let now = SystemTime::now();
+    let duration_since_epoch = now.duration_since(UNIX_EPOCH).unwrap();
+    let seconds = duration_since_epoch.as_secs();
+    let nanoseconds = duration_since_epoch.subsec_nanos();
+    seconds as u128 * 1_000_000 + (nanoseconds as u128 / 1_000)
 }
 
-#[macro_export]
-macro_rules! tslog {
-    ( $( $arg:expr ),* ) => {
+struct TimestampU128(u128);
 
-        {
-            use chrono;
-            use std::thread;
+trait TimeStampStr {
+    fn to_string() -> String;
+}
 
-            let now = chrono::Local::now();
-            format!(
-                "{} - [{:?}] : {}",
-                now.format("%Y-%m-%d %H:%M:%S%.6f"),
-                thread::current().id(),
-                format!($($arg),*)
-            )
-        }
-    };
+impl TimeStampStr for TimestampU128 {
+    fn to_string() -> String {
+        todo!()
+    }
+}
+
+impl From<chrono::DateTime<chrono::Local>> for TimestampU128 {
+    fn from(value: chrono::DateTime<chrono::Local>) -> Self {
+        TimestampU128(value.timestamp() as u128 * 1000_000u128 + value.timestamp_micros() as u128)
+    }
 }
 
 #[cfg(test)]
 mod tests_log {
+
+    use crate::{log, tslog};
 
     #[test]
     fn test_dateformat() {
