@@ -6,6 +6,13 @@ macro_rules! log {
 }
 
 #[macro_export]
+macro_rules! elog {
+    ( $( $arg:expr ),* ) => {
+        eprintln!("{}", tslog!($($arg),*));
+    };
+}
+
+#[macro_export]
 macro_rules! tslog {
     ( $( $arg:expr ),* ) => {
 
