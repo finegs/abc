@@ -3,15 +3,15 @@ use std::sync::atomic::Ordering;
 use std::sync::{atomic, mpsc};
 use std::thread;
 
-use atoz::{elog, log, tslog};
+use atoz::{elog, log_err, log_info, tslog};
 use serde::{Deserialize, Serialize};
 
 #[test]
 fn test_snd_rcv_test_prd_cons() {
     use serde::{Deserialize, Serialize};
-    use serde_json::{self, Result};
+    use serde_json;
 
-    use crate::log;
+    use atoz::log;
 
     #[derive(Serialize, Deserialize)]
     struct Msg {
@@ -60,11 +60,11 @@ fn test_snd_rcv_test_prd_cons() {
             }
             // Receive the message
             let message = rx.recv().unwrap();
-            log!("Received: {}", message);
+            log_info!("Received: {}", message);
 
             // handle for terminate cmd from sender.
             if message.is_terminate_cmd() {
-                log!("### Receiver receive terminate cmd. cmd : [{}]", message);
+                log_info!("### Receiver receive terminate cmd. cmd : [{}]", message);
                 is_shutdown_reserved.fetch_xor(true, Ordering::SeqCst);
                 break;
             }
@@ -77,14 +77,14 @@ fn test_snd_rcv_test_prd_cons() {
         match tx.send(Msg::new(idx.to_string().as_str())) {
             Ok(()) => {}
             Err(err) => {
-                elog!("### fail to send. idx : [{}], err : [{}]", idx, err);
+                log_err!("### fail to send. idx : [{}], err : [{}]", idx, err);
             }
         };
 
         thread::sleep(std::time::Duration::from_millis(500));
     }
 
-    log!("### send/recv for n-thread. msg_count : {}", msg_count);
+    log_info!("### send/recv for n-thread. msg_count : {}", msg_count);
 
     // Send a message
     tx.send(Msg::new("Last send string from main thread."))
@@ -93,5 +93,5 @@ fn test_snd_rcv_test_prd_cons() {
     // Wait for the thread to finish
     thread.join().unwrap();
 
-    log!("### done.");
+    log_info!("### done.");
 }
