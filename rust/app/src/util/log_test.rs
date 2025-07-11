@@ -3,9 +3,9 @@
 fn  datetime_format_test() {
 
     use chrono::prelude::*;
-    let date_time: DateTime<Utc> = Utc.with_ymd_and_hms(2017, 04, 02, 12, 50, 32).unwrap();
-    date_time.with_nanosecond(123000);
-    let formatted = format!("{}", date_time.format("%d/%m/%Y %H:%M:%S.%6f"));
+    let date_time: DateTime<Utc> = Utc.with_ymd_and_hms(2017, 4, 2, 12, 50, 32).unwrap();
+    let date_time2 = date_time.with_nanosecond(123000000).unwrap_or(date_time);
+    let formatted = format!("{}", date_time2.format("%d/%m/%Y %H:%M:%S.%6f"));
     assert_eq!(formatted, "02/04/2017 12:50:32.123000");
 }
 #[test]
@@ -18,5 +18,5 @@ fn choron_test() {
 
     println!("Current  DT : {}", s);
 
-    assert!(true);
+    assert!(true == true);
 }
