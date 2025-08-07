@@ -26,10 +26,10 @@ mod tests {
         let r1 = &s;
         let r2 = &s;
 
-        println!("r1:{r1}, r2:{r2}");
+        log_info!("r1:{r1}, r2:{r2}");
 
         let r3 = &mut s;
         append(r3);
-        println!("r3:{r3}");
+        log_info!("r3:{r3}");
     }
 }

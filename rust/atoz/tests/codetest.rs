@@ -40,10 +40,10 @@ fn test_snd_rcv_test_prd_cons() {
             let ss = match serde_json::to_string(self) {
                 Ok(s) => s,
                 Err(err) => {
-                    format!("### Fail to serde_json::to_string(). err : [{}]", err)
+                    format!("### Fail to serde_json::to_string(). err : [{err}]")
                 }
             };
-            write!(f, "{}", ss)
+            write!(f, "{ss}")
         }
     }
 
