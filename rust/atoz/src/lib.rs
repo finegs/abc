@@ -15,4 +15,21 @@ mod tests {
         log_info!("### add({},{})={}", left, right, calc::add(left, right));
         assert_eq!(result, 4);
     }
+
+    fn append(s: &mut String) {
+        s.push_str(" ...");
+    }
+
+    #[test]
+    fn test01() {
+        let mut s = String::from("hello");
+        let r1 = &s;
+        let r2 = &s;
+
+        println!("r1:{r1}, r2:{r2}");
+
+        let r3 = &mut s;
+        append(r3);
+        println!("r3:{r3}");
+    }
 }
