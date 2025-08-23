@@ -1,4 +1,4 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 3.1)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.20)
 
 PROJECT(abc)
 
@@ -47,6 +47,17 @@ ELSE()
 
 ENDIF()
 
+
+# Google Test
+INCLUDE(GoogleTest)
+
+# INCLUDE(FetchContent)
+# FETCHCONTENT_DECLARE(
+#   googletest
+#   URL https://github.com/google/googletest/archive/release-1.11.0.zip
+# )
+# FETCHCONTENT_MAKEAVAILABLE(googletest)
+
 INCLUDE_DIRECTORIES(.)
 
 ADD_EXECUTABLE(a a.cpp)
@@ -58,6 +69,8 @@ ADD_EXECUTABLE(colormenu colormenu.cpp)
 ADD_EXECUTABLE(scoville scoville.cpp)
 
 ADD_EXECUTABLE(algo algo.cpp)
+
+ADD_SUBDIRECTORY(tests)
 
 IF(MSYS)
 
