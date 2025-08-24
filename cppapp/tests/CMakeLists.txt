@@ -27,16 +27,16 @@ FetchContent_MakeAvailable(googletest)
 #   GIT_TAG release-1.12.1
 # )
 
-add_executable(tests my_test_file.cpp)
+add_executable(codetest codetest.cpp)
 add_executable(hello_test hello_test.cpp)
 
-target_link_libraries(tests GTest::gtest_main)
+target_link_libraries(codetest GTest::gtest_main)
 target_link_libraries(hello_test GTest::gtest_main)
 
 include(GoogleTest)
-gtest_discover_tests(tests)
+gtest_discover_tests(codetest)
 gtest_discover_tests(hello_test)
 
-add_test(NAME tests COMMAND tests)
+add_test(NAME codetest COMMAND codetest)
 add_test(NAME hello_test COMMAND hello_test)
 
