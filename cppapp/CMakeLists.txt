@@ -63,6 +63,8 @@ ADD_EXECUTABLE(scoville   ${PJT_SRC_DIR}/scoville.cpp)
 
 ADD_EXECUTABLE(algo       ${PJT_SRC_DIR}/algo.cpp)
 
+ADD_EXECUTABLE(dijstra ${PJT_SRC_DIR}/dijstra.cpp)
+
 ADD_SUBDIRECTORY(tests)
 
 IF(MSYS)
