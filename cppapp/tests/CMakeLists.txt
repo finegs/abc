@@ -8,6 +8,9 @@
 #   URL https://github.com/google/googletest/archive/release-1.11.0.zip
 # )
 # FETCHCONTENT_MAKEAVAILABLE(googletest)
+
+enable_testing()
+
 include(FetchContent)
 FetchContent_Declare(
   googletest
@@ -32,4 +35,8 @@ target_link_libraries(hello_test GTest::gtest_main)
 
 include(GoogleTest)
 gtest_discover_tests(tests)
+gtest_discover_tests(hello_test)
+
+add_test(NAME tests COMMAND tests)
+add_test(NAME hello_test COMMAND hello_test)
 
