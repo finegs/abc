@@ -2,208 +2,207 @@
 #include <ostream>
 #if 1
 
-#include <iostream>
-#include <string>
-#include <vector>
-#include <sstream>
-#include <unordered_map>
-#include <cstring>
 #include "u.hpp"
 #include <algorithm>
+#include <cstring>
+#include <iostream>
 #include <ranges>
+#include <sstream>
+#include <string>
+#include <unordered_map>
+#include <vector>
 
-std::ostream& operator<<(std::ostream& os, const char* o) {
-	os << o;
-	return os;
+std::ostream &operator<<(std::ostream &os, const char *o) {
+  os << o;
+  return os;
 }
 
 namespace my {
-	const static char obj_sep_default = ',';
-	static char obj_sep = obj_sep_default;
+const static char obj_sep_default = ',';
+static char obj_sep = obj_sep_default;
 
-	template <typename It>
-	inline std::ostream& display(std::ostream& os, It begin, It end) {
-		char sep[3]{'\0', ' ', '\0'};
-		for(auto& cur=begin;cur!=end;++cur) {
-			os << sep << *cur; sep[0]=',';
-		}
-		return os;
-	}
-};
+template <typename It>
+inline std::ostream &display(std::ostream &os, It begin, It end) {
+  char sep[3]{'\0', ' ', '\0'};
+  for (auto &cur = begin; cur != end; ++cur) {
+    os << sep << *cur;
+    sep[0] = ',';
+  }
+  return os;
+}
+}; // namespace my
 
 class Person {
-	protected:
-		std::string first;
-		std::string last;
-		int val;
-	public:
-	Person() = default;
+protected:
+  std::string first;
+  std::string last;
+  int val;
 
-	Person(const std::string& f, const std::string& l, int v) 
-		: first{f}, last{l}, val{v} {}
-	Person(const Person& o) = default;
-	Person(Person&& o) noexcept = default;
-	Person& operator=(const Person&) = default;
-	Person& operator=(Person&&) noexcept = default;
-//	Person(const Person& o)
-//   		: first{o.first}, last{o.last}, val{o.val} 	{
-//	}
-//	Person(Person&& o) noexcept 
-//		: first{std::move(o.first)}, last{std::move(o.last)}, val{o.val} {
-//	}
-//	Person& operator=(const Person& o) {
-//		if(this==&o) return *this;
-//		first = o.first;
-//		last = o.last;
-//		val = o.val;
-//		return *this;
-//	}
-//	Person& operator=(Person&& o) {
-//		if(this==&o) return *this;
-//		first = std::move(o.first);
-//		last = std::move(o.last);
-//		val = o.val;
-//		return *this;
-//	}
-	virtual ~Person() = default; 
-	virtual void print(int n) const = 0;
+public:
+  Person() = default;
 
-	bool operator<(const Person& o) const {
-		return first < o.first || last < o.last || val < o.val;
-	}
-	
-	virtual std::ostream& print(std::ostream& os) const {
-		// os << "{";
-		#ifndef NDEBUG
- 		os << "\"&\":"<< this << ", ";
-		#endif
-		os << '"' << "first" << '"' << ":" << '"' << first << '"';
-		os << ", \"" << "last" << '"' << ":" << '"' << last << '"';
-		os << ", \"" << "val" << '"' << ":" << val;
- 		// os << "}";
-		return os;
-	}
- 	friend std::ostream& operator<<(std::ostream& os, const Person& o) {
-		 os << "{";
-		 o.print(os);
-		 os << "}";
-		return os;
- 	}
+  Person(const std::string &f, const std::string &l, int v)
+      : first{f}, last{l}, val{v} {}
+  Person(const Person &o) = default;
+  Person(Person &&o) noexcept = default;
+  Person &operator=(const Person &) = default;
+  Person &operator=(Person &&) noexcept = default;
+  //	Person(const Person& o)
+  //   		: first{o.first}, last{o.last}, val{o.val} 	{
+  //	}
+  //	Person(Person&& o) noexcept
+  //		: first{std::move(o.first)}, last{std::move(o.last)}, val{o.val}
+  //{
+  //	}
+  //	Person& operator=(const Person& o) {
+  //		if(this==&o) return *this;
+  //		first = o.first;
+  //		last = o.last;
+  //		val = o.val;
+  //		return *this;
+  //	}
+  //	Person& operator=(Person&& o) {
+  //		if(this==&o) return *this;
+  //		first = std::move(o.first);
+  //		last = std::move(o.last);
+  //		val = o.val;
+  //		return *this;
+  //	}
+  virtual ~Person() = default;
+  virtual void print(int n) const = 0;
+
+  bool operator<(const Person &o) const {
+    return first < o.first || last < o.last || val < o.val;
+  }
+
+  virtual std::ostream &print(std::ostream &os) const {
+// os << "{";
+#ifndef NDEBUG
+    os << "\"&\":" << this << ", ";
+#endif
+    os << '"' << "first" << '"' << ":" << '"' << first << '"';
+    os << ", \"" << "last" << '"' << ":" << '"' << last << '"';
+    os << ", \"" << "val" << '"' << ":" << val;
+    // os << "}";
+    return os;
+  }
+  friend std::ostream &operator<<(std::ostream &os, const Person &o) {
+    os << "{";
+    o.print(os);
+    os << "}";
+    return os;
+  }
 };
-  
+
 class Customer : public Person {
-	protected:
-		std::vector<int> data;
+protected:
+  std::vector<int> data;
 
-	public:
-		Customer();
-		~Customer();
-		Customer(const std::string& f, const std::string& l, int v)
-			: Person(f, l, v)	{
-			data.push_back(v);
-		}
-		Customer(const Customer& o) 
-			:Person(o)	{
-		}
-		Customer(Customer&& o) noexcept
-			: Person(std::forward<Person>(o))	{
-		}
-		Customer& operator=(const Customer& o) {
-			if(this==&o) return *this;
-			Person::operator=(o);	
-			return *this;
-		}
-		Customer& operator=(Customer&& o) noexcept {
-			if(this==&o) return *this;
-			Person::operator=(std::forward<Person>(o));
-			return *this;
-		}
-		virtual std::ostream& print(std::ostream& os) const override {
-			Person::print(os) << my::obj_sep_default;
-			os << "\"data\":"; my::display(std::cout, data.begin(), data.end());
-			return os;
-		}
-		void print(int n) const override;
+public:
+  Customer();
+  ~Customer();
+  Customer(const std::string &f, const std::string &l, int v)
+      : Person(f, l, v) {
+    data.push_back(v);
+  }
+  Customer(const Customer &o) : Person(o) {}
+  Customer(Customer &&o) noexcept : Person(std::forward<Person>(o)) {}
+  Customer &operator=(const Customer &o) {
+    if (this == &o)
+      return *this;
+    Person::operator=(o);
+    return *this;
+  }
+  Customer &operator=(Customer &&o) noexcept {
+    if (this == &o)
+      return *this;
+    Person::operator=(std::forward<Person>(o));
+    return *this;
+  }
+  virtual std::ostream &print(std::ostream &os) const override {
+    Person::print(os) << my::obj_sep_default;
+    os << "\"data\":";
+    my::display(std::cout, data.begin(), data.end());
+    return os;
+  }
+  void print(int n) const override;
 };
-Customer::Customer() : Person(){}
+Customer::Customer() : Person() {}
 Customer::~Customer() = default;
 
 void Customer::print(int n) const {
-	char __tmstr[25]{'\0'};
-	std::stringstream ss;
+  char __tmstr[25]{'\0'};
+  std::stringstream ss;
 
-	ss << "{";
-	#ifndef NDEBUG
-	// if constexpr(NDEBUG) {
-	ss << "&=" << this << ", ";
-	// }
-	#endif
-
-	ss << "[";
-	ss << first << ", " << last << ", " << val;
-	ss << "]";
-	ss << "}";
-	DBG_LOG2(ss.str().c_str());
-}
-
-namespace std
-{
-	template<>
-	struct hash<const char*>
-	{
-		size_t operator()(const char* s) const {
-			return mstrhash(s);
-		}
-	};
-
-	template<>
-	struct equal_to<const char*>
-	{
-		bool operator()(const char* a, const char* b) const {
-			return strncmp(a,b, strlen(a)) == 0;
-		}
-	};
-};
-
-using KeyCustomer = std::pair<const char*, Customer>;
-std::ostream& operator<<(std::ostream& os, const KeyCustomer& o) {
-	os << '{' << o.first << ':' << o.second << '}';
-	return os;
-}
-
-int main(int argc, char* argv[]) {
-	std::vector<Person*> v;
-	std::unordered_map<const char*, Customer> m;
-
-	//Student student{"First", "Last", 10};
-	for (int i = 0; i < argc; i++) {
-		Customer* c1 = new Customer{argv[i], "Last", i};
-		m.insert({argv[i], *c1});
-		v.push_back(std::move(c1));
-
-		c1->print(i);
-	}
-	my::obj_sep = '\n';
-	std::cout << "v : "; my::display(std::cout, v.begin(), v.end()) << std::endl;
-	my::obj_sep = '\n';
-	std::cout << "m : "; my::display(std::cout, m.begin(), m.end()) << std::endl;
-
-#if ((defined(_MSVC_LANG) && _MSVC_LANG >= 201703L) || __cplusplus >= 201703L)
-     //C++17 specific stuff here
-	for (auto& o : v) { delete o; }
-#elif ((defined(_MSVC_LANG) && _MSVC_LANG >= 202002L) || __cplusplus >= 202002L)
-	 //C++20 specific stuff here
-	std::for_each(v.begin(), v.end(), [](auto& o) { delete o;});
-#elif ( __GNUC__ > 0 )
-	std::for_each(v.begin(), v.end(), [](auto& o) { delete o;});
+  ss << "{";
+#ifndef NDEBUG
+  // if constexpr(NDEBUG) {
+  ss << "&=" << this << ", ";
+// }
 #endif
 
-	// for(auto& c : v) { c->print(1); delete c; }
+  ss << "[";
+  ss << first << ", " << last << ", " << val;
+  ss << "]";
+  ss << "}";
+  DBG_LOG2(ss.str().c_str());
+}
 
-	getchar();
+namespace std {
+template <> struct hash<const char *> {
+  size_t operator()(const char *s) const { return mstrhash(s); }
+};
 
-	std::vector<int> vec{1,2,3,4,5};
-	my::display(std::cout, vec.begin(), vec.end());
+template <> struct equal_to<const char *> {
+  bool operator()(const char *a, const char *b) const {
+    return strncmp(a, b, strlen(a)) == 0;
+  }
+};
+}; // namespace std
+
+using KeyCustomer = std::pair<const char *, Customer>;
+std::ostream &operator<<(std::ostream &os, const KeyCustomer &o) {
+  os << '{' << o.first << ':' << o.second << '}';
+  return os;
+}
+
+int main(int argc, char *argv[]) {
+  std::vector<Person *> v;
+  std::unordered_map<const char *, Customer> m;
+
+  // Student student{"First", "Last", 10};
+  for (int i = 0; i < argc; i++) {
+    Customer *c1 = new Customer{argv[i], "Last", i};
+    m.insert({argv[i], *c1});
+    v.push_back(std::move(c1));
+
+    c1->print(i);
+  }
+  my::obj_sep = '\n';
+  std::cout << "v : ";
+  my::display(std::cout, v.begin(), v.end()) << std::endl;
+  my::obj_sep = '\n';
+  std::cout << "m : ";
+  my::display(std::cout, m.begin(), m.end()) << std::endl;
+
+#if ((defined(_MSVC_LANG) && _MSVC_LANG >= 201703L) || __cplusplus >= 201703L)
+  // C++17 specific stuff here
+  for (auto &o : v) {
+    delete o;
+  }
+#elif ((defined(_MSVC_LANG) && _MSVC_LANG >= 202002L) || __cplusplus >= 202002L)
+  // C++20 specific stuff here
+  std::for_each(v.begin(), v.end(), [](auto &o) { delete o; });
+#elif (__GNUC__ > 0)
+  std::for_each(v.begin(), v.end(), [](auto &o) { delete o; });
+#endif
+
+  // for(auto& c : v) { c->print(1); delete c; }
+
+  getchar();
+
+  std::vector<int> vec{1, 2, 3, 4, 5};
+  my::display(std::cout, vec.begin(), vec.end());
 }
 
 #endif
@@ -246,14 +245,14 @@ int main() {
 #endif
 
 #if 0
-#include <iostream>
-#include <vector>
-#include <cstring>
-#include <chrono>
-#include <sys/timeb.h>
-#include <ctime>
 #include <cassert>
+#include <chrono>
 #include <cmath>
+#include <cstring>
+#include <ctime>
+#include <iostream>
+#include <sys/timeb.h>
+#include <vector>
 
 
 using std::chrono::system_clock;
@@ -401,8 +400,8 @@ int main(int argc,char* argv[]) {
 #endif
 #if 0
 
-#include <stdio.h>
 #include <malloc.h>
+#include <stdio.h>
 
 char* mstrcpy(char dst[], const char src[]) {
     int i = 0;

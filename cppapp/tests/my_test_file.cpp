@@ -1,4 +1,4 @@
-#include "gtest/gtest.h"
+#include <gtest/gtest.h>
 
 // Function to be tested
 int add(int a, int b) { return a + b; }

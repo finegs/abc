@@ -6,6 +6,10 @@ SET(CMAKE_BUILD_TYPE Debug)
 
 SET(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+# for source path
+SET(PJT_SRC_DIR src)
+
+
 IF(MSVC)
   SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /MDd /Zi /Ob0 /Od /RTC1 /std:c17")
   SET(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS} /MDd /Zi /Ob0 /Od /RTC1 /std:c17")
@@ -47,28 +51,17 @@ ELSE()
 
 ENDIF()
 
+INCLUDE_DIRECTORIES(. ${PROJECT_SOURCE_DIR}/inc)
 
-# Google Test
-INCLUDE(GoogleTest)
+ADD_EXECUTABLE(a          ${PJT_SRC_DIR}/a.cpp)
+ADD_EXECUTABLE(b          ${PJT_SRC_DIR}/b.cpp)
+ADD_EXECUTABLE(d          ${PJT_SRC_DIR}/d.cpp)
+ADD_EXECUTABLE(tt         ${PJT_SRC_DIR}/tt.cpp)
+ADD_EXECUTABLE(trie_sum   ${PJT_SRC_DIR}/trie_sum.cpp)
+ADD_EXECUTABLE(colormenu  ${PJT_SRC_DIR}/colormenu.cpp)
+ADD_EXECUTABLE(scoville   ${PJT_SRC_DIR}/scoville.cpp)
 
-# INCLUDE(FetchContent)
-# FETCHCONTENT_DECLARE(
-#   googletest
-#   URL https://github.com/google/googletest/archive/release-1.11.0.zip
-# )
-# FETCHCONTENT_MAKEAVAILABLE(googletest)
-
-INCLUDE_DIRECTORIES(.)
-
-ADD_EXECUTABLE(a a.cpp)
-ADD_EXECUTABLE(b b.cpp)
-ADD_EXECUTABLE(d d.cpp)
-ADD_EXECUTABLE(tt tt.cpp)
-ADD_EXECUTABLE(trie_sum trie_sum.cpp)
-ADD_EXECUTABLE(colormenu colormenu.cpp)
-ADD_EXECUTABLE(scoville scoville.cpp)
-
-ADD_EXECUTABLE(algo algo.cpp)
+ADD_EXECUTABLE(algo       ${PJT_SRC_DIR}/algo.cpp)
 
 ADD_SUBDIRECTORY(tests)
 
