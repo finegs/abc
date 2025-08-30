@@ -2,10 +2,10 @@
 #include <ostream>
 #if 1
 
-#include "u.hpp"
 #include <algorithm>
 #include <cstring>
 #include <iostream>
+#include <my/u.hpp>
 #include <ranges>
 #include <sstream>
 #include <string>
@@ -131,7 +131,7 @@ Customer::Customer() : Person() {}
 Customer::~Customer() = default;
 
 void Customer::print(int n) const {
-  char __tmstr[25]{'\0'};
+  // char __tmstr[25]{'\0'};
   std::stringstream ss;
 
   ss << "{";
@@ -145,7 +145,8 @@ void Customer::print(int n) const {
   ss << first << ", " << last << ", " << val;
   ss << "]";
   ss << "}";
-  DBG_LOG2(ss.str().c_str());
+  ss << '\0';
+  DBG_LOG2("%s", ss.str().c_str());
 }
 
 namespace std {

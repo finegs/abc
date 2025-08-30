@@ -43,8 +43,8 @@ add_executable(hello_test hello_test.cpp)
 target_link_libraries(codetest GTest::gtest_main)
 target_link_libraries(hello_test GTest::gtest_main)
 
-target_include_directories(codetest PRIVATE ${PROJECT_SOURCE_DIR}/inc)
-target_include_directories(hello_test PRIVATE ${PROJECT_SOURCE_DIR}/inc)
+target_include_directories(codetest PUBLIC ${PROJECT_SOURCE_DIR}/inc)
+target_include_directories(hello_test PUBLIC ${PROJECT_SOURCE_DIR}/inc)
 
 include(GoogleTest)
 gtest_discover_tests(codetest)

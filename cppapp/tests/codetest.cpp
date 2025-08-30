@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include <u.hpp>
+#include <my/u.hpp>
 
 // Function to be tested
 int add(int a, int b) { return a + b; }
@@ -20,6 +20,11 @@ TEST(MinusTest, BasicMinus) {
 }
 
 TEST(MStrTest, BasicMStr) { EXPECT_EQ(1, 1); }
+
+TEST(DbgLogTest, MyDbgLog) {
+  DBG_LOG2("%s %s", "DbgLogTest", "1 + 1");
+  EXPECT_EQ(1, 1);
+}
 
 // Main function to run tests
 int main(int argc, char **argv) {
