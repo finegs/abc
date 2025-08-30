@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.10.2)
 project(foo)
 
-set(PROJECT_ROOT /home/mrd/Development/compile_test)
+set(PROJECT_ROOT /home/user01/dev/git/abc/cppapp/foo)
 set(
     CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_ROOT}/bin/
 )
