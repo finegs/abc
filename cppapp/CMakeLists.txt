@@ -9,6 +9,10 @@ SET(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 # for source path
 SET(PJT_SRC_DIR src)
 
+# # for gtest
+# SET(MY_GTEST_FILE
+#   https://github.com/google/googletest/archive/03597a01ee50ed33e9dfd640b249b4be3799d395.zip
+# )
 
 IF(MSVC)
   SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /MDd /Zi /Ob0 /Od /RTC1 /std:c17")

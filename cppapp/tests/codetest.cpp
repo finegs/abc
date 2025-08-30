@@ -1,4 +1,5 @@
 #include <gtest/gtest.h>
+#include <u.hpp>
 
 // Function to be tested
 int add(int a, int b) { return a + b; }
@@ -17,6 +18,8 @@ TEST(MinusTest, BasicMinus) {
   EXPECT_GE(minus(2, 2), 0);
   EXPECT_GE(minus(2, -2), 4);
 }
+
+TEST(MStrTest, BasicMStr) { EXPECT_EQ(1, 1); }
 
 // Main function to run tests
 int main(int argc, char **argv) {
