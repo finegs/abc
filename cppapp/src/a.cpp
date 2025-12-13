@@ -89,6 +89,7 @@ auto item_hasher = [](const IntPair &o) { return std::hash<int>{}(o.first); };
 auto item_less = [](const IntPair &a, const IntPair &b) {
   return a.first < b.first;
 };
+
 auto item_grater = [](const IntPair &a, const IntPair &b) {
   return a.first > b.first;
 };
@@ -143,8 +144,9 @@ std::get<1>(v1) && std::get<2>(v0) == std::get<2>(v1));
 
 typedef unordered_map<MyTuple, int, KeyHash, KeyEqual> MyMap;
  */
-std::set<IntPair, decltype(item_less)> item_set{};
-std::unordered_set<IntPair, decltype(item_hasher)> item_unordered_set{};
+std::set<IntPair, decltype(item_less)> item_set(item_less);
+std::unordered_set<IntPair, decltype(item_hasher), decltype(item_equal_to)>
+    item_unordered_set;
 std::unordered_map<MyRec, MyRec, decltype(myrec_hasher)> recs{
     {{1, 1.0, "aa"}, {1, 1.0001, "aa"}},
     {{2, 2.0, "bb"}, {2, 2.0101, "bb"}},

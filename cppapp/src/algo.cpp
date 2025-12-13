@@ -1,4 +1,7 @@
+#ifndef _WIN32
 #include <bits/stdc++.h>
+#endif // NOT WIN
+
 #include <iostream>
 #include <queue>
 #include <vector>

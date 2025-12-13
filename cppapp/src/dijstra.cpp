@@ -1,4 +1,4 @@
-#include <cmath>
+// #include <cmath>
 #include <iostream>
 #include <queue>
 #include <vector>
@@ -16,7 +16,7 @@ static char __VERSION[20] = "v.0.0.01_250824";
 
 // 시작 위치와 정점의 개수, 인접 행렬을 받아
 // 최소 거리 행렬을 반환함
-vector<int> dijkstra(vector<pair<int, int>> *graph, int start = 0) {
+vector<int> dijkstra(vector<vector<pair<int, int>>> &graph, int start = 0) {
   vector<int> dist(N, INF);          // 거리를 저장할 리스트 초기화
   priority_queue<pair<int, int>> pq; // 우선순위 큐 선언
 
@@ -29,7 +29,7 @@ vector<int> dijkstra(vector<pair<int, int>> *graph, int start = 0) {
     int curNode = pq.top().second; // 정점의 인덱스(번호)
     pq.pop();
 
-    for (int i = 0; i < graph[curNode].size(); i++) {
+    for (size_t i = 0; i < graph[curNode].size(); i++) {
       int nxtNode = graph[curNode][i].first;            // 인접 정점 번호
       int nxtDist = curDist + graph[curNode][i].second; // 인접 정점까지 거리
 
@@ -52,10 +52,12 @@ int main() {
   cin >> N >> E;
   cout << "Node : " << N << ", Edge : " << E << std::endl;
 
-  size_t node_len = static_cast<size_t>(N);
-  vector<pair<int, int>> graph[node_len];
+  // size_t node_len = N;
+  // int node_len = static_cast<size_t>(N);
+  vector<vector<pair<int, int>>> graph(N, vector<pair<int, int>>{0, {0, 0}});
+ranges:
 
-  cout << " Node_Len : " << node_len << std::endl;
+  cout << " Node_Len : " << N << std::endl;
 
   for (int i = 0; i < E; i++) {
     int from, to, cost; // 간선의 시작점, 끝점, 가중치
@@ -75,12 +77,11 @@ int main() {
     for (pair<int, int> ne : node_edges) {
       cout << i << " " << ne.first << " " << ne.second << std::endl;
     }
-    i++;
   }
 
   cout << "==========" << std::endl;
   vector<int> dist = dijkstra(graph);
-  cout << "끝점까지의 최단거리 : " << dist[N - 1] << endl;
+  cout << "Shortest Distance to dist : " << dist[N - 1] << endl;
   cout << " .Version : " << __VERSION << std::endl;
 
   // if (graph)
