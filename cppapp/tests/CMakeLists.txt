@@ -1,14 +1,3 @@
-# Google Test
-# include(GoogleTest)
-# fetchcontent_makeavailable(googletest)
-
-# INCLUDE(FetchContent)
-# FETCHCONTENT_DECLARE(
-#   googletest
-#   URL https://github.com/google/googletest/archive/release-1.11.0.zip
-# )
-# FETCHCONTENT_MAKEAVAILABLE(googletest)
-
 enable_testing()
 
 # Fetch Google Test
@@ -16,44 +5,46 @@ include(FetchContent)
 fetchcontent_declare(
   googletest
   GIT_REPOSITORY https://github.com/google/googletest.git
-  # Specify the desired GTest version tag here latest at 2025-08-30
-  #GIT_TAG        release-1.17.0
   GIT_TAG        v1.17.0
 )
-fetchcontent_makeavailable(googletest)
-
-# fetchcontent_declare(googletest URL
-#   https://github.com/google/googletest/archive/03597a01ee50ed33e9dfd640b249b4be3799d395.zip
-#   DOWNLOAD_EXTRACT_TIMESTAMP TRUE
-# )
-# For Windows: Prevent overriding the parent project's compiler/linker settings
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 fetchcontent_makeavailable(googletest)
-
-# include(FetchContent)
-# fetchcontent_declare(
-#   googletest
-#   GIT_REPOSITORY https://github.com/google/googletest.git
-#   GIT_TAG release-1.12.1
-# )
 
 add_executable(codetest codetest.cpp)
 add_executable(hello_test hello_test.cpp)
 add_executable(dijkstra_test dijkstra_test.cpp)
 add_executable(scoville_test scoville_test.cpp)
 add_executable(trie_test trie_test.cpp)
+add_executable(list_test list_test.cpp ${PROJECT_SOURCE_DIR}/src/List.cpp)
+add_executable(park_test park_test.cpp ${PROJECT_SOURCE_DIR}/src/park.cpp)
+add_executable(item_test item_test.cpp)
+add_executable(hash_time_test hash_time_test.cpp)
+add_executable(integration_test integration_test.cpp ${PROJECT_SOURCE_DIR}/src/List.cpp ${PROJECT_SOURCE_DIR}/src/park.cpp)
+add_executable(patterns_test patterns_test.cpp ${PROJECT_SOURCE_DIR}/src/patterns.cpp ${PROJECT_SOURCE_DIR}/src/List.cpp)
 
 target_link_libraries(codetest GTest::gtest_main)
 target_link_libraries(hello_test GTest::gtest_main)
 target_link_libraries(dijkstra_test GTest::gtest_main)
 target_link_libraries(scoville_test GTest::gtest_main)
 target_link_libraries(trie_test GTest::gtest_main)
+target_link_libraries(list_test GTest::gtest_main)
+target_link_libraries(park_test GTest::gtest_main)
+target_link_libraries(item_test GTest::gtest_main)
+target_link_libraries(hash_time_test GTest::gtest_main)
+target_link_libraries(integration_test GTest::gtest_main)
+target_link_libraries(patterns_test GTest::gtest_main)
 
-target_include_directories(codetest PUBLIC ${PROJECT_SOURCE_DIR}/inc)
-target_include_directories(hello_test PUBLIC ${PROJECT_SOURCE_DIR}/inc)
-target_include_directories(dijkstra_test PUBLIC ${PROJECT_SOURCE_DIR}/inc)
-target_include_directories(scoville_test PUBLIC ${PROJECT_SOURCE_DIR}/inc)
-target_include_directories(trie_test PUBLIC ${PROJECT_SOURCE_DIR}/inc)
+target_include_directories(codetest PUBLIC ${PROJECT_SOURCE_DIR}/inc ${PROJECT_SOURCE_DIR}/src)
+target_include_directories(hello_test PUBLIC ${PROJECT_SOURCE_DIR}/inc ${PROJECT_SOURCE_DIR}/src)
+target_include_directories(dijkstra_test PUBLIC ${PROJECT_SOURCE_DIR}/inc ${PROJECT_SOURCE_DIR}/src)
+target_include_directories(scoville_test PUBLIC ${PROJECT_SOURCE_DIR}/inc ${PROJECT_SOURCE_DIR}/src)
+target_include_directories(trie_test PUBLIC ${PROJECT_SOURCE_DIR}/inc ${PROJECT_SOURCE_DIR}/src)
+target_include_directories(list_test PUBLIC ${PROJECT_SOURCE_DIR}/inc ${PROJECT_SOURCE_DIR}/src)
+target_include_directories(park_test PUBLIC ${PROJECT_SOURCE_DIR}/inc ${PROJECT_SOURCE_DIR}/src)
+target_include_directories(item_test PUBLIC ${PROJECT_SOURCE_DIR}/inc ${PROJECT_SOURCE_DIR}/src)
+target_include_directories(hash_time_test PUBLIC ${PROJECT_SOURCE_DIR}/inc ${PROJECT_SOURCE_DIR}/src)
+target_include_directories(integration_test PUBLIC ${PROJECT_SOURCE_DIR}/inc ${PROJECT_SOURCE_DIR}/src)
+target_include_directories(patterns_test PUBLIC ${PROJECT_SOURCE_DIR}/inc ${PROJECT_SOURCE_DIR}/src)
 
 include(GoogleTest)
 gtest_discover_tests(codetest)
@@ -61,4 +52,9 @@ gtest_discover_tests(hello_test)
 gtest_discover_tests(dijkstra_test)
 gtest_discover_tests(scoville_test)
 gtest_discover_tests(trie_test)
-
+gtest_discover_tests(list_test)
+gtest_discover_tests(park_test)
+gtest_discover_tests(item_test)
+gtest_discover_tests(hash_time_test)
+gtest_discover_tests(integration_test)
+gtest_discover_tests(patterns_test)
