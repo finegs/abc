@@ -39,17 +39,26 @@ fetchcontent_makeavailable(googletest)
 
 add_executable(codetest codetest.cpp)
 add_executable(hello_test hello_test.cpp)
+add_executable(dijkstra_test dijkstra_test.cpp)
+add_executable(scoville_test scoville_test.cpp)
+add_executable(trie_test trie_test.cpp)
 
 target_link_libraries(codetest GTest::gtest_main)
 target_link_libraries(hello_test GTest::gtest_main)
+target_link_libraries(dijkstra_test GTest::gtest_main)
+target_link_libraries(scoville_test GTest::gtest_main)
+target_link_libraries(trie_test GTest::gtest_main)
 
 target_include_directories(codetest PUBLIC ${PROJECT_SOURCE_DIR}/inc)
 target_include_directories(hello_test PUBLIC ${PROJECT_SOURCE_DIR}/inc)
+target_include_directories(dijkstra_test PUBLIC ${PROJECT_SOURCE_DIR}/inc)
+target_include_directories(scoville_test PUBLIC ${PROJECT_SOURCE_DIR}/inc)
+target_include_directories(trie_test PUBLIC ${PROJECT_SOURCE_DIR}/inc)
 
 include(GoogleTest)
 gtest_discover_tests(codetest)
 gtest_discover_tests(hello_test)
-
-add_test(NAME codetest COMMAND codetest)
-add_test(NAME hello_test COMMAND hello_test)
+gtest_discover_tests(dijkstra_test)
+gtest_discover_tests(scoville_test)
+gtest_discover_tests(trie_test)
 

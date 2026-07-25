@@ -19,25 +19,16 @@ SET(PJT_SRC_DIR src)
 ENABLE_TESTING()
 
 IF(MSVC)
-  SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /MDd /Zi /Ob0 /Od /RTC1 /std:c17")
-  SET(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS} /MDd /Zi /Ob0 /Od /RTC1 /std:c17")
-  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MDd /Zi /Ob0 /Od /RTC1 /std:c++17")
-  SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MDd \
-                                                      /Zi \
-                                                      /Ob0 \
-                                                      /Od \
-                                                      /RTC1 \
-                                                      /std:c++17")
-  SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MD \
-                                                      /O2 \
-                                                      /Ob2 \
-                                                      /DNDEBUG \
-                                                      /std:c++17")
+  SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /MDd /Zi /Ob0 /Od /RTC1 /std:c17 /W4")
+  SET(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} /MDd /Zi /Ob0 /Od /RTC1 /std:c17 /W4")
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MDd /Zi /Ob0 /Od /RTC1 /std:c++20 /W4")
+  SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MDd /Zi /Ob0 /Od /RTC1 /std:c++20 /W4")
+  SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MD /O2 /Ob2 /DNDEBUG /std:c++20 /W4")
 ELSE() ## xNIX, MSYS
-  SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O2 -std=c17")
-  SET(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS} -g -O0 -std=c17")
-  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2 -std=c++20")
-  SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g -O0 -std=c++2a")
+  SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O2 -std=c17 -Wall -Wextra")
+  SET(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -g -O0 -std=c17 -Wall -Wextra")
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2 -std=c++20 -Wall -Wextra")
+  SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g -O0 -std=c++20 -Wall -Wextra")
 ENDIF()
 
 # find dependencies
@@ -116,11 +107,11 @@ ENDIF()
 
 IF(MSYS OR MSVC)
 
-  INSTALL(TARGETS trie_sum DESTINATION C:\\Programs\\bin)
-  INSTALL(TARGETS tt DESTINATION C:\\Programs\\bin)
-  INSTALL(TARGETS a DESTINATION C:\\Programs\\bin)
-  INSTALL(TARGETS b DESTINATION C:\\Programs\\bin)
-  INSTALL(TARGETS d DESTINATION C:\\Programs\\bin)
+  INSTALL(TARGETS trie_sum DESTINATION C:/Programs/bin)
+  INSTALL(TARGETS tt DESTINATION C:/Programs/bin)
+  INSTALL(TARGETS a DESTINATION C:/Programs/bin)
+  INSTALL(TARGETS b DESTINATION C:/Programs/bin)
+  INSTALL(TARGETS d DESTINATION C:/Programs/bin)
 
 ELSE()
 

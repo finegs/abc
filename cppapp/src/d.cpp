@@ -12,10 +12,7 @@
 #include <unordered_map>
 #include <vector>
 
-std::ostream &operator<<(std::ostream &os, const char *o) {
-  os << o;
-  return os;
-}
+
 
 namespace my {
 const static char obj_sep_default = ',';

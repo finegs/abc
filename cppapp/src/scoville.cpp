@@ -11,14 +11,15 @@ int solution(vector<int> scoville, int K) {
     while(!pq.empty() && pq.top() < K) {
         int first = pq.top();
         pq.pop();
+        if (pq.empty()) break;
         int second = pq.top();
         pq.pop();
 
-        pq.push(first + (second*2));
+        pq.push(first + (second * 2));
         answer++;
     }
 
-    if(pq.top()<K) return -1;
+    if (pq.empty() || pq.top() < K) return -1;
     return answer;
 }
 

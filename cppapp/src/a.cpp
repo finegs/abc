@@ -146,12 +146,14 @@ typedef unordered_map<MyTuple, int, KeyHash, KeyEqual> MyMap;
  */
 std::set<IntPair, decltype(item_less)> item_set(item_less);
 std::unordered_set<IntPair, decltype(item_hasher), decltype(item_equal_to)>
-    item_unordered_set;
-std::unordered_map<MyRec, MyRec, decltype(myrec_hasher)> recs{
-    {{1, 1.0, "aa"}, {1, 1.0001, "aa"}},
-    {{2, 2.0, "bb"}, {2, 2.0101, "bb"}},
-    {{1, 11.0, "11111"}, {2, 11.0001, "11111"}},
-};
+    item_unordered_set(0, item_hasher, item_equal_to);
+std::unordered_map<MyRec, MyRec, decltype(myrec_hasher)> recs(
+    {
+        {{1, 1.0f, "aa"}, {1, 1.0001f, "aa"}},
+        {{2, 2.0f, "bb"}, {2, 2.0101f, "bb"}},
+        {{1, 11.0f, "11111"}, {2, 11.0001f, "11111"}},
+    },
+    0, myrec_hasher);
 
 template <typename T>
 std::vector<T> fill(std::vector<T> &v, size_t count,
@@ -164,14 +166,15 @@ std::vector<T> fill(std::vector<T> &v, size_t count,
 
 void init_item_set(set<IntPair, decltype(item_less)> &s, size_t count) {
   for (size_t i = 0; i < count; i++) {
-    s.insert({i, i});
+    s.insert({static_cast<int>(i), static_cast<int>(i)});
   }
 }
 
-void init_item_unorderd_set(unordered_set<IntPair, decltype(item_hasher)> &s,
-                            size_t count) {
+void init_item_unorderd_set(
+    unordered_set<IntPair, decltype(item_hasher), decltype(item_equal_to)> &s,
+    size_t count) {
   for (size_t i = 0; i < count; i++) {
-    s.insert({i, i});
+    s.insert({static_cast<int>(i), static_cast<int>(i)});
   }
 }
 typedef struct _MyInitiator {
@@ -193,9 +196,9 @@ int main() {
   display(std::cout, item_set.begin(), item_set.end());
   cout << std::endl;
 
-  MyRec new_key = std::make_tuple(1, 1.0, "aa");
+  MyRec new_key = std::make_tuple(1, 1.0f, "aa");
   MyRec new_val = new_key;
-  std::get<1>(new_val) = 1.002002;
+  std::get<1>(new_val) = 1.002002f;
 
   cout << "## rect.insert_or_assign" << endl;
   // cout << "hash(1) : " << std::hash<int>{}(1) << std::endl;
