@@ -5,15 +5,37 @@ edition = "2021"
 
 [dependencies]
 chrono = { version = ">=0.4.39" }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+tokio = { version = "1.0", features = ["full"] }
+socket2 = "0.5"
+rustls = { version = "0.23", features = ["ring"] }
+tokio-rustls = { version = "0.26", features = ["ring"] }
+rustls-pki-types = "1.0"
+rcgen = "0.13"
+aes-gcm = "0.10"
+axum = { version = "0.7", features = ["ws"] }
+tower-http = { version = "0.5", features = ["cors", "fs"] }
+async-trait = "0.1"
 
 [lib]
 name = "app_util"
-path = "src/util/mod.rs"
+path = "src/lib.rs"
 crate-type = ["lib"]
-edition = "2021"
 test = true
-#required_features = []
 
 [[bin]]
 name = "app_main"
 path = "src/main.rs"
+
+[[bin]]
+name = "client"
+path = "src/bin/client.rs"
+
+[[bin]]
+name = "seq_client"
+path = "src/bin/seq_client.rs"
+
+[[bin]]
+name = "cli_client"
+path = "src/bin/cli_client.rs"
