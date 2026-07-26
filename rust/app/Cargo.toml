@@ -10,6 +10,10 @@ chrono = { version = ">=0.4.39" }
 name = "app_util"
 path = "src/util/mod.rs"
 crate-type = ["lib"]
-edition =  "2021"
+edition = "2021"
 test = true
 #required_features = []
+
+[[bin]]
+name = "app_main"
+path = "src/main.rs"
