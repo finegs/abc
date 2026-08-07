@@ -5,7 +5,10 @@ mod tui;
 use clap::{Parser, Subcommand};
 use client::ApiClient;
 use crossterm::{
-    event::{self, Event, KeyCode, KeyModifiers},
+    event::{
+        self, Event, KeyCode, KeyModifiers, KeyboardEnhancementFlags,
+        PopKeyboardEnhancementFlags, PushKeyboardEnhancementFlags,
+    },
     execute,
     terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
 };
@@ -109,7 +112,11 @@ async fn main() -> Result<(), Box<dyn Error>> {
 async fn run_tui_app(client: ApiClient) -> Result<(), Box<dyn Error>> {
     enable_raw_mode()?;
     let mut stdout = io::stdout();
-    execute!(stdout, EnterAlternateScreen)?;
+    let _ = execute!(
+        stdout,
+        EnterAlternateScreen,
+        PushKeyboardEnhancementFlags(KeyboardEnhancementFlags::DISAMBIGUATE_ESCAPE_CODES)
+    );
     let backend = CrosstermBackend::new(stdout);
     let mut terminal = Terminal::new(backend)?;
 
@@ -122,11 +129,16 @@ async fn run_tui_app(client: ApiClient) -> Result<(), Box<dyn Error>> {
         if event::poll(std::time::Duration::from_millis(100))? {
             if let Event::Key(key) = event::read()? {
                 let is_ctrl = key.modifiers.contains(KeyModifiers::CONTROL);
-                let is_ctrl_enter = is_ctrl
-                    && (key.code == KeyCode::Enter
-                        || key.code == KeyCode::Char('s')
+                let is_alt = key.modifiers.contains(KeyModifiers::ALT);
+
+                // Save shortcut: Ctrl+S, Alt+Enter, Ctrl+Enter, Ctrl+D
+                let is_save_shortcut = (is_ctrl
+                    && (key.code == KeyCode::Char('s')
+                        || key.code == KeyCode::Char('d')
+                        || key.code == KeyCode::Enter
                         || key.code == KeyCode::Char('j')
-                        || key.code == KeyCode::Char('m'));
+                        || key.code == KeyCode::Char('m')))
+                    || (is_alt && key.code == KeyCode::Enter);
 
                 match app.mode {
                     AppMode::Normal => match key.code {
@@ -163,7 +175,7 @@ async fn run_tui_app(client: ApiClient) -> Result<(), Box<dyn Error>> {
                         _ => {}
                     },
                     AppMode::AddForm | AppMode::EditForm => {
-                        if is_ctrl_enter {
+                        if is_save_shortcut {
                             submit_form(&mut app, &client, &mut terminal).await?;
                         } else {
                             match key.code {
@@ -177,21 +189,23 @@ async fn run_tui_app(client: ApiClient) -> Result<(), Box<dyn Error>> {
                                 KeyCode::BackTab | KeyCode::Up => {
                                     app.form_focus = app.form_focus.previous();
                                 }
-                                KeyCode::Enter => match app.form_focus {
-                                    FormFocus::Title => {
-                                        app.form_focus = FormFocus::Content;
+                                KeyCode::Enter | KeyCode::Char('\r') | KeyCode::Char('\n') => {
+                                    match app.form_focus {
+                                        FormFocus::Title => {
+                                            app.form_focus = FormFocus::Content;
+                                        }
+                                        FormFocus::Content => {
+                                            app.form_content.push('\n');
+                                        }
+                                        FormFocus::SaveButton => {
+                                            submit_form(&mut app, &client, &mut terminal).await?;
+                                        }
+                                        FormFocus::CancelButton => {
+                                            app.mode = AppMode::Normal;
+                                            app.status_message = "Cancelled form.".to_string();
+                                        }
                                     }
-                                    FormFocus::Content => {
-                                        app.form_content.push('\n');
-                                    }
-                                    FormFocus::SaveButton => {
-                                        submit_form(&mut app, &client, &mut terminal).await?;
-                                    }
-                                    FormFocus::CancelButton => {
-                                        app.mode = AppMode::Normal;
-                                        app.status_message = "Cancelled form.".to_string();
-                                    }
-                                },
+                                }
                                 KeyCode::Char(' ') => match app.form_focus {
                                     FormFocus::SaveButton => {
                                         submit_form(&mut app, &client, &mut terminal).await?;
@@ -212,15 +226,19 @@ async fn run_tui_app(client: ApiClient) -> Result<(), Box<dyn Error>> {
                                     }
                                     _ => {}
                                 },
-                                KeyCode::Char(c) => match app.form_focus {
-                                    FormFocus::Title => {
-                                        app.form_title.push(c);
+                                KeyCode::Char(c) => {
+                                    if c != '\r' && c != '\n' {
+                                        match app.form_focus {
+                                            FormFocus::Title => {
+                                                app.form_title.push(c);
+                                            }
+                                            FormFocus::Content => {
+                                                app.form_content.push(c);
+                                            }
+                                            _ => {}
+                                        }
                                     }
-                                    FormFocus::Content => {
-                                        app.form_content.push(c);
-                                    }
-                                    _ => {}
-                                },
+                                }
                                 _ => {}
                             }
                         }
@@ -231,7 +249,11 @@ async fn run_tui_app(client: ApiClient) -> Result<(), Box<dyn Error>> {
     }
 
     disable_raw_mode()?;
-    execute!(terminal.backend_mut(), LeaveAlternateScreen)?;
+    let _ = execute!(
+        terminal.backend_mut(),
+        PopKeyboardEnhancementFlags,
+        LeaveAlternateScreen
+    );
     terminal.show_cursor()?;
 
     Ok(())
