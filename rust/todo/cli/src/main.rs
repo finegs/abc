@@ -131,13 +131,19 @@ async fn run_tui_app(client: ApiClient) -> Result<(), Box<dyn Error>> {
                 let is_ctrl = key.modifiers.contains(KeyModifiers::CONTROL);
                 let is_alt = key.modifiers.contains(KeyModifiers::ALT);
 
-                let is_enter_code = key.code == KeyCode::Enter
-                    || key.code == KeyCode::Char('\r')
-                    || key.code == KeyCode::Char('\n');
-
-                // Save shortcut: Ctrl+Enter, Ctrl+S, or Alt+Enter
-                let is_save_shortcut = (is_ctrl && (key.code == KeyCode::Char('s') || is_enter_code))
-                    || (is_alt && is_enter_code);
+                // Save shortcut: Ctrl+S or Ctrl+Enter (or Alt+Enter)
+                let is_save_shortcut = (is_ctrl
+                    && (key.code == KeyCode::Char('s')
+                        || key.code == KeyCode::Char('S')
+                        || key.code == KeyCode::Enter
+                        || key.code == KeyCode::Char('\r')
+                        || key.code == KeyCode::Char('\n')
+                        || key.code == KeyCode::Char('j')
+                        || key.code == KeyCode::Char('m')))
+                    || (is_alt
+                        && (key.code == KeyCode::Enter
+                            || key.code == KeyCode::Char('\r')
+                            || key.code == KeyCode::Char('\n')));
 
                 match app.mode {
                     AppMode::Normal => match key.code {
