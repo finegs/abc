@@ -2,18 +2,18 @@
 
 use crate::models::NoteItem;
 use ratatui::{
-    layout::{Constraint, Direction, Layout},
+    layout::{Constraint, Direction, Layout, Rect},
     style::{Color, Modifier, Style},
     text::{Line, Span},
-    widgets::{Block, Borders, List, ListItem, ListState, Paragraph},
+    widgets::{Block, Borders, Clear, List, ListItem, ListState, Paragraph},
     Frame,
 };
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum AppMode {
     Normal,
-    Add,
-    Help,
+    AddTitle,
+    AddContent,
 }
 
 pub struct App {
@@ -35,7 +35,7 @@ impl App {
             items,
             list_state,
             mode: AppMode::Normal,
-            status_message: "Ready | [q] Quit | [j/k] Navigate | [a] Add | [d] Delete".to_string(),
+            status_message: "Ready | [q] Quit | [j/k] Nav | [a] Add | [d] Del | [r] Refresh".to_string(),
             new_title: String::new(),
             new_content: String::new(),
         }
@@ -160,5 +160,52 @@ impl App {
             .style(Style::default().fg(Color::Yellow))
             .block(Block::default().borders(Borders::ALL));
         f.render_widget(footer, chunks[2]);
+
+        // Floating Modal Popup Dialog for Add Note
+        if self.mode == AppMode::AddTitle || self.mode == AppMode::AddContent {
+            let area = centered_rect(70, 50, f.area());
+            let title_active = if self.mode == AppMode::AddTitle { " ▶" } else { "" };
+            let content_active = if self.mode == AppMode::AddContent { " ▶" } else { "" };
+
+            let popup_text = format!(
+                "Title{}:\n  {}\n\nContent{}:\n  {}\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n[Enter] Next/Submit | [Esc] Cancel",
+                title_active,
+                if self.new_title.is_empty() { "<Type note title...>" } else { &self.new_title },
+                content_active,
+                if self.new_content.is_empty() { "<Type note content...>" } else { &self.new_content }
+            );
+
+            let popup = Paragraph::new(popup_text)
+                .block(
+                    Block::default()
+                        .borders(Borders::ALL)
+                        .title("➕ Create New Note Dialog")
+                        .style(Style::default().fg(Color::Yellow)),
+                )
+                .style(Style::default().fg(Color::White).bg(Color::Reset));
+
+            f.render_widget(Clear, area);
+            f.render_widget(popup, area);
+        }
     }
+}
+
+fn centered_rect(percent_x: u16, percent_y: u16, r: Rect) -> Rect {
+    let popup_layout = Layout::default()
+        .direction(Direction::Vertical)
+        .constraints([
+            Constraint::Percentage((100 - percent_y) / 2),
+            Constraint::Percentage(percent_y),
+            Constraint::Percentage((100 - percent_y) / 2),
+        ])
+        .split(r);
+
+    Layout::default()
+        .direction(Direction::Horizontal)
+        .constraints([
+            Constraint::Percentage((100 - percent_x) / 2),
+            Constraint::Percentage(percent_x),
+            Constraint::Percentage((100 - percent_x) / 2),
+        ])
+        .split(popup_layout[1])[1]
 }

@@ -11,7 +11,7 @@ use crossterm::{
 };
 use ratatui::{backend::CrosstermBackend, Terminal};
 use std::{error::Error, io};
-use tui::App;
+use tui::{App, AppMode};
 
 #[derive(Parser, Debug)]
 #[command(name = "todo-cli")]
@@ -98,37 +98,121 @@ async fn main() -> Result<(), Box<dyn Error>> {
             }
         }
         None => {
-            // Default to TUI mode
-            let notes = match client.fetch_notes().await {
-                Ok(n) => n,
-                Err(_) => vec![],
-            };
-            run_tui_app(notes)?;
+            // Default to interactive TUI mode
+            run_tui_app(client).await?;
         }
     }
 
     Ok(())
 }
 
-fn run_tui_app(items: Vec<models::NoteItem>) -> Result<(), Box<dyn Error>> {
+async fn run_tui_app(client: ApiClient) -> Result<(), Box<dyn Error>> {
     enable_raw_mode()?;
     let mut stdout = io::stdout();
     execute!(stdout, EnterAlternateScreen)?;
     let backend = CrosstermBackend::new(stdout);
     let mut terminal = Terminal::new(backend)?;
 
-    let mut app = App::new(items);
+    let initial_notes = client.fetch_notes().await.unwrap_or_default();
+    let mut app = App::new(initial_notes);
 
     loop {
         terminal.draw(|f| app.render(f))?;
 
         if event::poll(std::time::Duration::from_millis(100))? {
             if let Event::Key(key) = event::read()? {
-                match key.code {
-                    KeyCode::Char('q') | KeyCode::Esc => break,
-                    KeyCode::Char('j') | KeyCode::Down => app.next(),
-                    KeyCode::Char('k') | KeyCode::Up => app.previous(),
-                    _ => {}
+                match app.mode {
+                    AppMode::Normal => match key.code {
+                        KeyCode::Char('q') | KeyCode::Esc => break,
+                        KeyCode::Char('j') | KeyCode::Down => app.next(),
+                        KeyCode::Char('k') | KeyCode::Up => app.previous(),
+                        KeyCode::Char('a') => {
+                            app.mode = AppMode::AddTitle;
+                            app.new_title.clear();
+                            app.new_content.clear();
+                            app.status_message =
+                                "MODE: Add Note (Title) | Type title -> press [Enter]".to_string();
+                        }
+                        KeyCode::Char('d') => {
+                            if let Some(note) = app.selected_item().cloned() {
+                                app.status_message = format!("Deleting note '{}'...", note.title);
+                                terminal.draw(|f| app.render(f))?;
+                                if client.delete_note(&note.id).await.unwrap_or(false) {
+                                    app.status_message = format!("✅ Note '{}' deleted!", note.title);
+                                    if let Ok(updated) = client.fetch_notes().await {
+                                        app.items = updated;
+                                        if !app.items.is_empty() {
+                                            app.list_state.select(Some(0));
+                                        } else {
+                                            app.list_state.select(None);
+                                        }
+                                    }
+                                } else {
+                                    app.status_message = "❌ Failed to delete note!".to_string();
+                                }
+                            }
+                        }
+                        KeyCode::Char('r') => {
+                            if let Ok(updated) = client.fetch_notes().await {
+                                app.items = updated;
+                                app.status_message = "🔄 Refreshed notes list!".to_string();
+                            }
+                        }
+                        _ => {}
+                    },
+                    AppMode::AddTitle => match key.code {
+                        KeyCode::Esc => {
+                            app.mode = AppMode::Normal;
+                            app.status_message = "Cancelled adding note.".to_string();
+                        }
+                        KeyCode::Enter => {
+                            if !app.new_title.trim().is_empty() {
+                                app.mode = AppMode::AddContent;
+                                app.status_message =
+                                    "MODE: Add Note (Content) | Type content -> press [Enter] to submit"
+                                        .to_string();
+                            }
+                        }
+                        KeyCode::Backspace => {
+                            app.new_title.pop();
+                        }
+                        KeyCode::Char(c) => {
+                            app.new_title.push(c);
+                        }
+                        _ => {}
+                    },
+                    AppMode::AddContent => match key.code {
+                        KeyCode::Esc => {
+                            app.mode = AppMode::Normal;
+                            app.status_message = "Cancelled adding note.".to_string();
+                        }
+                        KeyCode::Enter => {
+                            let title = app.new_title.trim().to_string();
+                            let content = app.new_content.trim().to_string();
+                            if !title.is_empty() {
+                                app.status_message = format!("Creating note '{}'...", title);
+                                terminal.draw(|f| app.render(f))?;
+                                if client.create_note(&title, &content, true).await.unwrap_or(false) {
+                                    app.status_message =
+                                        format!("✅ Note '{}' created successfully!", title);
+                                    if let Ok(updated) = client.fetch_notes().await {
+                                        app.items = updated;
+                                        app.list_state.select(Some(app.items.len().saturating_sub(1)));
+                                    }
+                                } else {
+                                    app.status_message = "❌ Failed to create note!".to_string();
+                                }
+                            }
+                            app.mode = AppMode::Normal;
+                        }
+                        KeyCode::Backspace => {
+                            app.new_content.pop();
+                        }
+                        KeyCode::Char(c) => {
+                            app.new_content.push(c);
+                        }
+                        _ => {}
+                    },
                 }
             }
         }
