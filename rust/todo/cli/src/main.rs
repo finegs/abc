@@ -5,10 +5,7 @@ mod tui;
 use clap::{Parser, Subcommand};
 use client::ApiClient;
 use crossterm::{
-    event::{
-        self, Event, KeyCode, KeyModifiers, KeyboardEnhancementFlags,
-        PopKeyboardEnhancementFlags, PushKeyboardEnhancementFlags,
-    },
+    event::{self, Event, KeyCode, KeyModifiers},
     execute,
     terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
 };
@@ -112,11 +109,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
 async fn run_tui_app(client: ApiClient) -> Result<(), Box<dyn Error>> {
     enable_raw_mode()?;
     let mut stdout = io::stdout();
-    let _ = execute!(
-        stdout,
-        EnterAlternateScreen,
-        PushKeyboardEnhancementFlags(KeyboardEnhancementFlags::DISAMBIGUATE_ESCAPE_CODES)
-    );
+    let _ = execute!(stdout, EnterAlternateScreen);
     let backend = CrosstermBackend::new(stdout);
     let mut terminal = Terminal::new(backend)?;
 
@@ -131,13 +124,9 @@ async fn run_tui_app(client: ApiClient) -> Result<(), Box<dyn Error>> {
                 let is_ctrl = key.modifiers.contains(KeyModifiers::CONTROL);
                 let is_alt = key.modifiers.contains(KeyModifiers::ALT);
 
-                // Save shortcut: Ctrl+S, Alt+Enter, Ctrl+Enter, Ctrl+D
-                let is_save_shortcut = (is_ctrl
-                    && (key.code == KeyCode::Char('s')
-                        || key.code == KeyCode::Char('d')
-                        || key.code == KeyCode::Enter
-                        || key.code == KeyCode::Char('j')
-                        || key.code == KeyCode::Char('m')))
+                // Save shortcut: Ctrl+S, Alt+Enter, or Ctrl+Enter
+                let is_save_shortcut = (is_ctrl && key.code == KeyCode::Char('s'))
+                    || (is_ctrl && key.code == KeyCode::Enter)
                     || (is_alt && key.code == KeyCode::Enter);
 
                 match app.mode {
@@ -195,6 +184,7 @@ async fn run_tui_app(client: ApiClient) -> Result<(), Box<dyn Error>> {
                                             app.form_focus = FormFocus::Content;
                                         }
                                         FormFocus::Content => {
+                                            // Shift+Enter and Enter both insert a newline in Content!
                                             app.form_content.push('\n');
                                         }
                                         FormFocus::SaveButton => {
@@ -249,11 +239,7 @@ async fn run_tui_app(client: ApiClient) -> Result<(), Box<dyn Error>> {
     }
 
     disable_raw_mode()?;
-    let _ = execute!(
-        terminal.backend_mut(),
-        PopKeyboardEnhancementFlags,
-        LeaveAlternateScreen
-    );
+    let _ = execute!(terminal.backend_mut(), LeaveAlternateScreen);
     terminal.show_cursor()?;
 
     Ok(())

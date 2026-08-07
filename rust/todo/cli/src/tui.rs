@@ -314,7 +314,7 @@ impl App {
             f.render_widget(cancel_btn, button_chunks[1]);
 
             // 4. Hints Footer
-            let hint = Paragraph::new("Nav: [Tab/↑↓] Focus | Multiline: [Enter] in Content | Save: [Ctrl+S] / [Alt+Enter] / [Ctrl+Enter]")
+            let hint = Paragraph::new("Nav: [Tab/↑↓] Focus | Multiline: [Enter] or [Shift+Enter] in Content | Save: [Ctrl+S] or [Save Button]")
                 .style(Style::default().fg(Color::DarkGray))
                 .alignment(ratatui::layout::Alignment::Center);
             f.render_widget(hint, popup_chunks[3]);
