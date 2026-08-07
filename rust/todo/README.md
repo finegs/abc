@@ -6,12 +6,25 @@ A high-performance, asynchronous RESTful API service built in Rust using **Axum*
 
 ## ✨ Features
 
+- **🏗️ 5 Major Design Patterns**: Built using Repository, Factory, Builder, Strategy, and Singleton/Shared State patterns.
 - **⚡ Fast & Async**: Built on top of [Tokio](https://tokio.rs/) runtime and [Axum](https://github.com/tokio-rs/axum) web framework.
 - **🗄️ Multi-Database Support**: Cargo feature flags allowing easy switching between **SQLite** (default) and **MySQL**.
 - **📋 RESTful CRUD Endpoints**: Full CRUD for Notes (Create, Read, Update, Delete, List with pagination) and Health Checks.
 - **🛡️ Type-Safe Querying**: SQL query execution powered by [SQLx](https://github.com/launchbadge/sqlx).
 - **🧪 Complete Test Suite**: Comprehensive unit tests and integration tests with in-memory SQLite support.
 - **📦 Docker Ready**: Includes `docker-compose.yml` for local MySQL database setup.
+
+---
+
+## 🏛️ 5 Major Design Patterns
+
+| Pattern | Module | Purpose & Implementation |
+| :--- | :--- | :--- |
+| **1. Repository Pattern** | [`src/patterns/repository.rs`](file:///home/user01/dev/git/abc/rust/todo/src/patterns/repository.rs) | Abstracts database persistence behind `NoteRepository` trait (`SqliteNoteRepository`), decoupling business logic from raw SQL execution. |
+| **2. Factory Pattern** | [`src/patterns/factory.rs`](file:///home/user01/dev/git/abc/rust/todo/src/patterns/factory.rs) | Encapsulates repository creation logic via `RepositoryFactory::create_sqlite_repository()`. |
+| **3. Builder Pattern** | [`src/patterns/builder.rs`](file:///home/user01/dev/git/abc/rust/todo/src/patterns/builder.rs) | Provides fluent builder API (`NoteBuilder`, `CreateNoteSchemaBuilder`) for constructing entities and request DTOs. |
+| **4. Strategy Pattern** | [`src/patterns/strategy.rs`](file:///home/user01/dev/git/abc/rust/todo/src/patterns/strategy.rs) | Encapsulates pagination calculation algorithms (`DefaultPaginationStrategy`) behind `PaginationStrategy` interface. |
+| **5. Singleton / Shared State** | [`src/appstate.rs`](file:///home/user01/dev/git/abc/rust/todo/src/appstate.rs) | Manages thread-safe global application state (`Arc<AppState>`) injected into Axum web handlers. |
 
 ---
 

@@ -2,6 +2,7 @@ mod appstate;
 mod handler;
 #[allow(unused)]
 mod model;
+mod patterns;
 mod schema;
 
 use std::sync::Arc;
@@ -46,9 +47,7 @@ async fn main() {
                     .patch(edit_note_handler)
                     .delete(delete_note_handler),
             )
-            .with_state(Arc::new(AppState {
-                conn_pool: pool.clone(),
-            }));
+            .with_state(Arc::new(AppState::new(pool.clone())));
 
         println!("✅  Server started successfully at 0.0.0.0:8080");
 

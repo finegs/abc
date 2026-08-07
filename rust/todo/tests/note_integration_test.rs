@@ -14,6 +14,8 @@ mod appstate;
 mod handler;
 #[path = "../src/model.rs"]
 mod model;
+#[path = "../src/patterns/mod.rs"]
+mod patterns;
 #[path = "../src/schema.rs"]
 mod schema;
 
@@ -54,7 +56,7 @@ async fn test_healthcheck() {
 #[tokio::test]
 async fn test_note_crud_lifecycle() {
     let pool = setup_test_db().await;
-    let state = Arc::new(AppState { conn_pool: pool });
+    let state = Arc::new(AppState::new(pool));
 
     // 1. Create Note
     let create_body = CreateNoteSchema {

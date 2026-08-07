@@ -35,6 +35,13 @@
 - [x] **Task 5: Test Execution & Verification**
   - Ran `cargo test` and verified zero compiler errors and zero warnings.
 
+- [x] **Task 6: Implementation of 5 Major Design Patterns**
+  1. **Repository Pattern (`src/patterns/repository.rs`)**: Abstracted persistence ops behind `NoteRepository` trait (`SqliteNoteRepository`).
+  2. **Factory Pattern (`src/patterns/factory.rs`)**: Encapsulated creation of repository instances via `RepositoryFactory`.
+  3. **Builder Pattern (`src/patterns/builder.rs`)**: Implemented `NoteBuilder` and `CreateNoteSchemaBuilder` for fluent object construction.
+  4. **Strategy Pattern (`src/patterns/strategy.rs`)**: Implemented `PaginationStrategy` (`DefaultPaginationStrategy`) for offset/limit calculations.
+  5. **Singleton / Shared State Pattern (`src/appstate.rs`)**: Thread-safe shared application state injected into Axum router via `Arc<AppState>`.
+
 ---
 
 ## 🧪 Test Execution Results (`cargo test`)
