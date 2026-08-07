@@ -1,0 +1,11 @@
+target/
+.git/
+.github/
+db/*.db
+db/*.db-shm
+db/*.db-wal
+.env
+*.log
+tasks.md
+deploy.md
+.pjt.lua

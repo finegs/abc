@@ -1,6 +1,24 @@
 # 🚀 Deployment & Architecture Guide (`deploy.md`)
 
-This document provides a comprehensive overview of the **Rust Axum + SQLx Todo REST API** architecture, database options, container setup, and production deployment procedures.
+This document provides a comprehensive overview of the **Rust Axum + SQLx Todo REST API** architecture, database options, container setup, CI/CD pipeline, and production deployment procedures.
+
+---
+
+## 🔄 Docker CI/CD Pipeline (`.github/workflows/ci-cd.yml`)
+
+The repository includes a production-ready GitHub Actions CI/CD pipeline automating test verification and container image deployment:
+
+```mermaid
+flowchart LR
+    Push["Git Push / PR"] --> CI["Job 1: Test & Lint<br/>cargo check & cargo test"]
+    CI -->|Pass| CD["Job 2: Docker Buildx<br/>Build multi-stage image"]
+    CD --> Registry["GHCR Registry<br/>ghcr.io/finegs/abc"]
+    CD --> Health["Container Health Check<br/>curl http://localhost:8080/api/healthcheck"]
+```
+
+### Pipeline Jobs & Workflow
+1. **`test-and-check`**: Runs `cargo check` and `cargo test --all-targets --all-features` with Cargo caching (`Swatinem/rust-cache`).
+2. **`docker-build`**: Uses `docker/build-push-action` to build a multi-stage Docker image, tests running the container, verifies healthcheck endpoint, and publishes image tags (`latest`, `<sha>`) to GHCR.
 
 ---
 

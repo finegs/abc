@@ -1,7 +1,26 @@
-version: '3'
+version: '3.8'
+
 services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: todo_app
+    ports:
+      - '8080:8080'
+    environment:
+      - DATABASE_URL=sqlite:///app/db/todo.db
+    volumes:
+      - sqlite_data:/app/db
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/healthcheck"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
   mysql:
-    image: mysql:latest
+    image: mysql:8.0
     container_name: mysql
     env_file:
       - ./.env
@@ -9,5 +28,13 @@ services:
       - '3306:3306'
     volumes:
       - mysqlDb:/var/lib/mysql
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
 volumes:
+  sqlite_data:
   mysqlDb:

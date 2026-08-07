@@ -42,6 +42,12 @@
   4. **Strategy Pattern (`src/patterns/strategy.rs`)**: Implemented `PaginationStrategy` (`DefaultPaginationStrategy`) for offset/limit calculations.
   5. **Singleton / Shared State Pattern (`src/appstate.rs`)**: Thread-safe shared application state injected into Axum router via `Arc<AppState>`.
 
+- [x] **Task 7: Docker CI/CD Pipeline Setup**
+  - Created multi-stage production [`Dockerfile`](file:///home/user01/dev/git/abc/rust/todo/Dockerfile) (`rust:1.80` builder -> `debian:bookworm-slim` runner).
+  - Created [`.dockerignore`](file:///home/user01/dev/git/abc/rust/todo/.dockerignore) to optimize build context.
+  - Enhanced [`docker-compose.yml`](file:///home/user01/dev/git/abc/rust/todo/docker-compose.yml) with production `app` service and container healthchecks.
+  - Created GitHub Actions CI/CD pipeline [`.github/workflows/ci-cd.yml`](file:///home/user01/dev/git/abc/rust/todo/.github/workflows/ci-cd.yml).
+
 ---
 
 ## 🧪 Test Execution Results (`cargo test`)
