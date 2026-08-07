@@ -14,7 +14,7 @@ use crossterm::{
 };
 use ratatui::{backend::CrosstermBackend, Terminal};
 use std::{error::Error, io};
-use tui::{App, AppMode, FormFocus};
+use tui::{App, AppMode, FormEditorMode, FormFocus};
 
 #[derive(Parser, Debug)]
 #[command(name = "todo-cli")]
@@ -135,7 +135,7 @@ async fn run_tui_app(client: ApiClient) -> Result<(), Box<dyn Error>> {
                     || key.code == KeyCode::Char('\r')
                     || key.code == KeyCode::Char('\n');
 
-                // Save shortcut: Ctrl+S or Ctrl+Enter (or Alt+Enter)
+                // Universal Save shortcut: Ctrl+S or Ctrl+Enter (or Alt+Enter)
                 let is_save_shortcut = (is_ctrl
                     && (key.code == KeyCode::Char('s')
                         || key.code == KeyCode::Char('S')
@@ -196,68 +196,173 @@ async fn run_tui_app(client: ApiClient) -> Result<(), Box<dyn Error>> {
                         if is_save_shortcut {
                             submit_form(&mut app, &client, &mut terminal).await?;
                         } else {
-                            match key.code {
-                                KeyCode::Esc => {
-                                    app.mode = AppMode::Normal;
-                                    app.status_message = "Cancelled form.".to_string();
-                                }
-                                KeyCode::Tab | KeyCode::Down => {
-                                    app.form_focus = app.form_focus.next();
-                                }
-                                KeyCode::BackTab | KeyCode::Up => {
-                                    app.form_focus = app.form_focus.previous();
-                                }
-                                KeyCode::Enter | KeyCode::Char('\r') | KeyCode::Char('\n') => {
-                                    match app.form_focus {
-                                        FormFocus::Title => {
+                            match app.form_editor_mode {
+                                FormEditorMode::VimNormal => match key.code {
+                                    KeyCode::Char('i') | KeyCode::Char('a') => {
+                                        if app.form_focus == FormFocus::SaveButton || app.form_focus == FormFocus::CancelButton {
                                             app.form_focus = FormFocus::Content;
                                         }
-                                        FormFocus::Content => {
-                                            app.form_content.push('\n');
+                                        app.form_editor_mode = FormEditorMode::VimInsert;
+                                        app.status_message = "-- VIM INSERT -- (Press Esc for Normal mode)".to_string();
+                                    }
+                                    KeyCode::Char('o') => {
+                                        app.form_focus = FormFocus::Content;
+                                        app.content_insert_char('\n');
+                                        app.form_editor_mode = FormEditorMode::VimInsert;
+                                        app.status_message = "-- VIM INSERT -- (Opened new line)".to_string();
+                                    }
+                                    KeyCode::Char('j') => {
+                                        app.form_focus = app.form_focus.next();
+                                    }
+                                    KeyCode::Char('k') => {
+                                        app.form_focus = app.form_focus.previous();
+                                    }
+                                    KeyCode::Char('h') | KeyCode::Left => match app.form_focus {
+                                        FormFocus::Title => {
+                                            if app.title_cursor > 0 {
+                                                app.title_cursor -= 1;
+                                            }
                                         }
+                                        FormFocus::Content => {
+                                            if app.content_cursor > 0 {
+                                                app.content_cursor -= 1;
+                                            }
+                                        }
+                                        FormFocus::CancelButton => {
+                                            app.form_focus = FormFocus::SaveButton;
+                                        }
+                                        FormFocus::SaveButton => {}
+                                    },
+                                    KeyCode::Char('l') | KeyCode::Right => match app.form_focus {
+                                        FormFocus::Title => {
+                                            if app.title_cursor < app.form_title.len() {
+                                                app.title_cursor += 1;
+                                            }
+                                        }
+                                        FormFocus::Content => {
+                                            if app.content_cursor < app.form_content.len() {
+                                                app.content_cursor += 1;
+                                            }
+                                        }
+                                        FormFocus::SaveButton => {
+                                            app.form_focus = FormFocus::CancelButton;
+                                        }
+                                        FormFocus::CancelButton => {}
+                                    },
+                                    KeyCode::Char('0') => match app.form_focus {
+                                        FormFocus::Title => app.title_cursor = 0,
+                                        FormFocus::Content => app.content_cursor = 0,
+                                        _ => {}
+                                    },
+                                    KeyCode::Char('$') => match app.form_focus {
+                                        FormFocus::Title => app.title_cursor = app.form_title.len(),
+                                        FormFocus::Content => app.content_cursor = app.form_content.len(),
+                                        _ => {}
+                                    },
+                                    KeyCode::Char('x') => match app.form_focus {
+                                        FormFocus::Title => app.title_delete_char(),
+                                        FormFocus::Content => app.content_delete_char(),
+                                        _ => {}
+                                    },
+                                    KeyCode::Char(':') => {
+                                        app.form_editor_mode = FormEditorMode::CommandInput;
+                                        app.vim_cmd_buffer.clear();
+                                    }
+                                    KeyCode::Tab => {
+                                        app.form_focus = app.form_focus.next();
+                                    }
+                                    KeyCode::BackTab => {
+                                        app.form_focus = app.form_focus.previous();
+                                    }
+                                    KeyCode::Esc => {
+                                        app.mode = AppMode::Normal;
+                                        app.status_message = "Cancelled form editor.".to_string();
+                                    }
+                                    KeyCode::Enter => match app.form_focus {
                                         FormFocus::SaveButton => {
                                             submit_form(&mut app, &client, &mut terminal).await?;
                                         }
                                         FormFocus::CancelButton => {
                                             app.mode = AppMode::Normal;
-                                            app.status_message = "Cancelled form.".to_string();
+                                            app.status_message = "Cancelled form editor.".to_string();
+                                        }
+                                        _ => {}
+                                    },
+                                    _ => {}
+                                },
+                                FormEditorMode::VimInsert => match key.code {
+                                    KeyCode::Esc => {
+                                        app.form_editor_mode = FormEditorMode::VimNormal;
+                                        app.status_message = "-- VIM NORMAL -- [i=Insert | j/k=Move Field | h/l=Cursor | :w=Save]".to_string();
+                                    }
+                                    KeyCode::Tab => {
+                                        app.form_focus = app.form_focus.next();
+                                    }
+                                    KeyCode::BackTab => {
+                                        app.form_focus = app.form_focus.previous();
+                                    }
+                                    KeyCode::Enter | KeyCode::Char('\r') | KeyCode::Char('\n') => {
+                                        match app.form_focus {
+                                            FormFocus::Title => {
+                                                app.form_focus = FormFocus::Content;
+                                            }
+                                            FormFocus::Content => {
+                                                app.content_insert_char('\n');
+                                            }
+                                            FormFocus::SaveButton => {
+                                                submit_form(&mut app, &client, &mut terminal).await?;
+                                            }
+                                            FormFocus::CancelButton => {
+                                                app.mode = AppMode::Normal;
+                                                app.status_message = "Cancelled form editor.".to_string();
+                                            }
                                         }
                                     }
-                                }
-                                KeyCode::Char(' ') => match app.form_focus {
-                                    FormFocus::SaveButton => {
-                                        submit_form(&mut app, &client, &mut terminal).await?;
-                                    }
-                                    FormFocus::CancelButton => {
-                                        app.mode = AppMode::Normal;
-                                        app.status_message = "Cancelled form.".to_string();
-                                    }
-                                    FormFocus::Title => app.form_title.push(' '),
-                                    FormFocus::Content => app.form_content.push(' '),
+                                    KeyCode::Backspace => match app.form_focus {
+                                        FormFocus::Title => app.title_backspace(),
+                                        FormFocus::Content => app.content_backspace(),
+                                        _ => {}
+                                    },
+                                    KeyCode::Char(c) => match app.form_focus {
+                                        FormFocus::Title => app.title_insert_char(c),
+                                        FormFocus::Content => app.content_insert_char(c),
+                                        FormFocus::SaveButton | FormFocus::CancelButton => {}
+                                    },
+                                    _ => {}
                                 },
-                                KeyCode::Backspace => match app.form_focus {
-                                    FormFocus::Title => {
-                                        app.form_title.pop();
+                                FormEditorMode::CommandInput => match key.code {
+                                    KeyCode::Esc => {
+                                        app.form_editor_mode = FormEditorMode::VimNormal;
+                                        app.vim_cmd_buffer.clear();
                                     }
-                                    FormFocus::Content => {
-                                        app.form_content.pop();
+                                    KeyCode::Enter => {
+                                        let cmd = app.vim_cmd_buffer.trim();
+                                        match cmd {
+                                            "w" | "wq" => {
+                                                submit_form(&mut app, &client, &mut terminal).await?;
+                                            }
+                                            "q" | "q!" => {
+                                                app.mode = AppMode::Normal;
+                                                app.status_message = "Cancelled form editor.".to_string();
+                                            }
+                                            _ => {
+                                                app.status_message = format!("Unknown command: :{}", cmd);
+                                                app.form_editor_mode = FormEditorMode::VimNormal;
+                                            }
+                                        }
+                                        app.vim_cmd_buffer.clear();
+                                    }
+                                    KeyCode::Backspace => {
+                                        app.vim_cmd_buffer.pop();
+                                        if app.vim_cmd_buffer.is_empty() {
+                                            app.form_editor_mode = FormEditorMode::VimNormal;
+                                        }
+                                    }
+                                    KeyCode::Char(c) => {
+                                        app.vim_cmd_buffer.push(c);
                                     }
                                     _ => {}
                                 },
-                                KeyCode::Char(c) => {
-                                    if c != '\r' && c != '\n' {
-                                        match app.form_focus {
-                                            FormFocus::Title => {
-                                                app.form_title.push(c);
-                                            }
-                                            FormFocus::Content => {
-                                                app.form_content.push(c);
-                                            }
-                                            _ => {}
-                                        }
-                                    }
-                                }
-                                _ => {}
                             }
                         }
                     }

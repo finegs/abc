@@ -37,6 +37,13 @@ impl FormFocus {
     }
 }
 
+#[derive(Debug, PartialEq, Clone, Copy)]
+pub enum FormEditorMode {
+    VimNormal,
+    VimInsert,
+    CommandInput,
+}
+
 #[derive(Debug, PartialEq, Clone)]
 pub enum AppMode {
     Normal,
@@ -49,11 +56,15 @@ pub struct App {
     pub items: Vec<NoteItem>,
     pub list_state: ListState,
     pub mode: AppMode,
+    pub form_editor_mode: FormEditorMode,
     pub form_focus: FormFocus,
     pub status_message: String,
     pub form_id: Option<String>,
     pub form_title: String,
     pub form_content: String,
+    pub title_cursor: usize,
+    pub content_cursor: usize,
+    pub vim_cmd_buffer: String,
 }
 
 impl App {
@@ -66,31 +77,85 @@ impl App {
             items,
             list_state,
             mode: AppMode::Normal,
+            form_editor_mode: FormEditorMode::VimNormal,
             form_focus: FormFocus::Title,
             status_message: "Vim Keymaps Active | [j/k] Nav | [a] Add | [e] Edit | [d/x] Del | [?] Help".to_string(),
             form_id: None,
             form_title: String::new(),
             form_content: String::new(),
+            title_cursor: 0,
+            content_cursor: 0,
+            vim_cmd_buffer: String::new(),
         }
     }
 
     pub fn open_add_form(&mut self) {
         self.mode = AppMode::AddForm;
+        self.form_editor_mode = FormEditorMode::VimInsert;
         self.form_focus = FormFocus::Title;
         self.form_id = None;
         self.form_title.clear();
         self.form_content.clear();
-        self.status_message = "MODE: Add Note Prompt | [Tab/↑↓] Switch Focus | [Ctrl+Enter / Ctrl+S] Save".to_string();
+        self.title_cursor = 0;
+        self.content_cursor = 0;
+        self.vim_cmd_buffer.clear();
+        self.status_message = "-- VIM INSERT -- Type title, press Esc for Vim Normal mode".to_string();
     }
 
     pub fn open_edit_form(&mut self) {
         if let Some(note) = self.selected_item().cloned() {
             self.mode = AppMode::EditForm;
+            self.form_editor_mode = FormEditorMode::VimNormal;
             self.form_focus = FormFocus::Title;
             self.form_id = Some(note.id);
             self.form_title = note.title;
             self.form_content = note.content;
-            self.status_message = "MODE: Edit Note Prompt | [Tab/↑↓] Switch Focus | [Ctrl+Enter / Ctrl+S] Save".to_string();
+            self.title_cursor = self.form_title.len();
+            self.content_cursor = self.form_content.len();
+            self.vim_cmd_buffer.clear();
+            self.status_message = "-- VIM NORMAL -- [i] Insert mode | [j/k] Focus Field | [h/l] Cursor | [:w] Save".to_string();
+        }
+    }
+
+    pub fn title_insert_char(&mut self, c: char) {
+        if self.title_cursor > self.form_title.len() {
+            self.title_cursor = self.form_title.len();
+        }
+        self.form_title.insert(self.title_cursor, c);
+        self.title_cursor += 1;
+    }
+
+    pub fn title_backspace(&mut self) {
+        if self.title_cursor > 0 && !self.form_title.is_empty() {
+            self.title_cursor -= 1;
+            self.form_title.remove(self.title_cursor);
+        }
+    }
+
+    pub fn title_delete_char(&mut self) {
+        if self.title_cursor < self.form_title.len() {
+            self.form_title.remove(self.title_cursor);
+        }
+    }
+
+    pub fn content_insert_char(&mut self, c: char) {
+        if self.content_cursor > self.form_content.len() {
+            self.content_cursor = self.form_content.len();
+        }
+        self.form_content.insert(self.content_cursor, c);
+        self.content_cursor += 1;
+    }
+
+    pub fn content_backspace(&mut self) {
+        if self.content_cursor > 0 && !self.form_content.is_empty() {
+            self.content_cursor -= 1;
+            self.form_content.remove(self.content_cursor);
+        }
+    }
+
+    pub fn content_delete_char(&mut self) {
+        if self.content_cursor < self.form_content.len() {
+            self.form_content.remove(self.content_cursor);
         }
     }
 
@@ -159,7 +224,7 @@ impl App {
             .split(f.area());
 
         // Header Block
-        let header = Paragraph::new("📝 Rust Axum Todo TUI (Vim Keybindings Enabled)")
+        let header = Paragraph::new("📝 Rust Axum Todo TUI (Vim Modal Editing Active)")
             .style(
                 Style::default()
                     .fg(Color::Cyan)
@@ -229,7 +294,7 @@ impl App {
 
         // Floating Modal Form Dialog (Add / Edit Note)
         if self.mode == AppMode::AddForm || self.mode == AppMode::EditForm {
-            let area = centered_rect(75, 65, f.area());
+            let area = centered_rect(75, 75, f.area());
             f.render_widget(Clear, area);
 
             let dialog_title = if self.mode == AppMode::AddForm {
@@ -256,57 +321,92 @@ impl App {
                 .margin(1)
                 .constraints(
                     [
+                        Constraint::Length(1), // Vim Mode Banner
                         Constraint::Length(3), // Title Field
-                        Constraint::Min(5),    // Content Field (Multiline)
+                        Constraint::Min(6),    // Content Field (Multiline)
                         Constraint::Length(3), // Buttons Area
-                        Constraint::Length(1), // Shortcut Hints
+                        Constraint::Length(1), // Command / Status Hints Footer
                     ]
                     .as_ref(),
                 )
                 .split(area);
 
+            // 0. Vim Mode Banner
+            let vim_banner_str = match self.form_editor_mode {
+                FormEditorMode::VimNormal => "-- VIM NORMAL MODE -- (Press 'i' for Insert, 'j/k' to move field, ':w' to save, 'Esc' for normal)".to_string(),
+                FormEditorMode::VimInsert => "-- VIM INSERT MODE -- (Press 'Esc' for Normal mode, 'Enter' for newline in Content)".to_string(),
+                FormEditorMode::CommandInput => format!("-- VIM COMMAND MODE -- :{}", self.vim_cmd_buffer),
+            };
+            let vim_banner_style = match self.form_editor_mode {
+                FormEditorMode::VimNormal => Style::default().fg(Color::Cyan).add_modifier(Modifier::BOLD),
+                FormEditorMode::VimInsert => Style::default().fg(Color::Green).add_modifier(Modifier::BOLD),
+                FormEditorMode::CommandInput => Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD),
+            };
+            let vim_banner = Paragraph::new(vim_banner_str)
+                .alignment(ratatui::layout::Alignment::Center)
+                .style(vim_banner_style);
+            f.render_widget(vim_banner, popup_chunks[0]);
+
             // 1. Title Input Block
-            let title_style = if self.form_focus == FormFocus::Title {
+            let is_title_focused = self.form_focus == FormFocus::Title;
+            let title_style = if is_title_focused {
                 Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD)
             } else {
                 Style::default().fg(Color::Gray)
             };
             let title_block = Block::default()
                 .borders(Borders::ALL)
-                .title(if self.form_focus == FormFocus::Title { "📌 Title (Focused - Type Text)" } else { "📌 Title" })
+                .title(if is_title_focused { "📌 Title (Focused)" } else { "📌 Title" })
                 .style(title_style);
-            let title_para = Paragraph::new(if self.form_title.is_empty() {
+
+            let formatted_title = format_text_with_cursor(
+                &self.form_title,
+                self.title_cursor,
+                is_title_focused,
+                self.form_editor_mode == FormEditorMode::VimInsert,
+            );
+
+            let title_para = Paragraph::new(if self.form_title.is_empty() && !is_title_focused {
                 Text::styled("<Enter title...>", Style::default().fg(Color::DarkGray))
             } else {
-                Text::styled(&self.form_title, Style::default().fg(Color::White))
+                Text::from(formatted_title)
             })
             .block(title_block);
-            f.render_widget(title_para, popup_chunks[0]);
+            f.render_widget(title_para, popup_chunks[1]);
 
             // 2. Multiline Content Input Block
-            let content_style = if self.form_focus == FormFocus::Content {
+            let is_content_focused = self.form_focus == FormFocus::Content;
+            let content_style = if is_content_focused {
                 Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD)
             } else {
                 Style::default().fg(Color::Gray)
             };
             let content_block = Block::default()
                 .borders(Borders::ALL)
-                .title(if self.form_focus == FormFocus::Content { "📝 Content (Focused - Multiline: Enter=Newline)" } else { "📝 Content" })
+                .title(if is_content_focused { "📝 Content (Focused - Multiline: Enter=Newline)" } else { "📝 Content" })
                 .style(content_style);
-            let content_para = Paragraph::new(if self.form_content.is_empty() {
+
+            let formatted_content = format_text_with_cursor(
+                &self.form_content,
+                self.content_cursor,
+                is_content_focused,
+                self.form_editor_mode == FormEditorMode::VimInsert,
+            );
+
+            let content_para = Paragraph::new(if self.form_content.is_empty() && !is_content_focused {
                 Text::styled("<Enter content (multiline supported)...>", Style::default().fg(Color::DarkGray))
             } else {
-                Text::styled(&self.form_content, Style::default().fg(Color::White))
+                Text::from(formatted_content)
             })
             .block(content_block)
             .wrap(Wrap { trim: false });
-            f.render_widget(content_para, popup_chunks[1]);
+            f.render_widget(content_para, popup_chunks[2]);
 
             // 3. Buttons Area (Save & Cancel)
             let button_chunks = Layout::default()
                 .direction(Direction::Horizontal)
                 .constraints([Constraint::Percentage(50), Constraint::Percentage(50)].as_ref())
-                .split(popup_chunks[2]);
+                .split(popup_chunks[3]);
 
             // Save Button
             let save_style = if self.form_focus == FormFocus::SaveButton {
@@ -314,7 +414,7 @@ impl App {
             } else {
                 Style::default().fg(Color::Green)
             };
-            let save_btn = Paragraph::new(" [ Save (Ctrl+S / Ctrl+Enter) ] ")
+            let save_btn = Paragraph::new(" [ Save (:w / Ctrl+S / Ctrl+Enter) ] ")
                 .alignment(ratatui::layout::Alignment::Center)
                 .block(Block::default().borders(Borders::ALL))
                 .style(save_style);
@@ -326,30 +426,35 @@ impl App {
             } else {
                 Style::default().fg(Color::Red)
             };
-            let cancel_btn = Paragraph::new(" [ Cancel (Esc) ] ")
+            let cancel_btn = Paragraph::new(" [ Cancel (:q / Esc) ] ")
                 .alignment(ratatui::layout::Alignment::Center)
                 .block(Block::default().borders(Borders::ALL))
                 .style(cancel_style);
             f.render_widget(cancel_btn, button_chunks[1]);
 
-            // 4. Hints Footer
-            let hint = Paragraph::new("Nav: [Tab/↑↓] Focus | Multiline: [Enter] in Content | Save: [Ctrl+S] or [Ctrl+Enter]")
-                .style(Style::default().fg(Color::DarkGray))
+            // 4. Command / Status Hints Footer
+            let hint_str = if self.form_editor_mode == FormEditorMode::CommandInput {
+                format!(":{}", self.vim_cmd_buffer)
+            } else {
+                "Vim Mode: [i] Insert | [Esc] Normal | [j/k] Switch Field | [h/l] Cursor | [:w] Save | [:q] Quit".to_string()
+            };
+            let hint = Paragraph::new(hint_str)
+                .style(Style::default().fg(Color::Yellow))
                 .alignment(ratatui::layout::Alignment::Center);
-            f.render_widget(hint, popup_chunks[3]);
+            f.render_widget(hint, popup_chunks[4]);
         }
 
         // Vim Keybindings Help Sheet Overlay
         if self.mode == AppMode::Help {
-            let area = centered_rect(65, 70, f.area());
+            let area = centered_rect(65, 75, f.area());
             f.render_widget(Clear, area);
 
             let help_text = r#"
 🎮 Vim Keybindings Quick Reference
 
 Navigation (Normal Mode):
-  j / ↓         Move down in list
-  k / ↑         Move up in list
+  j / ↓         Move down in note list
+  k / ↑         Move up in note list
   g / Home      Jump to top of list
   G / End       Jump to bottom of list
 
@@ -361,13 +466,17 @@ Actions (Normal Mode):
   ? / h         Toggle this Vim Help sheet
   q / Esc       Quit TUI
 
-Form Modal Prompt Mode:
-  Tab / ↓       Focus next field / button
-  Shift+Tab / ↑ Focus previous field / button
-  Enter         Insert newline in Content field
-  Ctrl+S /      Save & Submit note form
+Vim Modal Note Editor (Inside Prompt):
+  i / a         Enter Vim Insert mode
+  o             Open new line in Content field (Insert mode)
+  Esc           Return to Vim Normal mode
+  j / k         Move field focus (Title <-> Content <-> Save)
+  h / l         Move cursor Left / Right
+  x / dd        Delete char / line
+  :w / :wq      Save note & exit prompt
+  :q / :q!      Cancel & quit prompt
+  Ctrl+S /      Save & submit immediately
   Ctrl+Enter
-  Esc           Cancel & Close Form
 
 Press [?] or [Esc] to return to application.
 "#;
@@ -382,6 +491,26 @@ Press [?] or [Esc] to return to application.
                 .style(Style::default().fg(Color::White).bg(Color::Reset));
 
             f.render_widget(help_para, area);
+        }
+    }
+}
+
+fn format_text_with_cursor(text: &str, cursor: usize, active: bool, is_insert: bool) -> String {
+    if !active {
+        return text.to_string();
+    }
+    let safe_cursor = cursor.min(text.len());
+    let (left, right) = text.split_at(safe_cursor);
+    if is_insert {
+        format!("{}█{}", left, right)
+    } else {
+        if right.is_empty() {
+            format!("{}█", left)
+        } else {
+            let mut chars = right.chars();
+            let _c = chars.next().unwrap();
+            let rest = chars.as_str();
+            format!("{}▒{}", left, rest)
         }
     }
 }
