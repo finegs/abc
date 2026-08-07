@@ -42,7 +42,7 @@ async fn main() {
             .route("/api/healthcheck", get(health_check_handler))
             .route("/api/notes", get(note_list_handle).post(create_note_handler))
             .route(
-                "/api/notes/:id",
+                "/api/notes/{id}",
                 get(get_note_handler)
                     .patch(edit_note_handler)
                     .delete(delete_note_handler),
@@ -78,14 +78,38 @@ async fn create_mysql_conn_pool(db_url: &str) -> sqlx::mysql::MySqlPool {
 
 #[cfg(feature = "sqlite")]
 async fn create_sqlite_conn_pool(db_url: &str) -> sqlx::sqlite::SqlitePool {
-    // let db_url =  "sqlite::mydb.db";
-    match sqlx::sqlite::SqlitePool::connect(&db_url).await {
+    use sqlx::sqlite::SqliteConnectOptions;
+    use std::str::FromStr;
+
+    let options = SqliteConnectOptions::from_str(db_url)
+        .unwrap_or_else(|_| SqliteConnectOptions::new())
+        .create_if_missing(true);
+
+    match sqlx::sqlite::SqlitePoolOptions::new()
+        .max_connections(10)
+        .connect_with(options)
+        .await
+    {
         Ok(pool) => {
-            println!("✅ Connection to the database is successful!");
+            println!("✅ Connection to SQLite database is successful!");
+            let _ = sqlx::query(
+                r#"
+                CREATE TABLE IF NOT EXISTS notes (
+                    id CHAR(36) PRIMARY KEY NOT NULL,
+                    title VARCHAR(255) NOT NULL UNIQUE,
+                    content TEXT NOT NULL,
+                    is_published BOOLEAN NOT NULL DEFAULT FALSE,
+                    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+                );
+                "#,
+            )
+            .execute(&pool)
+            .await;
             pool
         }
         Err(err) => {
-            eprintln!("fail to  create_sqlite_conn_pool. err = {}", err);
+            eprintln!("fail to create_sqlite_conn_pool. err = {}", err);
             std::process::exit(1);
         }
     }
