@@ -26,58 +26,46 @@ fn to_note_response(note: &NoteModel) -> NoteModelResponse {
     }
 }
 
+pub async fn health_check_handler() -> impl IntoResponse {
+    const MESSAGE: &str = "API Services";
+
+    let json_response = serde_json::json!(
+        {
+            "status": "ok",
+            "message": MESSAGE
+        }
+    );
+
+    Json(json_response)
+}
+
 pub async fn note_list_handle(
-    opts: Option<Query<FilterOptions>>,
+    Query(opts): Query<FilterOptions>,
     State(data): State<Arc<AppState>>,
 ) -> Result<impl IntoResponse, (StatusCode, Json<serde_json::Value>)> {
-    // Param
-    let Query(opts) = opts.unwrap_or_default();
-
     let limit = opts.limit.unwrap_or(10);
     let offset = (opts.page.unwrap_or(1) - 1) * limit;
 
     // Query with macro
-    let notes = sqlx::query_as::<_, NoteModel>(r#"SELECT * FROM notes ORDER by id LIMIT $1 OFFSET $2"#)
-        .bind(limit as i32)
-        .bind(offset as i32)
-        .fetch_all(&data.conn_pool)
-        .await
-        .map_err(|e| {
-            let error_response = serde_json::json!({
-                "status": "error",
-                "message": format!("Database error: { }", e),
-            });
-<<<<<<< Updated upstream
-            (StatusCode::INTERNAL_SERVER_ERROR, Json(error_response))
-        })?;
-=======
-            eprintln!("fail to acquire connect. {}", &error_response);
-            return Err((StatusCode::INTERNAL_SERVER_ERROR, Json(error_response)));
-        }
-    };
-    // Query with macro
-    let notes = sqlx::query_as!(
-        NoteModel,
-        r#"SELECT * FROM notes ORDER by id LIMIT ? OFFSET ?"#,
-        limit as i32,
-        offset as i32
-    )
-    .fetch_all(&mut conn)
-    .await
-    .map_err(|e| {
-        let error_response = serde_json::json!({
-            "status": "error",
-            "message": format!("Database error: { }", e),
-        });
-        (StatusCode::INTERNAL_SERVER_ERROR, Json(error_response))
-    })?;
->>>>>>> Stashed changes
+    let notes =
+        sqlx::query_as::<_, NoteModel>(r#"SELECT * FROM notes ORDER by id LIMIT $1 OFFSET $2"#)
+            .bind(limit as i32)
+            .bind(offset as i32)
+            .fetch_all(&data.conn_pool)
+            .await
+            .map_err(|e| {
+                let error_response = serde_json::json!({
+                    "status": "error",
+                    "message": format!("Database error: { }", e),
+                });
+                (StatusCode::INTERNAL_SERVER_ERROR, Json(error_response))
+            })?;
 
     // Response
     let note_responses = notes
-                                                .iter()
-                                                .map(|note| to_note_response(&note))
-                                                .collect::<Vec<NoteModelResponse>>();
+        .iter()
+        .map(to_note_response)
+        .collect::<Vec<NoteModelResponse>>();
 
     let json_response = serde_json::json!({
         "status": "ok",
@@ -119,7 +107,7 @@ pub async fn create_note_handler(
     }
 
     // Get insereted note by ID
-    let note = sqlx::query_as::<_, NoteModel>(r#"SELECT * FROM notes WHERE id = %1"#)
+    let note = sqlx::query_as::<_, NoteModel>(r#"SELECT * FROM notes WHERE id = $1"#)
         .bind(&id)
         .fetch_one(&data.conn_pool)
         .await
@@ -138,7 +126,6 @@ pub async fn create_note_handler(
     });
 
     Ok(Json(note_response))
-        
 }
 
 pub async fn get_note_handler(
@@ -146,8 +133,7 @@ pub async fn get_note_handler(
     State(data): State<Arc<AppState>>,
 ) -> Result<impl IntoResponse, (StatusCode, Json<serde_json::Value>)> {
     // get using query macro
-    let query_result = sqlx::query_as::<_, NoteModel>(
-        r#"SELECT * FROM notes WHERE id = ?"#)
+    let query_result = sqlx::query_as::<_, NoteModel>(r#"SELECT * FROM notes WHERE id = $1"#)
         .bind(&id)
         .fetch_one(&data.conn_pool)
         .await;
@@ -186,8 +172,7 @@ pub async fn edit_note_handler(
     Json(body): Json<UpdateNoteSchema>,
 ) -> Result<impl IntoResponse, (StatusCode, Json<serde_json::Value>)> {
     // validate note with query macro
-    let query_result = sqlx::query_as::<_, NoteModel>(
-        r#"SELECT * FROM notes WHERE id = $1"#)
+    let query_result = sqlx::query_as::<_, NoteModel>(r#"SELECT * FROM notes WHERE id = $1"#)
         .bind(&id)
         .fetch_one(&data.conn_pool)
         .await;
@@ -218,23 +203,24 @@ pub async fn edit_note_handler(
     let i8_is_published = is_published as i8;
 
     // Update (if empty, use old value)
-    let update_result =
-        sqlx::query(r#"UPDATE notes SET title = $1, content = $2, is_published = $3 WHERE id = $4"#)
-            .bind(&body.title.unwrap_or_else(|| note.title))
-            .bind(&body.content.unwrap_or_else(|| note.content))
-            .bind(i8_is_published)
-            .bind(&id)
-            .execute(&data.conn_pool)
-            .await
-            .map_err(|e| {
-                (
-                    StatusCode::INTERNAL_SERVER_ERROR,
-                    Json(json!({
-                        "status": "error",
-                        "message": format!("{:?}", e)
-                    })),
-                )
-            })?;
+    let update_result = sqlx::query(
+        r#"UPDATE notes SET title = $1, content = $2, is_published = $3 WHERE id = $4"#,
+    )
+    .bind(&body.title.unwrap_or_else(|| note.title))
+    .bind(&body.content.unwrap_or_else(|| note.content))
+    .bind(i8_is_published)
+    .bind(&id)
+    .execute(&data.conn_pool)
+    .await
+    .map_err(|e| {
+        (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            Json(json!({
+                "status": "error",
+                "message": format!("{:?}", e)
+            })),
+        )
+    })?;
 
     // if no data affected (or deleted when wanted to update)
     if update_result.rows_affected() == 0 {
@@ -246,8 +232,7 @@ pub async fn edit_note_handler(
     }
 
     // get updated data
-    let updated_note = sqlx::query_as::<_, NoteModel>(
-        r#"SELECT * FROM notes WHERE id = ?"#)
+    let updated_note = sqlx::query_as::<_, NoteModel>(r#"SELECT * FROM notes WHERE id = $1"#)
         .bind(&id)
         .fetch_one(&data.conn_pool)
         .await

@@ -4,15 +4,18 @@ mod handler;
 mod model;
 mod schema;
 
-use std::{borrow::Borrow, sync::Arc};
+use std::sync::Arc;
 
-use axum::{response::IntoResponse, routing::get, Json, Router};
+use axum::{routing::get, Router};
 use tokio::net::TcpListener;
 
 use dotenv::dotenv;
-use sqlx::database;
 
 use appstate::AppState;
+use handler::{
+    create_note_handler, delete_note_handler, edit_note_handler, get_note_handler,
+    health_check_handler, note_list_handle,
+};
 
 // TODO : check crud with  db (CRUD  BOOK)[https://wolfy.tistory.com/335]
 // FIXME:
@@ -36,6 +39,13 @@ async fn main() {
         #[cfg(any(feature = "mysql", feature = "sqlite"))]
         let app = Router::new()
             .route("/api/healthcheck", get(health_check_handler))
+            .route("/api/notes", get(note_list_handle).post(create_note_handler))
+            .route(
+                "/api/notes/:id",
+                get(get_note_handler)
+                    .patch(edit_note_handler)
+                    .delete(delete_note_handler),
+            )
             .with_state(Arc::new(AppState {
                 conn_pool: pool.clone(),
             }));
@@ -47,19 +57,6 @@ async fn main() {
             .await
             .unwrap();
     }
-}
-
-pub async fn health_check_handler() -> impl IntoResponse {
-    const MESSAGE: &str = "API Services";
-
-    let json_response = serde_json::json!(
-        {
-            "status": "ok",
-            "message": MESSAGE
-        }
-    );
-
-    Json(json_response)
 }
 
 #[cfg(feature = "mysql")]
