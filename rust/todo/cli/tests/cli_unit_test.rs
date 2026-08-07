@@ -112,3 +112,20 @@ fn test_tui_app_navigation() {
     app.previous();
     assert_eq!(app.list_state.selected(), Some(1));
 }
+
+#[test]
+fn test_form_focus_navigation() {
+    use tui::FormFocus;
+    let mut focus = FormFocus::Title;
+    focus = focus.next();
+    assert_eq!(focus, FormFocus::Content);
+    focus = focus.next();
+    assert_eq!(focus, FormFocus::SaveButton);
+    focus = focus.next();
+    assert_eq!(focus, FormFocus::CancelButton);
+    focus = focus.next();
+    assert_eq!(focus, FormFocus::Title);
+
+    focus = focus.previous();
+    assert_eq!(focus, FormFocus::CancelButton);
+}

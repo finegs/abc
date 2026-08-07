@@ -5,13 +5,13 @@ mod tui;
 use clap::{Parser, Subcommand};
 use client::ApiClient;
 use crossterm::{
-    event::{self, Event, KeyCode},
+    event::{self, Event, KeyCode, KeyModifiers},
     execute,
     terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
 };
 use ratatui::{backend::CrosstermBackend, Terminal};
 use std::{error::Error, io};
-use tui::{App, AppMode};
+use tui::{App, AppMode, FormFocus};
 
 #[derive(Parser, Debug)]
 #[command(name = "todo-cli")]
@@ -121,28 +121,20 @@ async fn run_tui_app(client: ApiClient) -> Result<(), Box<dyn Error>> {
 
         if event::poll(std::time::Duration::from_millis(100))? {
             if let Event::Key(key) = event::read()? {
+                let is_ctrl = key.modifiers.contains(KeyModifiers::CONTROL);
+                let is_ctrl_enter = is_ctrl
+                    && (key.code == KeyCode::Enter
+                        || key.code == KeyCode::Char('s')
+                        || key.code == KeyCode::Char('j')
+                        || key.code == KeyCode::Char('m'));
+
                 match app.mode {
                     AppMode::Normal => match key.code {
-                        KeyCode::Char('q') => break,
+                        KeyCode::Char('q') | KeyCode::Esc => break,
                         KeyCode::Char('j') | KeyCode::Down => app.next(),
                         KeyCode::Char('k') | KeyCode::Up => app.previous(),
-                        KeyCode::Char('a') => {
-                            app.mode = AppMode::AddTitle;
-                            app.new_title.clear();
-                            app.new_content.clear();
-                            app.status_message =
-                                "MODE: Add Note (Title) | Type title -> press [Enter]".to_string();
-                        }
-                        KeyCode::Char('e') | KeyCode::Enter => {
-                            if let Some(note) = app.selected_item().cloned() {
-                                app.mode = AppMode::EditTitle;
-                                app.editing_id = Some(note.id);
-                                app.edit_title = note.title;
-                                app.edit_content = note.content;
-                                app.status_message =
-                                    "MODE: Edit Note (Title) | Edit title -> press [Enter]".to_string();
-                            }
-                        }
+                        KeyCode::Char('a') => app.open_add_form(),
+                        KeyCode::Char('e') | KeyCode::Enter => app.open_edit_form(),
                         KeyCode::Char('d') => {
                             if let Some(note) = app.selected_item().cloned() {
                                 app.status_message = format!("Deleting note '{}'...", note.title);
@@ -168,116 +160,71 @@ async fn run_tui_app(client: ApiClient) -> Result<(), Box<dyn Error>> {
                                 app.status_message = "🔄 Refreshed notes list!".to_string();
                             }
                         }
-                        KeyCode::Esc => break,
                         _ => {}
                     },
-                    AppMode::AddTitle => match key.code {
-                        KeyCode::Esc => {
-                            app.mode = AppMode::Normal;
-                            app.status_message = "Cancelled adding note.".to_string();
-                        }
-                        KeyCode::Enter => {
-                            if !app.new_title.trim().is_empty() {
-                                app.mode = AppMode::AddContent;
-                                app.status_message =
-                                    "MODE: Add Note (Content) | Type content -> press [Enter] to submit"
-                                        .to_string();
-                            }
-                        }
-                        KeyCode::Backspace => {
-                            app.new_title.pop();
-                        }
-                        KeyCode::Char(c) => {
-                            app.new_title.push(c);
-                        }
-                        _ => {}
-                    },
-                    AppMode::AddContent => match key.code {
-                        KeyCode::Esc => {
-                            app.mode = AppMode::Normal;
-                            app.status_message = "Cancelled adding note.".to_string();
-                        }
-                        KeyCode::Enter => {
-                            let title = app.new_title.trim().to_string();
-                            let content = app.new_content.trim().to_string();
-                            if !title.is_empty() {
-                                app.status_message = format!("Creating note '{}'...", title);
-                                terminal.draw(|f| app.render(f))?;
-                                if client.create_note(&title, &content, true).await.unwrap_or(false) {
-                                    app.status_message =
-                                        format!("✅ Note '{}' created successfully!", title);
-                                    if let Ok(updated) = client.fetch_notes().await {
-                                        app.items = updated;
-                                        app.list_state.select(Some(app.items.len().saturating_sub(1)));
-                                    }
-                                } else {
-                                    app.status_message = "❌ Failed to create note!".to_string();
+                    AppMode::AddForm | AppMode::EditForm => {
+                        if is_ctrl_enter {
+                            submit_form(&mut app, &client, &mut terminal).await?;
+                        } else {
+                            match key.code {
+                                KeyCode::Esc => {
+                                    app.mode = AppMode::Normal;
+                                    app.status_message = "Cancelled form.".to_string();
                                 }
-                            }
-                            app.mode = AppMode::Normal;
-                        }
-                        KeyCode::Backspace => {
-                            app.new_content.pop();
-                        }
-                        KeyCode::Char(c) => {
-                            app.new_content.push(c);
-                        }
-                        _ => {}
-                    },
-                    AppMode::EditTitle => match key.code {
-                        KeyCode::Esc => {
-                            app.mode = AppMode::Normal;
-                            app.status_message = "Cancelled editing note.".to_string();
-                        }
-                        KeyCode::Enter => {
-                            app.mode = AppMode::EditContent;
-                            app.status_message =
-                                "MODE: Edit Note (Content) | Edit content -> press [Enter] to save"
-                                    .to_string();
-                        }
-                        KeyCode::Backspace => {
-                            app.edit_title.pop();
-                        }
-                        KeyCode::Char(c) => {
-                            app.edit_title.push(c);
-                        }
-                        _ => {}
-                    },
-                    AppMode::EditContent => match key.code {
-                        KeyCode::Esc => {
-                            app.mode = AppMode::Normal;
-                            app.status_message = "Cancelled editing note.".to_string();
-                        }
-                        KeyCode::Enter => {
-                            if let Some(id) = app.editing_id.clone() {
-                                let title = app.edit_title.trim().to_string();
-                                let content = app.edit_content.trim().to_string();
-                                app.status_message = format!("Saving updates for note '{}'...", title);
-                                terminal.draw(|f| app.render(f))?;
-                                if client
-                                    .edit_note(&id, Some(&title), Some(&content), None)
-                                    .await
-                                    .unwrap_or(false)
-                                {
-                                    app.status_message =
-                                        format!("✅ Note '{}' updated successfully!", title);
-                                    if let Ok(updated) = client.fetch_notes().await {
-                                        app.items = updated;
-                                    }
-                                } else {
-                                    app.status_message = "❌ Failed to update note!".to_string();
+                                KeyCode::Tab | KeyCode::Down => {
+                                    app.form_focus = app.form_focus.next();
                                 }
+                                KeyCode::BackTab | KeyCode::Up => {
+                                    app.form_focus = app.form_focus.previous();
+                                }
+                                KeyCode::Enter => match app.form_focus {
+                                    FormFocus::Title => {
+                                        app.form_focus = FormFocus::Content;
+                                    }
+                                    FormFocus::Content => {
+                                        app.form_content.push('\n');
+                                    }
+                                    FormFocus::SaveButton => {
+                                        submit_form(&mut app, &client, &mut terminal).await?;
+                                    }
+                                    FormFocus::CancelButton => {
+                                        app.mode = AppMode::Normal;
+                                        app.status_message = "Cancelled form.".to_string();
+                                    }
+                                },
+                                KeyCode::Char(' ') => match app.form_focus {
+                                    FormFocus::SaveButton => {
+                                        submit_form(&mut app, &client, &mut terminal).await?;
+                                    }
+                                    FormFocus::CancelButton => {
+                                        app.mode = AppMode::Normal;
+                                        app.status_message = "Cancelled form.".to_string();
+                                    }
+                                    FormFocus::Title => app.form_title.push(' '),
+                                    FormFocus::Content => app.form_content.push(' '),
+                                },
+                                KeyCode::Backspace => match app.form_focus {
+                                    FormFocus::Title => {
+                                        app.form_title.pop();
+                                    }
+                                    FormFocus::Content => {
+                                        app.form_content.pop();
+                                    }
+                                    _ => {}
+                                },
+                                KeyCode::Char(c) => match app.form_focus {
+                                    FormFocus::Title => {
+                                        app.form_title.push(c);
+                                    }
+                                    FormFocus::Content => {
+                                        app.form_content.push(c);
+                                    }
+                                    _ => {}
+                                },
+                                _ => {}
                             }
-                            app.mode = AppMode::Normal;
                         }
-                        KeyCode::Backspace => {
-                            app.edit_content.pop();
-                        }
-                        KeyCode::Char(c) => {
-                            app.edit_content.push(c);
-                        }
-                        _ => {}
-                    },
+                    }
                 }
             }
         }
@@ -287,5 +234,57 @@ async fn run_tui_app(client: ApiClient) -> Result<(), Box<dyn Error>> {
     execute!(terminal.backend_mut(), LeaveAlternateScreen)?;
     terminal.show_cursor()?;
 
+    Ok(())
+}
+
+async fn submit_form(
+    app: &mut App,
+    client: &ApiClient,
+    terminal: &mut Terminal<CrosstermBackend<io::Stdout>>,
+) -> Result<(), Box<dyn Error>> {
+    let title = app.form_title.trim().to_string();
+    let content = app.form_content.trim().to_string();
+
+    if title.is_empty() {
+        app.status_message = "❌ Title cannot be empty!".to_string();
+        return Ok(());
+    }
+
+    match app.mode {
+        AppMode::AddForm => {
+            app.status_message = format!("Creating note '{}'...", title);
+            terminal.draw(|f| app.render(f))?;
+            if client.create_note(&title, &content, true).await.unwrap_or(false) {
+                app.status_message = format!("✅ Note '{}' created successfully!", title);
+                if let Ok(updated) = client.fetch_notes().await {
+                    app.items = updated;
+                    app.list_state.select(Some(app.items.len().saturating_sub(1)));
+                }
+            } else {
+                app.status_message = "❌ Failed to create note!".to_string();
+            }
+        }
+        AppMode::EditForm => {
+            if let Some(id) = app.form_id.clone() {
+                app.status_message = format!("Saving updates for note '{}'...", title);
+                terminal.draw(|f| app.render(f))?;
+                if client
+                    .edit_note(&id, Some(&title), Some(&content), None)
+                    .await
+                    .unwrap_or(false)
+                {
+                    app.status_message = format!("✅ Note '{}' updated successfully!", title);
+                    if let Ok(updated) = client.fetch_notes().await {
+                        app.items = updated;
+                    }
+                } else {
+                    app.status_message = "❌ Failed to update note!".to_string();
+                }
+            }
+        }
+        AppMode::Normal => {}
+    }
+
+    app.mode = AppMode::Normal;
     Ok(())
 }

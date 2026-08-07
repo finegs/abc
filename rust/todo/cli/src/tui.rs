@@ -9,25 +9,50 @@ use ratatui::{
     Frame,
 };
 
+#[derive(Debug, PartialEq, Clone, Copy)]
+pub enum FormFocus {
+    Title,
+    Content,
+    SaveButton,
+    CancelButton,
+}
+
+impl FormFocus {
+    pub fn next(&self) -> Self {
+        match self {
+            FormFocus::Title => FormFocus::Content,
+            FormFocus::Content => FormFocus::SaveButton,
+            FormFocus::SaveButton => FormFocus::CancelButton,
+            FormFocus::CancelButton => FormFocus::Title,
+        }
+    }
+
+    pub fn previous(&self) -> Self {
+        match self {
+            FormFocus::Title => FormFocus::CancelButton,
+            FormFocus::Content => FormFocus::Title,
+            FormFocus::SaveButton => FormFocus::Content,
+            FormFocus::CancelButton => FormFocus::SaveButton,
+        }
+    }
+}
+
 #[derive(Debug, PartialEq, Clone)]
 pub enum AppMode {
     Normal,
-    AddTitle,
-    AddContent,
-    EditTitle,
-    EditContent,
+    AddForm,
+    EditForm,
 }
 
 pub struct App {
     pub items: Vec<NoteItem>,
     pub list_state: ListState,
     pub mode: AppMode,
+    pub form_focus: FormFocus,
     pub status_message: String,
-    pub new_title: String,
-    pub new_content: String,
-    pub editing_id: Option<String>,
-    pub edit_title: String,
-    pub edit_content: String,
+    pub form_id: Option<String>,
+    pub form_title: String,
+    pub form_content: String,
 }
 
 impl App {
@@ -40,12 +65,31 @@ impl App {
             items,
             list_state,
             mode: AppMode::Normal,
+            form_focus: FormFocus::Title,
             status_message: "Ready | [q] Quit | [j/k] Nav | [e/Enter] Edit | [a] Add | [d] Del | [r] Refresh".to_string(),
-            new_title: String::new(),
-            new_content: String::new(),
-            editing_id: None,
-            edit_title: String::new(),
-            edit_content: String::new(),
+            form_id: None,
+            form_title: String::new(),
+            form_content: String::new(),
+        }
+    }
+
+    pub fn open_add_form(&mut self) {
+        self.mode = AppMode::AddForm;
+        self.form_focus = FormFocus::Title;
+        self.form_id = None;
+        self.form_title.clear();
+        self.form_content.clear();
+        self.status_message = "MODE: Add Note | [Tab/↑↓] Focus Field/Button | [Ctrl+Enter] Save".to_string();
+    }
+
+    pub fn open_edit_form(&mut self) {
+        if let Some(note) = self.selected_item().cloned() {
+            self.mode = AppMode::EditForm;
+            self.form_focus = FormFocus::Title;
+            self.form_id = Some(note.id);
+            self.form_title = note.title;
+            self.form_content = note.content;
+            self.status_message = "MODE: Edit Note | [Tab/↑↓] Focus Field/Button | [Ctrl+Enter] Save".to_string();
         }
     }
 
@@ -169,58 +213,109 @@ impl App {
             .block(Block::default().borders(Borders::ALL));
         f.render_widget(footer, chunks[2]);
 
-        // Floating Modal Popup Dialog for Add Note
-        if self.mode == AppMode::AddTitle || self.mode == AppMode::AddContent {
-            let area = centered_rect(70, 50, f.area());
-            let title_active = if self.mode == AppMode::AddTitle { " ▶" } else { "" };
-            let content_active = if self.mode == AppMode::AddContent { " ▶" } else { "" };
-
-            let popup_text = format!(
-                "Title{}:\n  {}\n\nContent{}:\n  {}\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n[Enter] Next/Submit | [Esc] Cancel",
-                title_active,
-                if self.new_title.is_empty() { "<Type note title...>" } else { &self.new_title },
-                content_active,
-                if self.new_content.is_empty() { "<Type note content...>" } else { &self.new_content }
-            );
-
-            let popup = Paragraph::new(popup_text)
-                .block(
-                    Block::default()
-                        .borders(Borders::ALL)
-                        .title("➕ Create New Note Dialog")
-                        .style(Style::default().fg(Color::Yellow)),
-                )
-                .style(Style::default().fg(Color::White).bg(Color::Reset));
-
+        // Floating Modal Form Dialog (Add / Edit Note)
+        if self.mode == AppMode::AddForm || self.mode == AppMode::EditForm {
+            let area = centered_rect(75, 65, f.area());
             f.render_widget(Clear, area);
-            f.render_widget(popup, area);
-        }
 
-        // Floating Modal Popup Dialog for Edit Note
-        if self.mode == AppMode::EditTitle || self.mode == AppMode::EditContent {
-            let area = centered_rect(70, 50, f.area());
-            let title_active = if self.mode == AppMode::EditTitle { " ▶" } else { "" };
-            let content_active = if self.mode == AppMode::EditContent { " ▶" } else { "" };
+            let dialog_title = if self.mode == AppMode::AddForm {
+                "➕ Create New Note"
+            } else {
+                "✏️ Edit Note"
+            };
 
-            let popup_text = format!(
-                "Title{}:\n  {}\n\nContent{}:\n  {}\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n[Enter] Next/Save | [Esc] Cancel",
-                title_active,
-                if self.edit_title.is_empty() { "<Edit note title...>" } else { &self.edit_title },
-                content_active,
-                if self.edit_content.is_empty() { "<Edit note content...>" } else { &self.edit_content }
-            );
+            let outer_block = Block::default()
+                .borders(Borders::ALL)
+                .title(dialog_title)
+                .style(Style::default().fg(Color::Cyan).bg(Color::Reset));
+            f.render_widget(outer_block, area);
 
-            let popup = Paragraph::new(popup_text)
-                .block(
-                    Block::default()
-                        .borders(Borders::ALL)
-                        .title("✏️ Edit Note Dialog")
-                        .style(Style::default().fg(Color::Magenta)),
+            // Sub-layout inside popup modal
+            let popup_chunks = Layout::default()
+                .direction(Direction::Vertical)
+                .margin(1)
+                .constraints(
+                    [
+                        Constraint::Length(3), // Title Field
+                        Constraint::Min(5),    // Content Field (Multiline)
+                        Constraint::Length(3), // Buttons Area
+                        Constraint::Length(1), // Shortcut Hints
+                    ]
+                    .as_ref(),
                 )
-                .style(Style::default().fg(Color::White).bg(Color::Reset));
+                .split(area);
 
-            f.render_widget(Clear, area);
-            f.render_widget(popup, area);
+            // 1. Title Input Block
+            let title_style = if self.form_focus == FormFocus::Title {
+                Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD)
+            } else {
+                Style::default().fg(Color::Gray)
+            };
+            let title_block = Block::default()
+                .borders(Borders::ALL)
+                .title(if self.form_focus == FormFocus::Title { "📌 Title (Focused)" } else { "📌 Title" })
+                .style(title_style);
+            let title_para = Paragraph::new(if self.form_title.is_empty() {
+                Span::styled("<Enter title...>", Style::default().fg(Color::DarkGray))
+            } else {
+                Span::styled(&self.form_title, Style::default().fg(Color::White))
+            })
+            .block(title_block);
+            f.render_widget(title_para, popup_chunks[0]);
+
+            // 2. Multiline Content Input Block
+            let content_style = if self.form_focus == FormFocus::Content {
+                Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD)
+            } else {
+                Style::default().fg(Color::Gray)
+            };
+            let content_block = Block::default()
+                .borders(Borders::ALL)
+                .title(if self.form_focus == FormFocus::Content { "📝 Content (Focused - Multiline: Enter=Newline)" } else { "📝 Content" })
+                .style(content_style);
+            let content_para = Paragraph::new(if self.form_content.is_empty() {
+                Span::styled("<Enter content (multiline supported)...>", Style::default().fg(Color::DarkGray))
+            } else {
+                Span::styled(&self.form_content, Style::default().fg(Color::White))
+            })
+            .block(content_block);
+            f.render_widget(content_para, popup_chunks[1]);
+
+            // 3. Buttons Area (Save & Cancel)
+            let button_chunks = Layout::default()
+                .direction(Direction::Horizontal)
+                .constraints([Constraint::Percentage(50), Constraint::Percentage(50)].as_ref())
+                .split(popup_chunks[2]);
+
+            // Save Button
+            let save_style = if self.form_focus == FormFocus::SaveButton {
+                Style::default().fg(Color::Black).bg(Color::Green).add_modifier(Modifier::BOLD)
+            } else {
+                Style::default().fg(Color::Green)
+            };
+            let save_btn = Paragraph::new(" [ Save (Ctrl+Enter) ] ")
+                .alignment(ratatui::layout::Alignment::Center)
+                .block(Block::default().borders(Borders::ALL))
+                .style(save_style);
+            f.render_widget(save_btn, button_chunks[0]);
+
+            // Cancel Button
+            let cancel_style = if self.form_focus == FormFocus::CancelButton {
+                Style::default().fg(Color::White).bg(Color::Red).add_modifier(Modifier::BOLD)
+            } else {
+                Style::default().fg(Color::Red)
+            };
+            let cancel_btn = Paragraph::new(" [ Cancel (Esc) ] ")
+                .alignment(ratatui::layout::Alignment::Center)
+                .block(Block::default().borders(Borders::ALL))
+                .style(cancel_style);
+            f.render_widget(cancel_btn, button_chunks[1]);
+
+            // 4. Hints Footer
+            let hint = Paragraph::new("Nav: [Tab/↑↓] Switch Focus | Multiline: [Enter] Newline in Content | Save: [Ctrl+Enter]")
+                .style(Style::default().fg(Color::DarkGray))
+                .alignment(ratatui::layout::Alignment::Center);
+            f.render_widget(hint, popup_chunks[3]);
         }
     }
 }
