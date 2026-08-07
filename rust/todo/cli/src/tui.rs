@@ -4,7 +4,7 @@ use crate::models::NoteItem;
 use ratatui::{
     layout::{Constraint, Direction, Layout, Rect},
     style::{Color, Modifier, Style},
-    text::{Line, Span},
+    text::{Line, Span, Text},
     widgets::{Block, Borders, Clear, List, ListItem, ListState, Paragraph, Wrap},
     Frame,
 };
@@ -257,9 +257,9 @@ impl App {
                 .title(if self.form_focus == FormFocus::Title { "📌 Title (Focused)" } else { "📌 Title" })
                 .style(title_style);
             let title_para = Paragraph::new(if self.form_title.is_empty() {
-                Span::styled("<Enter title...>", Style::default().fg(Color::DarkGray))
+                Text::styled("<Enter title...>", Style::default().fg(Color::DarkGray))
             } else {
-                Span::styled(&self.form_title, Style::default().fg(Color::White))
+                Text::styled(&self.form_title, Style::default().fg(Color::White))
             })
             .block(title_block);
             f.render_widget(title_para, popup_chunks[0]);
@@ -275,9 +275,9 @@ impl App {
                 .title(if self.form_focus == FormFocus::Content { "📝 Content (Focused - Multiline: Enter=Newline)" } else { "📝 Content" })
                 .style(content_style);
             let content_para = Paragraph::new(if self.form_content.is_empty() {
-                Span::styled("<Enter content (multiline supported)...>", Style::default().fg(Color::DarkGray))
+                Text::styled("<Enter content (multiline supported)...>", Style::default().fg(Color::DarkGray))
             } else {
-                Span::styled(&self.form_content, Style::default().fg(Color::White))
+                Text::styled(&self.form_content, Style::default().fg(Color::White))
             })
             .block(content_block)
             .wrap(Wrap { trim: false });
