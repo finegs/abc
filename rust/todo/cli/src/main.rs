@@ -131,6 +131,10 @@ async fn run_tui_app(client: ApiClient) -> Result<(), Box<dyn Error>> {
                 let is_ctrl = key.modifiers.contains(KeyModifiers::CONTROL);
                 let is_alt = key.modifiers.contains(KeyModifiers::ALT);
 
+                let is_enter_code = key.code == KeyCode::Enter
+                    || key.code == KeyCode::Char('\r')
+                    || key.code == KeyCode::Char('\n');
+
                 // Save shortcut: Ctrl+S or Ctrl+Enter (or Alt+Enter)
                 let is_save_shortcut = (is_ctrl
                     && (key.code == KeyCode::Char('s')
@@ -140,19 +144,18 @@ async fn run_tui_app(client: ApiClient) -> Result<(), Box<dyn Error>> {
                         || key.code == KeyCode::Char('\n')
                         || key.code == KeyCode::Char('j')
                         || key.code == KeyCode::Char('m')))
-                    || (is_alt
-                        && (key.code == KeyCode::Enter
-                            || key.code == KeyCode::Char('\r')
-                            || key.code == KeyCode::Char('\n')));
+                    || (is_alt && is_enter_code);
 
                 match app.mode {
                     AppMode::Normal => match key.code {
-                        KeyCode::Char('q') | KeyCode::Esc => break,
+                        KeyCode::Char('q') => break,
                         KeyCode::Char('j') | KeyCode::Down => app.next(),
                         KeyCode::Char('k') | KeyCode::Up => app.previous(),
+                        KeyCode::Char('g') | KeyCode::Home => app.jump_top(),
+                        KeyCode::Char('G') | KeyCode::End => app.jump_bottom(),
                         KeyCode::Char('a') => app.open_add_form(),
                         KeyCode::Char('e') | KeyCode::Enter => app.open_edit_form(),
-                        KeyCode::Char('d') => {
+                        KeyCode::Char('d') | KeyCode::Char('x') => {
                             if let Some(note) = app.selected_item().cloned() {
                                 app.status_message = format!("Deleting note '{}'...", note.title);
                                 terminal.draw(|f| app.render(f))?;
@@ -176,6 +179,16 @@ async fn run_tui_app(client: ApiClient) -> Result<(), Box<dyn Error>> {
                                 app.items = updated;
                                 app.status_message = "🔄 Refreshed notes list!".to_string();
                             }
+                        }
+                        KeyCode::Char('?') | KeyCode::Char('h') => {
+                            app.mode = AppMode::Help;
+                        }
+                        KeyCode::Esc => break,
+                        _ => {}
+                    },
+                    AppMode::Help => match key.code {
+                        KeyCode::Char('?') | KeyCode::Char('h') | KeyCode::Esc | KeyCode::Char('q') => {
+                            app.mode = AppMode::Normal;
                         }
                         _ => {}
                     },
@@ -309,7 +322,7 @@ async fn submit_form(
                 }
             }
         }
-        AppMode::Normal => {}
+        _ => {}
     }
 
     app.mode = AppMode::Normal;

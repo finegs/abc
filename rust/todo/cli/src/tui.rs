@@ -42,6 +42,7 @@ pub enum AppMode {
     Normal,
     AddForm,
     EditForm,
+    Help,
 }
 
 pub struct App {
@@ -66,7 +67,7 @@ impl App {
             list_state,
             mode: AppMode::Normal,
             form_focus: FormFocus::Title,
-            status_message: "Ready | [q] Quit | [j/k] Nav | [e/Enter] Edit | [a] Add | [d] Del | [r] Refresh".to_string(),
+            status_message: "Vim Keymaps Active | [j/k] Nav | [a] Add | [e] Edit | [d/x] Del | [?] Help".to_string(),
             form_id: None,
             form_title: String::new(),
             form_content: String::new(),
@@ -79,7 +80,7 @@ impl App {
         self.form_id = None;
         self.form_title.clear();
         self.form_content.clear();
-        self.status_message = "MODE: Add Note | [Tab/↑↓] Focus Field/Button | [Ctrl+Enter] Save".to_string();
+        self.status_message = "MODE: Add Note Prompt | [Tab/↑↓] Switch Focus | [Ctrl+Enter / Ctrl+S] Save".to_string();
     }
 
     pub fn open_edit_form(&mut self) {
@@ -89,7 +90,7 @@ impl App {
             self.form_id = Some(note.id);
             self.form_title = note.title;
             self.form_content = note.content;
-            self.status_message = "MODE: Edit Note | [Tab/↑↓] Focus Field/Button | [Ctrl+Enter] Save".to_string();
+            self.status_message = "MODE: Edit Note Prompt | [Tab/↑↓] Switch Focus | [Ctrl+Enter / Ctrl+S] Save".to_string();
         }
     }
 
@@ -127,6 +128,18 @@ impl App {
         self.list_state.select(Some(i));
     }
 
+    pub fn jump_top(&mut self) {
+        if !self.items.is_empty() {
+            self.list_state.select(Some(0));
+        }
+    }
+
+    pub fn jump_bottom(&mut self) {
+        if !self.items.is_empty() {
+            self.list_state.select(Some(self.items.len() - 1));
+        }
+    }
+
     pub fn selected_item(&self) -> Option<&NoteItem> {
         self.list_state.selected().and_then(|i| self.items.get(i))
     }
@@ -146,7 +159,7 @@ impl App {
             .split(f.area());
 
         // Header Block
-        let header = Paragraph::new("📝 Rust Axum Todo CLI TUI Manager")
+        let header = Paragraph::new("📝 Rust Axum Todo TUI (Vim Keybindings Enabled)")
             .style(
                 Style::default()
                     .fg(Color::Cyan)
@@ -180,7 +193,7 @@ impl App {
             .collect();
 
         let list = List::new(list_items)
-            .block(Block::default().borders(Borders::ALL).title("Notes List"))
+            .block(Block::default().borders(Borders::ALL).title("Notes List [j/k/g/G]"))
             .highlight_style(
                 Style::default()
                     .bg(Color::Blue)
@@ -220,14 +233,20 @@ impl App {
             f.render_widget(Clear, area);
 
             let dialog_title = if self.mode == AppMode::AddForm {
-                "➕ Create New Note"
+                " ➕ PROMPT: Create New Note ".to_string()
             } else {
-                "✏️ Edit Note"
+                format!(
+                    " ✏️ PROMPT: Edit Note [ID: {}] ",
+                    self.form_id.as_deref().unwrap_or("N/A")
+                )
             };
 
             let outer_block = Block::default()
                 .borders(Borders::ALL)
-                .title(dialog_title)
+                .title(Span::styled(
+                    dialog_title,
+                    Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD),
+                ))
                 .style(Style::default().fg(Color::Cyan).bg(Color::Reset));
             f.render_widget(outer_block, area);
 
@@ -254,7 +273,7 @@ impl App {
             };
             let title_block = Block::default()
                 .borders(Borders::ALL)
-                .title(if self.form_focus == FormFocus::Title { "📌 Title (Focused)" } else { "📌 Title" })
+                .title(if self.form_focus == FormFocus::Title { "📌 Title (Focused - Type Text)" } else { "📌 Title" })
                 .style(title_style);
             let title_para = Paragraph::new(if self.form_title.is_empty() {
                 Text::styled("<Enter title...>", Style::default().fg(Color::DarkGray))
@@ -295,7 +314,7 @@ impl App {
             } else {
                 Style::default().fg(Color::Green)
             };
-            let save_btn = Paragraph::new(" [ Save (Ctrl+Enter) ] ")
+            let save_btn = Paragraph::new(" [ Save (Ctrl+S / Ctrl+Enter) ] ")
                 .alignment(ratatui::layout::Alignment::Center)
                 .block(Block::default().borders(Borders::ALL))
                 .style(save_style);
@@ -318,6 +337,51 @@ impl App {
                 .style(Style::default().fg(Color::DarkGray))
                 .alignment(ratatui::layout::Alignment::Center);
             f.render_widget(hint, popup_chunks[3]);
+        }
+
+        // Vim Keybindings Help Sheet Overlay
+        if self.mode == AppMode::Help {
+            let area = centered_rect(65, 70, f.area());
+            f.render_widget(Clear, area);
+
+            let help_text = r#"
+🎮 Vim Keybindings Quick Reference
+
+Navigation (Normal Mode):
+  j / ↓         Move down in list
+  k / ↑         Move up in list
+  g / Home      Jump to top of list
+  G / End       Jump to bottom of list
+
+Actions (Normal Mode):
+  a             Add new note (Open Prompt)
+  e / Enter     Edit selected note (Open Prompt)
+  d / x         Delete selected note
+  r             Refresh notes list from API
+  ? / h         Toggle this Vim Help sheet
+  q / Esc       Quit TUI
+
+Form Modal Prompt Mode:
+  Tab / ↓       Focus next field / button
+  Shift+Tab / ↑ Focus previous field / button
+  Enter         Insert newline in Content field
+  Ctrl+S /      Save & Submit note form
+  Ctrl+Enter
+  Esc           Cancel & Close Form
+
+Press [?] or [Esc] to return to application.
+"#;
+
+            let help_para = Paragraph::new(help_text)
+                .block(
+                    Block::default()
+                        .borders(Borders::ALL)
+                        .title(" 💡 Vim Keybindings Help Sheet ")
+                        .style(Style::default().fg(Color::Yellow)),
+                )
+                .style(Style::default().fg(Color::White).bg(Color::Reset));
+
+            f.render_widget(help_para, area);
         }
     }
 }
