@@ -159,6 +159,114 @@ impl App {
         }
     }
 
+    pub fn content_line_start(&mut self) {
+        if self.content_cursor == 0 || self.form_content.is_empty() {
+            return;
+        }
+        let safe_cursor = self.content_cursor.min(self.form_content.len());
+        let slice = &self.form_content[..safe_cursor];
+        if let Some(pos) = slice.rfind('\n') {
+            self.content_cursor = pos + 1;
+        } else {
+            self.content_cursor = 0;
+        }
+    }
+
+    pub fn content_line_end(&mut self) {
+        let safe_cursor = self.content_cursor.min(self.form_content.len());
+        let slice = &self.form_content[safe_cursor..];
+        if let Some(pos) = slice.find('\n') {
+            self.content_cursor = safe_cursor + pos;
+        } else {
+            self.content_cursor = self.form_content.len();
+        }
+    }
+
+    pub fn content_move_up(&mut self) -> bool {
+        let safe = self.content_cursor.min(self.form_content.len());
+        let current_start = match self.form_content[..safe].rfind('\n') {
+            Some(pos) => pos + 1,
+            None => 0,
+        };
+        if current_start == 0 {
+            return false;
+        }
+        let col = safe - current_start;
+        let prev_slice = &self.form_content[..current_start - 1];
+        let prev_start = match prev_slice.rfind('\n') {
+            Some(pos) => pos + 1,
+            None => 0,
+        };
+        let prev_line_len = (current_start - 1) - prev_start;
+        self.content_cursor = prev_start + col.min(prev_line_len);
+        true
+    }
+
+    pub fn content_move_down(&mut self) -> bool {
+        let safe = self.content_cursor.min(self.form_content.len());
+        let current_start = match self.form_content[..safe].rfind('\n') {
+            Some(pos) => pos + 1,
+            None => 0,
+        };
+        let col = safe - current_start;
+        let next_start = match self.form_content[safe..].find('\n') {
+            Some(pos) => safe + pos + 1,
+            None => return false,
+        };
+        let next_end = match self.form_content[next_start..].find('\n') {
+            Some(pos) => next_start + pos,
+            None => self.form_content.len(),
+        };
+        let next_line_len = next_end - next_start;
+        self.content_cursor = next_start + col.min(next_line_len);
+        true
+    }
+
+    pub fn content_delete_line(&mut self) {
+        if self.form_content.is_empty() {
+            return;
+        }
+        let safe = self.content_cursor.min(self.form_content.len());
+        let start = match self.form_content[..safe].rfind('\n') {
+            Some(pos) => pos + 1,
+            None => 0,
+        };
+        let end = match self.form_content[safe..].find('\n') {
+            Some(pos) => safe + pos + 1,
+            None => self.form_content.len(),
+        };
+        self.form_content.drain(start..end);
+        self.content_cursor = start.min(self.form_content.len());
+    }
+
+    pub fn content_delete_to_end(&mut self) {
+        if self.form_content.is_empty() {
+            return;
+        }
+        let safe = self.content_cursor.min(self.form_content.len());
+        let end = match self.form_content[safe..].find('\n') {
+            Some(pos) => safe + pos,
+            None => self.form_content.len(),
+        };
+        if safe < end {
+            self.form_content.drain(safe..end);
+        }
+    }
+
+    pub fn content_open_below(&mut self) {
+        self.content_line_end();
+        self.content_insert_char('\n');
+        self.form_editor_mode = FormEditorMode::VimInsert;
+    }
+
+    pub fn content_open_above(&mut self) {
+        self.content_line_start();
+        let pos = self.content_cursor;
+        self.form_content.insert(pos, '\n');
+        self.content_cursor = pos;
+        self.form_editor_mode = FormEditorMode::VimInsert;
+    }
+
     pub fn next(&mut self) {
         if self.items.is_empty() {
             return;

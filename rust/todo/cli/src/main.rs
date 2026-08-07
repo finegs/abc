@@ -198,25 +198,89 @@ async fn run_tui_app(client: ApiClient) -> Result<(), Box<dyn Error>> {
                         } else {
                             match app.form_editor_mode {
                                 FormEditorMode::VimNormal => match key.code {
-                                    KeyCode::Char('i') | KeyCode::Char('a') => {
+                                    KeyCode::Char('i') => {
                                         if app.form_focus == FormFocus::SaveButton || app.form_focus == FormFocus::CancelButton {
                                             app.form_focus = FormFocus::Content;
                                         }
                                         app.form_editor_mode = FormEditorMode::VimInsert;
                                         app.status_message = "-- VIM INSERT -- (Press Esc for Normal mode)".to_string();
                                     }
-                                    KeyCode::Char('o') => {
-                                        app.form_focus = FormFocus::Content;
-                                        app.content_insert_char('\n');
+                                    KeyCode::Char('a') => {
+                                        if app.form_focus == FormFocus::SaveButton || app.form_focus == FormFocus::CancelButton {
+                                            app.form_focus = FormFocus::Content;
+                                        }
+                                        match app.form_focus {
+                                            FormFocus::Title => {
+                                                if app.title_cursor < app.form_title.len() {
+                                                    app.title_cursor += 1;
+                                                }
+                                            }
+                                            FormFocus::Content => {
+                                                if app.content_cursor < app.form_content.len() {
+                                                    app.content_cursor += 1;
+                                                }
+                                            }
+                                            _ => {}
+                                        }
                                         app.form_editor_mode = FormEditorMode::VimInsert;
-                                        app.status_message = "-- VIM INSERT -- (Opened new line)".to_string();
+                                        app.status_message = "-- VIM INSERT -- (Press Esc for Normal mode)".to_string();
                                     }
-                                    KeyCode::Char('j') => {
-                                        app.form_focus = app.form_focus.next();
+                                    KeyCode::Char('I') => {
+                                        if app.form_focus == FormFocus::SaveButton || app.form_focus == FormFocus::CancelButton {
+                                            app.form_focus = FormFocus::Content;
+                                        }
+                                        match app.form_focus {
+                                            FormFocus::Title => app.title_cursor = 0,
+                                            FormFocus::Content => app.content_line_start(),
+                                            _ => {}
+                                        }
+                                        app.form_editor_mode = FormEditorMode::VimInsert;
                                     }
-                                    KeyCode::Char('k') => {
-                                        app.form_focus = app.form_focus.previous();
+                                    KeyCode::Char('A') => {
+                                        if app.form_focus == FormFocus::SaveButton || app.form_focus == FormFocus::CancelButton {
+                                            app.form_focus = FormFocus::Content;
+                                        }
+                                        match app.form_focus {
+                                            FormFocus::Title => app.title_cursor = app.form_title.len(),
+                                            FormFocus::Content => app.content_line_end(),
+                                            _ => {}
+                                        }
+                                        app.form_editor_mode = FormEditorMode::VimInsert;
                                     }
+                                    KeyCode::Char('o') => match app.form_focus {
+                                        FormFocus::Content => app.content_open_below(),
+                                        _ => {
+                                            app.form_focus = FormFocus::Content;
+                                            app.content_open_below();
+                                        }
+                                    },
+                                    KeyCode::Char('O') => match app.form_focus {
+                                        FormFocus::Content => app.content_open_above(),
+                                        _ => {
+                                            app.form_focus = FormFocus::Content;
+                                            app.content_open_above();
+                                        }
+                                    },
+                                    KeyCode::Char('j') | KeyCode::Down => match app.form_focus {
+                                        FormFocus::Content => {
+                                            if !app.content_move_down() {
+                                                app.form_focus = FormFocus::SaveButton;
+                                            }
+                                        }
+                                        _ => {
+                                            app.form_focus = app.form_focus.next();
+                                        }
+                                    },
+                                    KeyCode::Char('k') | KeyCode::Up => match app.form_focus {
+                                        FormFocus::Content => {
+                                            if !app.content_move_up() {
+                                                app.form_focus = FormFocus::Title;
+                                            }
+                                        }
+                                        _ => {
+                                            app.form_focus = app.form_focus.previous();
+                                        }
+                                    },
                                     KeyCode::Char('h') | KeyCode::Left => match app.form_focus {
                                         FormFocus::Title => {
                                             if app.title_cursor > 0 {
@@ -249,19 +313,38 @@ async fn run_tui_app(client: ApiClient) -> Result<(), Box<dyn Error>> {
                                         }
                                         FormFocus::CancelButton => {}
                                     },
-                                    KeyCode::Char('0') => match app.form_focus {
+                                    KeyCode::Char('0') | KeyCode::Char('^') => match app.form_focus {
                                         FormFocus::Title => app.title_cursor = 0,
-                                        FormFocus::Content => app.content_cursor = 0,
+                                        FormFocus::Content => app.content_line_start(),
                                         _ => {}
                                     },
                                     KeyCode::Char('$') => match app.form_focus {
                                         FormFocus::Title => app.title_cursor = app.form_title.len(),
+                                        FormFocus::Content => app.content_line_end(),
+                                        _ => {}
+                                    },
+                                    KeyCode::Char('g') => match app.form_focus {
+                                        FormFocus::Content => app.content_cursor = 0,
+                                        _ => {}
+                                    },
+                                    KeyCode::Char('G') => match app.form_focus {
                                         FormFocus::Content => app.content_cursor = app.form_content.len(),
                                         _ => {}
                                     },
                                     KeyCode::Char('x') => match app.form_focus {
                                         FormFocus::Title => app.title_delete_char(),
                                         FormFocus::Content => app.content_delete_char(),
+                                        _ => {}
+                                    },
+                                    KeyCode::Char('D') => match app.form_focus {
+                                        FormFocus::Content => app.content_delete_to_end(),
+                                        _ => {}
+                                    },
+                                    KeyCode::Char('C') => match app.form_focus {
+                                        FormFocus::Content => {
+                                            app.content_delete_to_end();
+                                            app.form_editor_mode = FormEditorMode::VimInsert;
+                                        }
                                         _ => {}
                                     },
                                     KeyCode::Char(':') => {
