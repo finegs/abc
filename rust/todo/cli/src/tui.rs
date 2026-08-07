@@ -5,7 +5,7 @@ use ratatui::{
     layout::{Constraint, Direction, Layout, Rect},
     style::{Color, Modifier, Style},
     text::{Line, Span},
-    widgets::{Block, Borders, Clear, List, ListItem, ListState, Paragraph},
+    widgets::{Block, Borders, Clear, List, ListItem, ListState, Paragraph, Wrap},
     Frame,
 };
 
@@ -204,7 +204,8 @@ impl App {
 
         let details = Paragraph::new(details_text)
             .block(Block::default().borders(Borders::ALL).title("Note Details"))
-            .style(Style::default().fg(Color::Green));
+            .style(Style::default().fg(Color::Green))
+            .wrap(Wrap { trim: false });
         f.render_widget(details, main_chunks[1]);
 
         // Footer / Status Bar Widget
@@ -278,7 +279,8 @@ impl App {
             } else {
                 Span::styled(&self.form_content, Style::default().fg(Color::White))
             })
-            .block(content_block);
+            .block(content_block)
+            .wrap(Wrap { trim: false });
             f.render_widget(content_para, popup_chunks[1]);
 
             // 3. Buttons Area (Save & Cancel)
