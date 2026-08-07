@@ -48,6 +48,13 @@
   - Enhanced [`docker-compose.yml`](file:///home/user01/dev/git/abc/rust/todo/docker-compose.yml) with production `app` service and container healthchecks.
   - Created GitHub Actions CI/CD pipeline [`.github/workflows/ci-cd.yml`](file:///home/user01/dev/git/abc/rust/todo/.github/workflows/ci-cd.yml).
 
+- [x] **Task 8: Cargo Workspace Restructuring & CLI TUI Package (`todo-cli`)**
+  - Converted repository to a Cargo Workspace (`todo-api` & `todo-cli`).
+  - Implemented `todo-cli` package with Ratatui TUI, Crossterm terminal widgets, and Reqwest HTTP API client.
+  - Implemented unit tests for TUI app state and models in [`cli/tests/cli_unit_test.rs`](file:///home/user01/dev/git/abc/rust/todo/cli/tests/cli_unit_test.rs).
+  - Implemented integration tests against a mock Axum server in [`cli/tests/cli_integration_test.rs`](file:///home/user01/dev/git/abc/rust/todo/cli/tests/cli_integration_test.rs).
+  - Executed `cargo test --workspace`: **All 26 tests across `todo-api` and `todo-cli` PASSED!**
+
 ---
 
 ## 🧪 Test Execution Results (`cargo test`)

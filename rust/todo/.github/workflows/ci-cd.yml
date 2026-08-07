@@ -34,8 +34,8 @@ jobs:
       - name: Cargo Check
         run: cargo check --manifest-path rust/todo/Cargo.toml
 
-      - name: Run Unit & Integration Tests
-        run: cargo test --manifest-path rust/todo/Cargo.toml --all-targets --all-features
+      - name: Run Workspace Unit & Integration Tests
+        run: cargo test --manifest-path rust/todo/Cargo.toml --workspace --all-targets --all-features
 
   # ==========================================
   # JOB 2: Docker Build & Security Verification

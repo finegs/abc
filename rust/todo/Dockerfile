@@ -1,5 +1,5 @@
 # ==========================================
-# Stage 1: Build Phase
+# Stage 1: Build Phase (Cargo Workspace)
 # ==========================================
 FROM rust:1.80-slim-bookworm AS builder
 
@@ -11,26 +11,33 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /usr/src/app
 
-# Pre-build dependencies for layer caching
+# Pre-build dependencies for workspace layer caching
 COPY Cargo.toml Cargo.lock ./
-RUN mkdir src && echo "fn main() {}" > src/main.rs
-RUN cargo build --release
-RUN rm -rf src
+COPY api/Cargo.toml ./api/
+COPY cli/Cargo.toml ./cli/
+
+RUN mkdir -p api/src cli/src && \
+    echo "fn main() {}" > api/src/main.rs && \
+    echo "fn main() {}" > cli/src/main.rs
+
+RUN cargo build --release --workspace
+RUN rm -rf api/src cli/src
 
 # Copy source code and migrations
-COPY src ./src
-COPY migrations ./migrations
+COPY api/src ./api/src
+COPY api/migrations ./api/migrations
+COPY cli/src ./cli/src
 
-# Touch main.rs to force rebuild of application code
-RUN touch src/main.rs
-RUN cargo build --release
+# Force rebuild of workspace binaries
+RUN touch api/src/main.rs cli/src/main.rs
+RUN cargo build --release --workspace
 
 # ==========================================
 # Stage 2: Minimal Runtime Phase
 # ==========================================
 FROM debian:bookworm-slim AS runner
 
-# Install runtime SSL certs and ca-certificates
+# Install runtime dependencies
 RUN apt-get update && apt-get install -y \
     ca-certificates \
     curl \
@@ -47,9 +54,10 @@ WORKDIR /app
 # Create database folder with permissions for appuser
 RUN mkdir -p /app/db && chown -R appuser:appgroup /app
 
-# Copy binary, migrations, and default env from builder
-COPY --from=builder --chown=appuser:appgroup /usr/src/app/target/release/todo /app/todo
-COPY --from=builder --chown=appuser:appgroup /usr/src/app/migrations /app/migrations
+# Copy binaries and migrations from builder
+COPY --from=builder --chown=appuser:appgroup /usr/src/app/target/release/todo-api /app/todo-api
+COPY --from=builder --chown=appuser:appgroup /usr/src/app/target/release/todo-cli /app/todo-cli
+COPY --from=builder --chown=appuser:appgroup /usr/src/app/api/migrations /app/migrations
 
 # Switch to non-root user
 USER appuser
@@ -63,4 +71,4 @@ EXPOSE 8080
 HEALTHCHECK --interval=10s --timeout=3s --start-period=5s --retries=3 \
   CMD curl -f http://localhost:8080/api/healthcheck || exit 1
 
-ENTRYPOINT ["/app/todo"]
+ENTRYPOINT ["/app/todo-api"]
