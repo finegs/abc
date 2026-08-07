@@ -14,6 +14,8 @@ pub enum AppMode {
     Normal,
     AddTitle,
     AddContent,
+    EditTitle,
+    EditContent,
 }
 
 pub struct App {
@@ -23,6 +25,9 @@ pub struct App {
     pub status_message: String,
     pub new_title: String,
     pub new_content: String,
+    pub editing_id: Option<String>,
+    pub edit_title: String,
+    pub edit_content: String,
 }
 
 impl App {
@@ -35,9 +40,12 @@ impl App {
             items,
             list_state,
             mode: AppMode::Normal,
-            status_message: "Ready | [q] Quit | [j/k] Nav | [a] Add | [d] Del | [r] Refresh".to_string(),
+            status_message: "Ready | [q] Quit | [j/k] Nav | [e/Enter] Edit | [a] Add | [d] Del | [r] Refresh".to_string(),
             new_title: String::new(),
             new_content: String::new(),
+            editing_id: None,
+            edit_title: String::new(),
+            edit_content: String::new(),
         }
     }
 
@@ -181,6 +189,33 @@ impl App {
                         .borders(Borders::ALL)
                         .title("➕ Create New Note Dialog")
                         .style(Style::default().fg(Color::Yellow)),
+                )
+                .style(Style::default().fg(Color::White).bg(Color::Reset));
+
+            f.render_widget(Clear, area);
+            f.render_widget(popup, area);
+        }
+
+        // Floating Modal Popup Dialog for Edit Note
+        if self.mode == AppMode::EditTitle || self.mode == AppMode::EditContent {
+            let area = centered_rect(70, 50, f.area());
+            let title_active = if self.mode == AppMode::EditTitle { " ▶" } else { "" };
+            let content_active = if self.mode == AppMode::EditContent { " ▶" } else { "" };
+
+            let popup_text = format!(
+                "Title{}:\n  {}\n\nContent{}:\n  {}\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n[Enter] Next/Save | [Esc] Cancel",
+                title_active,
+                if self.edit_title.is_empty() { "<Edit note title...>" } else { &self.edit_title },
+                content_active,
+                if self.edit_content.is_empty() { "<Edit note content...>" } else { &self.edit_content }
+            );
+
+            let popup = Paragraph::new(popup_text)
+                .block(
+                    Block::default()
+                        .borders(Borders::ALL)
+                        .title("✏️ Edit Note Dialog")
+                        .style(Style::default().fg(Color::Magenta)),
                 )
                 .style(Style::default().fg(Color::White).bg(Color::Reset));
 

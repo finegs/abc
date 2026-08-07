@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 
-use crate::models::{CreateNotePayload, NoteItem, NoteListResponse};
+use crate::models::{CreateNotePayload, NoteItem, NoteListResponse, UpdateNotePayload};
 use reqwest::Client;
 
 #[derive(Clone, Debug)]
@@ -43,6 +43,23 @@ impl ApiClient {
             is_published: Some(is_published),
         };
         let res = self.client.post(&url).json(&payload).send().await?;
+        Ok(res.status().is_success())
+    }
+
+    pub async fn edit_note(
+        &self,
+        id: &str,
+        title: Option<&str>,
+        content: Option<&str>,
+        is_published: Option<bool>,
+    ) -> Result<bool, reqwest::Error> {
+        let url = format!("{}/api/notes/{}", self.base_url, id);
+        let payload = UpdateNotePayload {
+            title: title.map(|s| s.to_string()),
+            content: content.map(|s| s.to_string()),
+            is_published,
+        };
+        let res = self.client.patch(&url).json(&payload).send().await?;
         Ok(res.status().is_success())
     }
 

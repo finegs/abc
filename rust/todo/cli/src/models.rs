@@ -18,6 +18,13 @@ pub struct CreateNotePayload {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
+pub struct UpdateNotePayload {
+    pub title: Option<String>,
+    pub content: Option<String>,
+    pub is_published: Option<bool>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
 pub struct NoteListResponse {
     pub status: String,
     pub count: usize,

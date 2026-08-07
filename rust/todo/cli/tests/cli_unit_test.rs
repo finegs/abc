@@ -60,6 +60,20 @@ fn test_create_note_payload_serialization() {
 }
 
 #[test]
+fn test_update_note_payload_serialization() {
+    use models::UpdateNotePayload;
+    let payload = UpdateNotePayload {
+        title: Some("Updated Title".to_string()),
+        content: Some("Updated Content".to_string()),
+        is_published: None,
+    };
+
+    let json = serde_json::to_string(&payload).unwrap();
+    assert!(json.contains("Updated Title"));
+    assert!(json.contains("Updated Content"));
+}
+
+#[test]
 fn test_tui_app_navigation() {
     let items = vec![
         NoteItem {

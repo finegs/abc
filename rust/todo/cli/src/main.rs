@@ -123,7 +123,7 @@ async fn run_tui_app(client: ApiClient) -> Result<(), Box<dyn Error>> {
             if let Event::Key(key) = event::read()? {
                 match app.mode {
                     AppMode::Normal => match key.code {
-                        KeyCode::Char('q') | KeyCode::Esc => break,
+                        KeyCode::Char('q') => break,
                         KeyCode::Char('j') | KeyCode::Down => app.next(),
                         KeyCode::Char('k') | KeyCode::Up => app.previous(),
                         KeyCode::Char('a') => {
@@ -132,6 +132,16 @@ async fn run_tui_app(client: ApiClient) -> Result<(), Box<dyn Error>> {
                             app.new_content.clear();
                             app.status_message =
                                 "MODE: Add Note (Title) | Type title -> press [Enter]".to_string();
+                        }
+                        KeyCode::Char('e') | KeyCode::Enter => {
+                            if let Some(note) = app.selected_item().cloned() {
+                                app.mode = AppMode::EditTitle;
+                                app.editing_id = Some(note.id);
+                                app.edit_title = note.title;
+                                app.edit_content = note.content;
+                                app.status_message =
+                                    "MODE: Edit Note (Title) | Edit title -> press [Enter]".to_string();
+                            }
                         }
                         KeyCode::Char('d') => {
                             if let Some(note) = app.selected_item().cloned() {
@@ -158,6 +168,7 @@ async fn run_tui_app(client: ApiClient) -> Result<(), Box<dyn Error>> {
                                 app.status_message = "🔄 Refreshed notes list!".to_string();
                             }
                         }
+                        KeyCode::Esc => break,
                         _ => {}
                     },
                     AppMode::AddTitle => match key.code {
@@ -210,6 +221,60 @@ async fn run_tui_app(client: ApiClient) -> Result<(), Box<dyn Error>> {
                         }
                         KeyCode::Char(c) => {
                             app.new_content.push(c);
+                        }
+                        _ => {}
+                    },
+                    AppMode::EditTitle => match key.code {
+                        KeyCode::Esc => {
+                            app.mode = AppMode::Normal;
+                            app.status_message = "Cancelled editing note.".to_string();
+                        }
+                        KeyCode::Enter => {
+                            app.mode = AppMode::EditContent;
+                            app.status_message =
+                                "MODE: Edit Note (Content) | Edit content -> press [Enter] to save"
+                                    .to_string();
+                        }
+                        KeyCode::Backspace => {
+                            app.edit_title.pop();
+                        }
+                        KeyCode::Char(c) => {
+                            app.edit_title.push(c);
+                        }
+                        _ => {}
+                    },
+                    AppMode::EditContent => match key.code {
+                        KeyCode::Esc => {
+                            app.mode = AppMode::Normal;
+                            app.status_message = "Cancelled editing note.".to_string();
+                        }
+                        KeyCode::Enter => {
+                            if let Some(id) = app.editing_id.clone() {
+                                let title = app.edit_title.trim().to_string();
+                                let content = app.edit_content.trim().to_string();
+                                app.status_message = format!("Saving updates for note '{}'...", title);
+                                terminal.draw(|f| app.render(f))?;
+                                if client
+                                    .edit_note(&id, Some(&title), Some(&content), None)
+                                    .await
+                                    .unwrap_or(false)
+                                {
+                                    app.status_message =
+                                        format!("✅ Note '{}' updated successfully!", title);
+                                    if let Ok(updated) = client.fetch_notes().await {
+                                        app.items = updated;
+                                    }
+                                } else {
+                                    app.status_message = "❌ Failed to update note!".to_string();
+                                }
+                            }
+                            app.mode = AppMode::Normal;
+                        }
+                        KeyCode::Backspace => {
+                            app.edit_content.pop();
+                        }
+                        KeyCode::Char(c) => {
+                            app.edit_content.push(c);
                         }
                         _ => {}
                     },
