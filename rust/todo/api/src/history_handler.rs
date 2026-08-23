@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use axum::{
     extract::{Query, State},
-    http::StatusCode,
+    http::{HeaderMap, StatusCode},
     response::IntoResponse,
     Json,
 };
@@ -11,7 +11,7 @@ use serde_json::json;
 use crate::{
     history::{
         HistoryDiffMergeEngine, HistoryDiffRequest, HistoryMergeRequest, HistoryQueryFilter,
-        MergeResolutionStrategy, RetentionConfig, RetentionManager,
+        MergeResolutionStrategy, RetentionManager, UpdateRetentionConfigSchema, UserRole,
     },
     AppState,
 };
@@ -78,8 +78,10 @@ pub async fn history_stats_handler(
     }
 }
 
-pub async fn history_retention_get_handler() -> impl IntoResponse {
-    let config = RetentionConfig::default();
+pub async fn history_retention_get_handler(
+    State(data): State<Arc<AppState>>,
+) -> Json<serde_json::Value> {
+    let config = data.retention_config.read().unwrap().clone();
     let manager = RetentionManager::new("db/history", config.clone());
     let summary = manager.get_summary();
 
@@ -90,8 +92,51 @@ pub async fn history_retention_get_handler() -> impl IntoResponse {
     }))
 }
 
-pub async fn history_retention_purge_handler() -> impl IntoResponse {
-    let config = RetentionConfig::default();
+pub async fn history_retention_put_handler(
+    State(data): State<Arc<AppState>>,
+    headers: HeaderMap,
+    Json(body): Json<UpdateRetentionConfigSchema>,
+) -> Result<Json<serde_json::Value>, (StatusCode, Json<serde_json::Value>)> {
+    let role_header = headers.get("x-user-role").and_then(|v| v.to_str().ok());
+    let role = UserRole::from_header(role_header);
+
+    if !role.is_admin() {
+        return Err((
+            StatusCode::FORBIDDEN,
+            Json(json!({
+                "status": "error",
+                "message": "Admin privilege required to configure retention settings"
+            })),
+        ));
+    }
+
+    let mut config = data.retention_config.write().unwrap();
+    if let Some(days) = body.history_retention_days {
+        config.history_retention_days = days;
+    }
+    if let Some(days) = body.notes_retention_days {
+        config.notes_retention_days = days;
+    }
+    if let Some(days) = body.stats_retention_days {
+        config.stats_retention_days = days;
+    }
+    if let Some(auto) = body.auto_purge_enabled {
+        config.auto_purge_enabled = auto;
+    }
+
+    let updated_config = config.clone();
+
+    Ok(Json(json!({
+        "status": "ok",
+        "message": "Retention settings updated successfully",
+        "retention_config": updated_config
+    })))
+}
+
+pub async fn history_retention_purge_handler(
+    State(data): State<Arc<AppState>>,
+) -> impl IntoResponse {
+    let config = data.retention_config.read().unwrap().clone();
     let manager = RetentionManager::new("db/history", config);
     let summary = manager.purge_expired_partitions();
 

@@ -1,6 +1,6 @@
-use std::sync::Arc;
+use std::sync::{Arc, RwLock};
 
-use crate::history::HistoryFacade;
+use crate::history::{HistoryFacade, RetentionConfig};
 use crate::patterns::{
     DefaultPaginationStrategy, NoteRepository, PaginationStrategy, RepositoryFactory,
 };
@@ -17,6 +17,7 @@ pub struct AppState {
     pub repository: Arc<dyn NoteRepository>,
     pub pagination_strategy: Arc<dyn PaginationStrategy>,
     pub history_facade: Option<Arc<HistoryFacade>>,
+    pub retention_config: Arc<RwLock<RetentionConfig>>,
 }
 
 impl AppState {
@@ -29,6 +30,7 @@ impl AppState {
             repository,
             pagination_strategy,
             history_facade: None,
+            retention_config: Arc::new(RwLock::new(RetentionConfig::default())),
         }
     }
 }

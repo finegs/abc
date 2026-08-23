@@ -6,6 +6,25 @@ use std::{
 
 use serde::{Deserialize, Serialize};
 
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum UserRole {
+    Admin,
+    User,
+}
+
+impl UserRole {
+    pub fn is_admin(&self) -> bool {
+        matches!(self, UserRole::Admin)
+    }
+
+    pub fn from_header(role_str: Option<&str>) -> Self {
+        match role_str {
+            Some(s) if s.eq_ignore_ascii_case("admin") => UserRole::Admin,
+            _ => UserRole::User,
+        }
+    }
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct RetentionConfig {
     pub history_retention_days: u32,
@@ -23,6 +42,14 @@ impl Default for RetentionConfig {
             auto_purge_enabled: true,
         }
     }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct UpdateRetentionConfigSchema {
+    pub history_retention_days: Option<u32>,
+    pub notes_retention_days: Option<u32>,
+    pub stats_retention_days: Option<u32>,
+    pub auto_purge_enabled: Option<bool>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

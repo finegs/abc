@@ -63,6 +63,7 @@ async fn main() {
         .route(
             "/api/history/retention",
             get(history_handler::history_retention_get_handler)
+                .put(history_handler::history_retention_put_handler)
                 .post(history_handler::history_retention_purge_handler),
         )
         .route("/api/history/diff", post(history_handler::history_diff_handler))

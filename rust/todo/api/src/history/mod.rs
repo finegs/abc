@@ -17,5 +17,5 @@ pub use diff_merge::{HistoryDiffMergeEngine, HistoryDiffRequest, HistoryMergeReq
 pub use facade::HistoryFacade;
 pub use factory::HistoryStoreFactory;
 pub use model::{HistoryEvent, HistoryQueryFilter, PartitionConfig, PartitionStat};
-pub use retention::{RetentionConfig, RetentionManager};
+pub use retention::{RetentionConfig, RetentionManager, UpdateRetentionConfigSchema, UserRole};
 pub use state::PartitionGranularity;
