@@ -12,7 +12,7 @@ use std::sync::Arc;
 
 use axum::{
     response::IntoResponse,
-    routing::get,
+    routing::{get, post},
     Json, Router,
 };
 use tokio::net::TcpListener;
@@ -33,8 +33,11 @@ async fn main() {
 
     let pool = create_conn_pool(database_url.as_str()).await;
 
-    let history_backend_path = std::env::var("HISTORY_DB_PATH").unwrap_or_else(|_| "db/history".to_string());
-    let history_backend = HistoryStoreFactory::create_backend(&history_backend_path, PartitionConfig::default()).await;
+    let history_backend_path =
+        std::env::var("HISTORY_DB_PATH").unwrap_or_else(|_| "db/history".to_string());
+    let history_backend =
+        HistoryStoreFactory::create_backend(&history_backend_path, PartitionConfig::default())
+            .await;
     let history_facade = Arc::new(HistoryFacade::new(history_backend));
 
     let mut state = AppState::new(pool);
@@ -53,7 +56,17 @@ async fn main() {
                 .delete(handler::delete_note_handler),
         )
         .route("/api/history", get(history_handler::history_list_handler))
-        .route("/api/history/stats", get(history_handler::history_stats_handler))
+        .route(
+            "/api/history/stats",
+            get(history_handler::history_stats_handler),
+        )
+        .route(
+            "/api/history/retention",
+            get(history_handler::history_retention_get_handler)
+                .post(history_handler::history_retention_purge_handler),
+        )
+        .route("/api/history/diff", post(history_handler::history_diff_handler))
+        .route("/api/history/merge", post(history_handler::history_merge_handler))
         .with_state(Arc::new(state));
 
     println!("✅ Server started successfully at 0.0.0.0:8080");
