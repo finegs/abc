@@ -2,7 +2,6 @@
 #include <iomanip>
 #include <iostream>
 #include <utility>
-#if 1
 
 #include <algorithm>
 #include <cstdio>
@@ -18,15 +17,26 @@ using namespace std;
 using IntPair = std::pair<int, int>;
 using MyRec = std::tuple<int, float, string>;
 
-std::ostream &operator<<(std::ostream &os, const IntPair &o) {
-  os << '{';
-  os << o.first;
-  os << ':';
-  os << std::setw(10);
-  os << o.second;
-  os << '}';
-  return os;
-}
+// template <typename T1, typename T2>
+// std::ostream &operator<<(std::ostream &os, const std::pair<T1, T2> &o) {
+//   os << '{';
+//   os << o.first;
+//   os << ':';
+//   os << std::setw(10);
+//   os << o.second;
+//   os << '}';
+//   return os;
+// }
+
+// std::ostream &operator<<(std::ostream &os, const IntPair &o) {
+//   os << '{';
+//   os << o.first;
+//   os << ':';
+//   os << std::setw(10);
+//   os << o.second;
+//   os << '}';
+//   return os;
+// }
 
 std::ostream &operator<<(std::ostream &os, const MyRec &o) {
   os << '{';
@@ -41,20 +51,19 @@ std::ostream &operator<<(std::ostream &os, const MyRec &o) {
   return os;
 }
 
-template <typename first, typename second>
-std::ostream &operator<<(std::ostream &os, const std::pair<first, second> &o) {
+template <typename T1, typename T2>
+std::ostream &operator<<(std::ostream &os, const std::pair<T1, T2> &o) {
   os << '{';
   os << '[' << (&o.first) << ']' << o.first;
   os << ':' << '[' << (&o.second) << ']' << o.second;
   os << '}';
   return os;
 }
-template <typename It>
-std::ostream &display(std::ostream &os, It begin, It end) {
+template <typename Iter>
+std::ostream &display(std::ostream &os, Iter begin, Iter end) {
   bool is_large = (std::distance(begin, end) > 20) ? true : false;
   char sep[3]{'\0', ' ', '\0'};
   if (is_large) {
-    sep[0] = '\0';
     //
     //  first 3
     auto nxt3_iter = std::next(begin, 3);
@@ -75,7 +84,6 @@ std::ostream &display(std::ostream &os, It begin, It end) {
       sep[0] = '\n';
     }
   } else {
-    sep[0] = '\0';
     for (auto &cur = begin; cur != end; ++cur) {
       os << sep << '\t' << *cur;
       sep[0] = '\n';
@@ -85,7 +93,15 @@ std::ostream &display(std::ostream &os, It begin, It end) {
   return os;
 }
 
-auto item_hasher = [](const IntPair &o) { return std::hash<int>{}(o.first); };
+template <typename T1, typename T2>
+auto pair_hasher =
+    [](const std::pair<T1, T2> &o) { return std::hash<T1>{}(o.first); };
+
+auto item_hasher = pair_hasher<int, int>;
+
+// auto item_hasher = [](const IntPair &o) { return std::hash<int>{}(o.first);
+// };
+
 auto item_less = [](const IntPair &a, const IntPair &b) {
   return a.first < b.first;
 };
@@ -145,8 +161,9 @@ std::get<1>(v1) && std::get<2>(v0) == std::get<2>(v1));
 typedef unordered_map<MyTuple, int, KeyHash, KeyEqual> MyMap;
  */
 std::set<IntPair, decltype(item_less)> item_set(item_less);
-std::unordered_set<IntPair, decltype(item_hasher), decltype(item_equal_to)>
-    item_unordered_set(0, item_hasher, item_equal_to);
+std::unordered_set<IntPair, decltype(pair_hasher<int, int>),
+                   decltype(item_equal_to)>
+    item_unordered_set(0, pair_hasher<int, int>, item_equal_to);
 std::unordered_map<MyRec, MyRec, decltype(myrec_hasher)> recs(
     {
         {{1, 1.0f, "aa"}, {1, 1.0001f, "aa"}},
@@ -234,5 +251,3 @@ int main() {
     cout << std::endl;
 #endif
 }
-
-#endif
