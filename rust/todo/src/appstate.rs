@@ -1,17 +1,14 @@
-#[allow(unused)]
+use std::sync::Arc;
+use crate::history::HistoryFacade;
 
-#[cfg(feature="sqlite")]
-use sqlx::SqlitePool;
+#[cfg(feature = "sqlite")]
+pub type DbPool = sqlx::SqlitePool;
 
-// #[cfg(feature="mysql")]
-// use sqlx::MySqlPool;
+#[cfg(all(feature = "mysql", not(feature = "sqlite")))]
+pub type DbPool = sqlx::MySqlPool;
 
-#[derive(Debug)]
-pub  struct AppState {
-
-    // #[cfg(feature="mysql")]
-    // pub conn_pool: sqlx::MySqlPool,
-
-    #[cfg(feature="sqlite")]
-    pub conn_pool: sqlx::SqlitePool,
+#[derive(Clone)]
+pub struct AppState {
+    pub conn_pool: DbPool,
+    pub history_facade: Arc<HistoryFacade>,
 }

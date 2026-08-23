@@ -1,15 +1,15 @@
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 use sqlx::prelude::FromRow;
 
 #[derive(Debug, Serialize, Deserialize, FromRow)]
 pub(crate) struct Book {
-    id: i32,
-    title: String,
-    author: String,
+    pub id: i32,
+    pub title: String,
+    pub author: String,
 }
 
 #[derive(Debug, Deserialize)]
 pub(crate) struct CreateBook {
-    title: String,
-    author: String,
+    pub title: String,
+    pub author: String,
 }

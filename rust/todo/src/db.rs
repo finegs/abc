@@ -1,3 +1,5 @@
-#[cfg_attr(feature="sqlite", path="db_imp/db_sqlite.rs")]
-#[cfg_attr(feature="mysql", path="db_imp/db_mysql.rs")]
-pub(crate) mod db;
+#[cfg_attr(feature = "sqlite", path = "db_imp/db_sqlite.rs")]
+#[cfg_attr(all(feature = "mysql", not(feature = "sqlite")), path = "db_imp/db_mysql.rs")]
+mod db;
+
+pub use db::create_conn_pool;

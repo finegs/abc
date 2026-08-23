@@ -1,6 +1,5 @@
--- Add up migration script here
-CREATE TABLE books (
-    id SERIAL PRIMARY KEY,
+CREATE TABLE IF NOT EXISTS books (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
     title VARCHAR(100) NOT NULL,
     author VARCHAR(100) NOT NULL
 );
