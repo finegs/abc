@@ -5,6 +5,7 @@ mod history;
 mod history_handler;
 #[allow(unused)]
 mod model;
+mod patterns;
 mod schema;
 
 use std::sync::Arc;
@@ -36,6 +37,9 @@ async fn main() {
     let history_backend = HistoryStoreFactory::create_backend(&history_backend_path, PartitionConfig::default()).await;
     let history_facade = Arc::new(HistoryFacade::new(history_backend));
 
+    let mut state = AppState::new(pool);
+    state.history_facade = Some(history_facade);
+
     let app = Router::new()
         .route("/api/healthcheck", get(health_check_handler))
         .route(
@@ -50,10 +54,7 @@ async fn main() {
         )
         .route("/api/history", get(history_handler::history_list_handler))
         .route("/api/history/stats", get(history_handler::history_stats_handler))
-        .with_state(Arc::new(AppState {
-            conn_pool: pool,
-            history_facade,
-        }));
+        .with_state(Arc::new(state));
 
     println!("✅ Server started successfully at 0.0.0.0:8080");
 

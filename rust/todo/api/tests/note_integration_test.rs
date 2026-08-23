@@ -7,24 +7,15 @@ use axum::{
 };
 use sqlx::sqlite::SqlitePool;
 
-// Include main src modules for integration testing
-#[path = "../src/appstate.rs"]
-mod appstate;
-#[path = "../src/handler.rs"]
-mod handler;
-#[path = "../src/model.rs"]
-mod model;
-#[path = "../src/patterns/mod.rs"]
-mod patterns;
-#[path = "../src/schema.rs"]
-mod schema;
-
-use appstate::AppState;
-use handler::{
-    create_note_handler, delete_note_handler, edit_note_handler, get_note_handler,
-    health_check_handler, note_list_handle,
+use todo_api::{
+    appstate::AppState,
+    handler::{
+        create_note_handler, delete_note_handler, edit_note_handler, get_note_handler,
+        health_check_handler, note_list_handle,
+    },
+    model,
+    schema::{CreateNoteSchema, FilterOptions, UpdateNoteSchema},
 };
-use schema::{CreateNoteSchema, FilterOptions, UpdateNoteSchema};
 
 async fn setup_test_db() -> SqlitePool {
     let pool = SqlitePool::connect(":memory:").await.unwrap();
@@ -102,7 +93,7 @@ async fn test_note_crud_lifecycle() {
     .expect("Edit note failed");
 
     // Verify DB update
-    let updated_note = sqlx::query_as::<_, model::NoteModel>("SELECT * FROM notes WHERE id = $1")
+    let updated_note = sqlx::query_as::<_, model::NoteModel>("SELECT * FROM notes WHERE id = ?")
         .bind(&note_id)
         .fetch_one(&state.conn_pool)
         .await

@@ -1,25 +1,26 @@
 use std::sync::Arc;
 
-#[cfg(feature = "sqlite")]
-use sqlx::SqlitePool;
-
+use crate::history::HistoryFacade;
 use crate::patterns::{
     DefaultPaginationStrategy, NoteRepository, PaginationStrategy, RepositoryFactory,
 };
 
-/// 🔹 5. SINGLETON / SHARED STATE PATTERN
-/// Thread-safe shared application state injected into Axum router via Arc<AppState>.
+#[cfg(feature = "sqlite")]
+pub type DbPool = sqlx::SqlitePool;
+
+#[cfg(all(feature = "mysql", not(feature = "sqlite")))]
+pub type DbPool = sqlx::MySqlPool;
+
 #[derive(Clone)]
 pub struct AppState {
-    #[cfg(feature = "sqlite")]
-    #[allow(dead_code)]
-    pub conn_pool: SqlitePool,
+    pub conn_pool: DbPool,
     pub repository: Arc<dyn NoteRepository>,
     pub pagination_strategy: Arc<dyn PaginationStrategy>,
+    pub history_facade: Option<Arc<HistoryFacade>>,
 }
 
 impl AppState {
-    pub fn new(conn_pool: SqlitePool) -> Self {
+    pub fn new(conn_pool: DbPool) -> Self {
         let repository = RepositoryFactory::create_sqlite_repository(conn_pool.clone());
         let pagination_strategy = Arc::new(DefaultPaginationStrategy::default());
 
@@ -27,6 +28,7 @@ impl AppState {
             conn_pool,
             repository,
             pagination_strategy,
+            history_facade: None,
         }
     }
 }

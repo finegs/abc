@@ -1,6 +1,6 @@
 use std::{fs, path::PathBuf, sync::Arc};
 use tokio::time::{sleep, Duration};
-use todo::history::{
+use todo_api::history::{
     HistoryFacade, HistoryQueryFilter, HistoryStoreFactory, PartitionConfig, PartitionGranularity,
 };
 

@@ -14,7 +14,6 @@ use crate::{
     AppState,
 };
 
-// Convert DB Model to Response
 fn to_note_response(note: &NoteModel) -> NoteModelResponse {
     NoteModelResponse {
         id: note.id.to_owned(),
@@ -99,6 +98,15 @@ pub async fn create_note_handler(
             ),
         })?;
 
+    if let Some(ref facade) = data.history_facade {
+        facade.record_action(
+            "CREATED",
+            "note",
+            &id,
+            Some(serde_json::to_string(&body).unwrap_or_default()),
+        );
+    }
+
     let note_response = serde_json::json!({
         "status": "success",
         "data": serde_json::json!({
@@ -158,6 +166,15 @@ pub async fn edit_note_handler(
 
     match updated_note {
         Some(note) => {
+            if let Some(ref facade) = data.history_facade {
+                facade.record_action(
+                    "UPDATED",
+                    "note",
+                    &id,
+                    Some(serde_json::to_string(&body).unwrap_or_default()),
+                );
+            }
+
             let note_response = serde_json::json!({
                 "status": "success",
                 "data": serde_json::json!({
@@ -193,6 +210,10 @@ pub async fn delete_note_handler(
             "message": format!("Note with ID: {} not found", id)
         });
         return Err((StatusCode::NOT_FOUND, Json(error_response)));
+    }
+
+    if let Some(ref facade) = data.history_facade {
+        facade.record_action("DELETED", "note", &id, None);
     }
 
     Ok(StatusCode::OK)
