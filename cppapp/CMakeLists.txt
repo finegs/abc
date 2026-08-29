@@ -7,7 +7,6 @@ SET(CMAKE_BUILD_TYPE Debug)
 SET(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 
-
 # for source path
 SET(PJT_SRC_DIR src)
 
@@ -65,6 +64,8 @@ ADD_EXECUTABLE(algo       ${PJT_SRC_DIR}/algo.cpp)
 ADD_EXECUTABLE(dijstra ${PJT_SRC_DIR}/dijstra.cpp)
 
 ADD_SUBDIRECTORY(tests)
+
+ADD_SUBDIRECTORY(swcert)
 
 IF(MSYS)
 
